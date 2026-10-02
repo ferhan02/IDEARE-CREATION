@@ -1,0 +1,198 @@
+/* -----------------------------------------------------------
+   IdeaRE SweetAlert2 styling
+------------------------------------------------------------ */
+
+.ideare-swal {
+    width: min(390px, calc(100vw - 28px)) !important;
+
+    border: 1px solid rgba(220, 213, 204, .8) !important;
+    border-radius: 22px !important;
+
+    padding: 28px 25px 22px !important;
+
+    box-shadow:
+        0 26px 80px rgba(24, 21, 18, .16),
+        0 3px 10px rgba(24, 21, 18, .04) !important;
+
+    background:
+        radial-gradient(
+            circle at 50% 3%,
+            rgba(230, 228, 255, .42),
+            rgba(255,255,255,0) 40%
+        ),
+        #fff !important;
+}
+
+.ideare-swal-success {
+    background:
+        radial-gradient(
+            circle at 50% 4%,
+            rgba(218, 255, 229, .67),
+            rgba(255,255,255,0) 41%
+        ),
+        #fff !important;
+}
+
+.ideare-swal-warning {
+    background:
+        radial-gradient(
+            circle at 50% 4%,
+            rgba(255, 232, 210, .67),
+            rgba(255,255,255,0) 41%
+        ),
+        #fff !important;
+}
+
+.ideare-swal-error {
+    background:
+        radial-gradient(
+            circle at 50% 4%,
+            rgba(255, 221, 231, .7),
+            rgba(255,255,255,0) 41%
+        ),
+        #fff !important;
+}
+
+.ideare-swal-info {
+    background:
+        radial-gradient(
+            circle at 50% 4%,
+            rgba(229, 225, 255, .65),
+            rgba(255,255,255,0) 41%
+        ),
+        #fff !important;
+}
+
+.ideare-swal-icon {
+    width: 48px !important;
+    height: 48px !important;
+
+    margin: 3px auto 17px !important;
+
+    border-width: 2px !important;
+
+    transform: scale(.78);
+}
+
+.ideare-swal-title {
+    padding: 0 !important;
+    margin: 0 !important;
+
+    color: #171614 !important;
+
+    font-size: 17px !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.025em !important;
+}
+
+.ideare-swal-text {
+    max-width: 300px !important;
+
+    margin: 8px auto 0 !important;
+    padding: 0 !important;
+
+    color: #77716a !important;
+
+    font-size: 11px !important;
+    line-height: 1.48 !important;
+}
+
+.ideare-swal-actions {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 9px !important;
+
+    margin: 24px 0 0 !important;
+}
+
+.ideare-swal-actions:has(.ideare-swal-confirm:only-child) {
+    grid-template-columns: 1fr !important;
+}
+
+.ideare-swal-confirm,
+.ideare-swal-cancel {
+    min-height: 41px;
+
+    border: 0;
+    border-radius: 999px;
+
+    padding: 0 16px;
+
+    font: inherit;
+    font-size: 10px;
+    font-weight: 850;
+
+    cursor: pointer;
+
+    transition:
+        transform .15s ease,
+        background .15s ease,
+        box-shadow .15s ease;
+}
+
+.ideare-swal-confirm {
+    background: #181719;
+    color: #fff;
+
+    box-shadow:
+        0 8px 20px rgba(18, 17, 18, .14);
+}
+
+.ideare-swal-confirm:hover {
+    background: #2b292c;
+    transform: translateY(-1px);
+}
+
+.ideare-swal-cancel {
+    background: #f1f1f1;
+    color: #373432;
+}
+
+.ideare-swal-cancel:hover {
+    background: #e8e8e8;
+}
+
+.ideare-swal-danger {
+    background: #2a2020;
+}
+
+.ideare-swal-danger:hover {
+    background: #3a2424;
+}
+
+.ideare-swal-in {
+    animation: ideareSwalIn .18s ease-out both;
+}
+
+.ideare-swal-out {
+    animation: ideareSwalOut .14s ease-in both;
+}
+
+@keyframes ideareSwalIn {
+    from {
+        opacity: 0;
+        transform: translateY(7px) scale(.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes ideareSwalOut {
+    from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(5px) scale(.99);
+    }
+}
+
+.swal2-container {
+    backdrop-filter: blur(3px);
+}

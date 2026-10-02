@@ -1,0 +1,2 @@
+<?php
+require_once __DIR__.'/../../includes/staff/auth.php';require_login();verify_csrf();if($_SERVER['REQUEST_METHOD']!=='POST'){http_response_code(405);exit('Method not allowed.');}$id=(int)($_POST['passkey_id']??0);$st=current_staff();$s=staff_db()->prepare("DELETE FROM staff_passkeys WHERE id=? AND staff_id=?");$s->execute([$id,$st['id']]);if($s->rowCount())flash('success','Passkey removed.');staff_redirect('staff/pages/profile.php');
