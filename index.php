@@ -1,32 +1,16 @@
 <?php
 $pageTitle='IdeaRE | Home';
+require_once __DIR__.'/includes/staff/feature-tools.php';
+$pdo=staff_db();$featuredProjects=[];$featuredIdeas=[];
+try{$featuredProjects=db_rows($pdo,'SELECT title,category,short_description,cover_image,location_label FROM project_gallery_entries WHERE is_published=1 ORDER BY is_featured DESC,sort_order,completion_date DESC LIMIT 3');}catch(Throwable $e){}
+try{$featuredIdeas=db_rows($pdo,'SELECT id,title,style_name,room_type,description,cover_image,base_design_id FROM inspiration_designs WHERE is_published=1 ORDER BY is_featured DESC,sort_order,created_at DESC LIMIT 3');}catch(Throwable $e){}
 require __DIR__.'/includes/customer/header.php';
 ?>
 <main>
-<section class="hero">
-  <div class="site-wrap hero-grid">
-    <div>
-      <p class="eyebrow">IdeaRE</p>
-      <h1>Plan your space before the consultation.</h1>
-      <p class="lead">Explore IdeaRE services, browse project ideas, and try the Cabinet Designer to build a first draft of your cabinet layout.</p>
-      <div class="actions">
-        <a class="btn primary" href="designer/index.php">Try Cabinet Designer</a>
-        <a class="btn" href="public/pages/contact.php">Contact IdeaRE</a>
-      </div>
-    </div>
-    <div class="hero-card">
-      <div class="mini-cabinet"><i></i><i></i></div>
-      <b>Interactive cabinet planning</b>
-      <span>Built into the main IdeaRE website.</span>
-    </div>
-  </div>
-</section>
-<section class="section">
-  <div class="site-wrap card-grid">
-    <article class="card"><h2>Cabinet Design</h2><p>Build a first draft before speaking with the IdeaRE team.</p></article>
-    <article class="card"><h2>Custom Interiors</h2><p>Explore layout, finishing, colours and storage possibilities.</p></article>
-    <article class="card"><h2>Consultation Workflow</h2><p>Saved designs can be continued by authorized staff inside the same system.</p></article>
-  </div>
-</section>
+<section class="hero"><div class="site-wrap hero-grid"><div><p class="eyebrow">IdeaRE</p><h1>Plan your space before the consultation.</h1><p class="lead">Explore IdeaRE services, browse real projects and cabinet ideas, then use the Cabinet Designer to build a first draft before your consultation.</p><div class="actions"><a class="btn primary" href="designer/index.php">Try Cabinet Designer</a><a class="btn" href="pages/book-appointment.php">Book Appointment</a></div></div><div class="hero-card"><div class="mini-cabinet"><i></i><i></i></div><b>Interactive cabinet planning</b><span>Your design can continue into quotation, costing and production inside the IdeaRE system.</span></div></div></section>
+<section class="section"><div class="site-wrap card-grid"><article class="card"><h2>Cabinet Design</h2><p>Build a first draft before speaking with the IdeaRE team.</p></article><article class="card"><h2>Custom Interiors</h2><p>Explore layout, finishing, colours and storage possibilities.</p></article><article class="card"><h2>Consultation Workflow</h2><p>Saved designs can be continued by authorized staff inside the same project.</p></article></div></section>
+<?php if($featuredProjects):?><section class="section"><div class="site-wrap"><p class="eyebrow">Completed work</p><h2>Featured IdeaRE Projects</h2><div class="card-grid"><?php foreach($featuredProjects as $p):?><article class="card"><?php if($p['cover_image']):?><img style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px" src="<?=h(ideare_root_url($p['cover_image']))?>" alt=""><?php endif?><small><?=h($p['category']?:'Project')?></small><h3><?=h($p['title'])?></h3><p><?=h($p['short_description']?:'')?></p><small><?=h($p['location_label']?:'')?></small></article><?php endforeach?></div><div class="actions" style="margin-top:20px"><a class="btn" href="pages/projects.php">View all projects</a></div></div></section><?php endif?>
+<?php if($featuredIdeas):?><section class="section"><div class="site-wrap"><p class="eyebrow">Get inspired</p><h2>Cabinet Inspiration</h2><div class="card-grid"><?php foreach($featuredIdeas as $p):?><article class="card"><?php if($p['cover_image']):?><img style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px" src="<?=h(ideare_root_url($p['cover_image']))?>" alt=""><?php endif?><small><?=h(($p['style_name']?:'IdeaRE').' · '.($p['room_type']?:''))?></small><h3><?=h($p['title'])?></h3><p><?=h($p['description']?:'')?></p><a class="btn" href="<?=h(ideare_root_url('designer/index.php'.($p['base_design_id']?'?design_id='.$p['base_design_id']:'')))?>">Customize this design</a></article><?php endforeach?></div><div class="actions" style="margin-top:20px"><a class="btn" href="pages/inspiration.php">Browse inspiration</a></div></div></section><?php endif?>
+<section class="section"><div class="site-wrap"><article class="card"><p class="eyebrow">Ready to discuss your space?</p><h2>Book a consultation or site measurement.</h2><p>Send your preferred date and our team can confirm it through the staff appointment system.</p><div class="actions"><a class="btn primary" href="pages/book-appointment.php">Book Appointment</a><a class="btn" href="public/pages/contact.php">Contact IdeaRE</a></div></article></div></section>
 </main>
 <?php require __DIR__.'/includes/customer/footer.php'; ?>

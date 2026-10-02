@@ -1,34 +1,36 @@
-# IdeaRE approved feature checklist
+# IdeaRE Creation — Approved Feature Checklist
 
 - [x] Customer / Lead CRM
 - [x] Leads / Sales Pipeline
 - [x] Follow-Up System
 - [x] Project Management
 - [x] Measurement / Site Survey
-- [ ] Cabinet Configurator → Project Integration
-- [ ] Automatic Bill of Materials
+- [x] Cabinet Configurator → Project Integration
+- [x] Automatic Bill of Materials
 - [x] Material Catalogue
-- [ ] Suppliers
-- [ ] Purchase Orders
-- [ ] Inventory
-- [ ] Production Board
-- [ ] Quality Control
-- [ ] Installation Scheduling
+- [x] Suppliers
+- [x] Purchase Orders
+- [x] Inventory
+- [x] Production Board
+- [x] Quality Control
+- [x] Installation Scheduling
 - [x] Employee Task Management
 - [x] Staff Calendar
-- [ ] Customer Appointments
-- [x] Improved Quotation System — previous update
-- [ ] Quotation Versions
-- [ ] Approval Workflow
-- [ ] Payments / Invoices
-- [ ] Customer Portal
+- [x] Customer Appointments
+- [x] Improved Quotation System
+- [x] Quotation Versions
+- [x] Approval Workflow
+- [x] Payments / Invoices
+- [x] Customer Portal
 - [x] Project Activity Timeline
-- [x] Internal Notes — initial customer/project notes foundation
-- [ ] Document Centre
-- [ ] Warranty / After-Sales
-- [x] Business Dashboard — existing management dashboard
+- [x] Internal Notes
+- [x] Document Centre
+- [x] Warranty / After-Sales
+- [x] Business Dashboard
 - [x] Notification Centre
-- [x] Permissions / Roles — existing role/permission system
-- [ ] Global Search
-- [ ] Homepage Project Gallery
-- [ ] Cabinet Inspiration Gallery
+- [x] Permissions / Roles
+- [x] Global Search
+- [x] Homepage Project Gallery
+- [x] Cabinet Inspiration Gallery
+
+All 32 approved features have an implementation surface in this package. See `IMPLEMENTATION-NOTES.md` for page mapping and deployment notes.

@@ -24,7 +24,7 @@ $flash=pull_flash();
 <?php if($staff): ?>
 <header class="topbar">
     <button id="menuBtn" class="menu-btn" aria-label="Toggle navigation">☰</button>
-    <div class="topbar-spacer"></div>
+    <form action="<?= h(ideare_root_url('staff/pages/search.php')) ?>" method="get" class="top-search"><input name="q" placeholder="Search customers, projects..." aria-label="Global search"></form><div class="topbar-spacer"></div>
 
     <a class="top-icon" href="<?= h(ideare_root_url('staff/pages/notifications.php')) ?>">
         Notifications

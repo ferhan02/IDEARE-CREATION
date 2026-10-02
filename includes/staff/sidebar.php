@@ -1,93 +1,176 @@
 <?php
 $path=str_replace('\\','/',$_SERVER['PHP_SELF']??'');
-function nav_active(string $needle): string {
-    global $path;
-    return str_contains($path,$needle)?'active':'';
-}
+function nav_active(string $needle):string{global $path;return str_contains($path,$needle)?'active':'';}
 ?>
 <aside class="sidebar" id="sidebar">
-<div class="brand-wrap">
-    <a class="brand" href="<?= h(ideare_root_url('staff/index.php')) ?>">IdeaRE</a>
-    <span>Staff Portal</span>
-</div>
+    <div class="brand-wrap">
+        <a class="brand" href="<?=h(ideare_root_url('staff/index.php'))?>">IdeaRE</a>
+        <span>Staff Portal</span>
+    </div>
 
-<nav>
-<p class="nav-label">Overview</p>
-<a class="<?= nav_active('/staff/index.php') ?>" href="<?= h(ideare_root_url('staff/index.php')) ?>">Dashboard</a>
-<?php if(can('dashboard.management')):?>
-<a class="<?= nav_active('/management-dashboard.php') ?>" href="<?= h(ideare_root_url('staff/admin/management-dashboard.php')) ?>">Management Dashboard</a>
-<?php endif;?>
+    <div class="sidebar-nav-search" role="search">
+        <div class="sidebar-nav-search-box">
+            <svg class="sidebar-nav-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input
+                id="sidebarNavSearch"
+                type="search"
+                placeholder="Find a page..."
+                aria-label="Filter staff navigation"
+                autocomplete="off"
+                spellcheck="false"
+            >
+            <button id="sidebarNavSearchClear" class="sidebar-nav-search-clear" type="button" aria-label="Clear navigation search" title="Clear search">×</button>
+        </div>
+        <div id="sidebarNavSearchHint" class="sidebar-nav-search-hint" aria-live="polite"></div>
+    </div>
 
-<p class="nav-label">Customers & Sales</p>
-<a class="<?= nav_active('/customers.php') || nav_active('/customer-view.php') ?>" href="<?= h(ideare_root_url('staff/pages/customers.php')) ?>">Customers / CRM</a>
-<a class="<?= nav_active('/leads.php') ?>" href="<?= h(ideare_root_url('staff/pages/leads.php')) ?>">Sales Pipeline</a>
+    <nav id="staffNavigation">
+        <p class="nav-label">Overview</p>
+        <a href="<?=h(ideare_root_url('staff/index.php'))?>">Dashboard</a>
+        <a href="<?=h(ideare_root_url('staff/admin/management-dashboard.php'))?>">Business Dashboard</a>
+        <a href="<?=h(ideare_root_url('staff/pages/search.php'))?>">Global Search</a>
+        <a href="<?=h(ideare_root_url('staff/pages/notifications.php'))?>">Notifications</a>
 
-<p class="nav-label">Projects</p>
-<a class="<?= nav_active('/projects.php') || nav_active('/project-view.php') ?>" href="<?= h(ideare_root_url('staff/pages/projects.php')) ?>">Projects</a>
-<a class="<?= nav_active('/site-measurements.php') ?>" href="<?= h(ideare_root_url('staff/pages/site-measurements.php')) ?>">Site Measurements</a>
-<a class="<?= nav_active('/calendar.php') ?>" href="<?= h(ideare_root_url('staff/pages/calendar.php')) ?>">Staff Calendar</a>
+        <p class="nav-label">Customers &amp; Sales</p>
+        <a href="<?=h(ideare_root_url('staff/pages/customers.php'))?>">Customers / CRM</a>
+        <a href="<?=h(ideare_root_url('staff/pages/leads.php'))?>">Sales Pipeline</a>
+        <a href="<?=h(ideare_root_url('staff/pages/appointments.php'))?>">Appointments</a>
+        <a href="<?=h(ideare_root_url('staff/pages/quotation-centre.php'))?>">Quotation Centre</a>
+        <a href="<?=h(ideare_root_url('staff/pages/finance.php'))?>">Payments / Invoices</a>
 
-<p class="nav-label">Work</p>
-<?php if(can('task.view_own')):?>
-<a class="<?= nav_active('/tasks.php') ?>" href="<?= h(ideare_root_url('staff/pages/tasks.php')) ?>">My Tasks</a>
-<?php endif;?>
-<?php if(can('design.view_assigned')):?>
-<a class="<?= nav_active('/designs.php') ?>" href="<?= h(ideare_root_url('staff/pages/designs.php')) ?>">Assigned Designs</a>
-<?php endif;?>
-<?php if(can('design.view_all')):?>
-<a class="<?= nav_active('/all-designs.php') ?>" href="<?= h(ideare_root_url('staff/admin/all-designs.php')) ?>">All Customer Designs</a>
-<?php endif;?>
-<a href="<?= h(ideare_root_url('designer/index.php')) ?>">Cabinet Designer ↗</a>
+        <p class="nav-label">Projects &amp; Design</p>
+        <a href="<?=h(ideare_root_url('staff/pages/projects.php'))?>">Projects</a>
+        <a href="<?=h(ideare_root_url('staff/pages/site-measurements.php'))?>">Site Measurements</a>
+        <a href="<?=h(ideare_root_url('designer/index.php'))?>">Cabinet Designer ↗</a>
+        <a href="<?=h(ideare_root_url('staff/pages/bom.php'))?>">Bill of Materials</a>
+        <a href="<?=h(ideare_root_url('staff/pages/documents.php'))?>">Documents / Notes</a>
 
-<?php if(can('material.calculate') || can('quotation.view')): ?>
-<p class="nav-label">Costing & Quotations</p>
-<?php endif; ?>
+        <p class="nav-label">Procurement &amp; Workshop</p>
+        <a href="<?=h(ideare_root_url('staff/pages/materials.php'))?>">Material Catalogue</a>
+        <a href="<?=h(ideare_root_url('staff/pages/suppliers.php'))?>">Suppliers</a>
+        <a href="<?=h(ideare_root_url('staff/pages/purchase-orders.php'))?>">Purchase Orders</a>
+        <a href="<?=h(ideare_root_url('staff/pages/inventory.php'))?>">Inventory</a>
+        <a href="<?=h(ideare_root_url('staff/pages/production.php'))?>">Production Board</a>
+        <a href="<?=h(ideare_root_url('staff/pages/quality-control.php'))?>">Quality Control</a>
+        <a href="<?=h(ideare_root_url('staff/pages/installations.php'))?>">Installations</a>
 
-<?php if(can('material.calculate')):?>
-<a class="<?= nav_active('/material-calculator.php') ?>" href="<?= h(ideare_root_url('staff/pages/material-calculator.php')) ?>">Material Calculator</a>
-<?php endif;?>
-<a class="<?= nav_active('/pages/materials.php') ?>" href="<?= h(ideare_root_url('staff/pages/materials.php')) ?>">Material Catalogue</a>
+        <p class="nav-label">Work</p>
+        <a href="<?=h(ideare_root_url('staff/pages/tasks.php'))?>">My Tasks</a>
+        <a href="<?=h(ideare_root_url('staff/admin/task-management.php'))?>">Task Management</a>
+        <a href="<?=h(ideare_root_url('staff/pages/calendar.php'))?>">Staff Calendar</a>
+        <a href="<?=h(ideare_root_url('staff/pages/warranty.php'))?>">Warranty / After-Sales</a>
 
-<?php if(can('quotation.view')):?>
-<a class="<?= nav_active('/quotations.php') || nav_active('/quotation-create.php') || nav_active('/quotation-view.php') ?>" href="<?= h(ideare_root_url('staff/pages/quotations.php')) ?>">Quotations</a>
-<?php endif;?>
+        <p class="nav-label">Management</p>
+        <a href="<?=h(ideare_root_url('staff/admin/approvals.php'))?>">Approvals</a>
+        <a href="<?=h(ideare_root_url('staff/admin/customer-portal-access.php'))?>">Customer Portal Access</a>
+        <a href="<?=h(ideare_root_url('staff/admin/roles.php'))?>">Roles / Permissions</a>
+        <a href="<?=h(ideare_root_url('staff/admin/gallery.php'))?>">Project Gallery</a>
+        <a href="<?=h(ideare_root_url('staff/admin/inspiration.php'))?>">Inspiration Gallery</a>
 
-<p class="nav-label">Attendance & requests</p>
-<?php if(can('attendance.view_own')):?><a href="<?= h(ideare_root_url('staff/pages/attendance.php')) ?>">Attendance</a><?php endif;?>
-<?php if(can('leave.view_own')):?><a href="<?= h(ideare_root_url('staff/pages/leave.php')) ?>">Leave</a><?php endif;?>
-<?php if(can('overtime.view_own')):?><a href="<?= h(ideare_root_url('staff/pages/overtime.php')) ?>">Overtime</a><?php endif;?>
-<?php if(can('salary_advance.view_own')):?><a href="<?= h(ideare_root_url('staff/pages/salary-advance.php')) ?>">Salary Advance</a><?php endif;?>
-<?php if(can('salary.view_own')):?><a href="<?= h(ideare_root_url('staff/pages/salary.php')) ?>">My Salary</a><?php endif;?>
+        <p class="nav-label">Existing Staff Tools</p>
+        <?php if(can('attendance.view_own')):?><a href="<?=h(ideare_root_url('staff/pages/attendance.php'))?>">Attendance</a><?php endif?>
+        <?php if(can('leave.view_own')):?><a href="<?=h(ideare_root_url('staff/pages/leave.php'))?>">Leave</a><?php endif?>
+        <a href="<?=h(ideare_root_url('staff/pages/profile.php'))?>">My Profile</a>
 
-<p class="nav-label">Company</p>
-<?php if(can('announcement.view')):?><a href="<?= h(ideare_root_url('staff/pages/announcements.php')) ?>">Announcements</a><?php endif;?>
-<a href="<?= h(ideare_root_url('staff/pages/profile.php')) ?>">My Profile</a>
+        <div id="sidebarNavNoResults" class="sidebar-nav-no-results" hidden>
+            <strong>No page found</strong>
+            <span>Try another keyword.</span>
+        </div>
+    </nav>
 
-<?php if(can('staff.view')||can('attendance.view_all')||can('leave.approve')||can('task.create')||can('design.assign')||can('material.manage')):?>
-<p class="nav-label">Management</p>
-<?php endif;?>
-
-<?php if(can('staff.view')):?><a href="<?= h(ideare_root_url('staff/admin/staff-management.php')) ?>">Staff Management</a><?php endif;?>
-<?php if(can('attendance.view_all')):?><a href="<?= h(ideare_root_url('staff/admin/attendance-management.php')) ?>">Attendance Management</a><?php endif;?>
-<?php if(can('leave.approve')):?><a href="<?= h(ideare_root_url('staff/admin/leave-approvals.php')) ?>">Leave Approvals</a><?php endif;?>
-<?php if(can('overtime.approve')):?><a href="<?= h(ideare_root_url('staff/admin/overtime-approvals.php')) ?>">Overtime Approvals</a><?php endif;?>
-<?php if(can('salary_advance.approve')):?><a href="<?= h(ideare_root_url('staff/admin/salary-advance-approvals.php')) ?>">Advance Approvals</a><?php endif;?>
-<?php if(can('design.assign')):?><a href="<?= h(ideare_root_url('staff/admin/design-assignments.php')) ?>">Design Assignments</a><?php endif;?>
-<?php if(can('task.create')):?><a href="<?= h(ideare_root_url('staff/admin/task-management.php')) ?>">Task Management</a><?php endif;?>
-<?php if(can('material.manage')):?><a class="<?= nav_active('/materials.php') ?>" href="<?= h(ideare_root_url('staff/admin/materials.php')) ?>">Material Catalogue</a><?php endif;?>
-
-<?php if(can('salary.manage')||can('announcement.manage')||can('activity.view')||can('settings.manage')||can('quotation.settings')):?>
-<p class="nav-label">Boss / Admin</p>
-<?php endif;?>
-
-<?php if(can('salary.manage')):?><a href="<?= h(ideare_root_url('staff/admin/payroll.php')) ?>">Payroll</a><?php endif;?>
-<?php if(can('quotation.settings')):?><a class="<?= nav_active('/quotation-settings.php') ?>" href="<?= h(ideare_root_url('staff/admin/quotation-settings.php')) ?>">Quotation Settings</a><?php endif;?>
-<?php if(can('announcement.manage')):?><a href="<?= h(ideare_root_url('staff/admin/announcements-management.php')) ?>">Manage Announcements</a><?php endif;?>
-<?php if(can('activity.view')):?><a href="<?= h(ideare_root_url('staff/admin/activity-logs.php')) ?>">Activity Logs</a><?php endif;?>
-<?php if(can('settings.manage')):?><a href="<?= h(ideare_root_url('staff/admin/settings.php')) ?>">System Settings</a><?php endif;?>
-</nav>
-
-<div class="sidebar-footer">
-    <a href="<?= h(ideare_root_url('auth/logout.php')) ?>">Sign out</a>
-</div>
+    <div class="sidebar-footer"><a href="<?=h(ideare_root_url('auth/logout.php'))?>">Sign out</a></div>
 </aside>
+
+<script>
+(function () {
+    const input = document.getElementById('sidebarNavSearch');
+    const clearButton = document.getElementById('sidebarNavSearchClear');
+    const nav = document.getElementById('staffNavigation');
+    const emptyState = document.getElementById('sidebarNavNoResults');
+    const hint = document.getElementById('sidebarNavSearchHint');
+
+    if (!input || !nav) return;
+
+    const links = Array.from(nav.querySelectorAll(':scope > a'));
+    const labels = Array.from(nav.querySelectorAll(':scope > .nav-label'));
+
+    const normalise = value => String(value || '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, ' ')
+        .trim();
+
+    function applyFilter() {
+        const query = normalise(input.value);
+        let visibleCount = 0;
+
+        links.forEach(link => {
+            const haystack = normalise(link.textContent + ' ' + (link.dataset.search || ''));
+            const matches = !query || haystack.includes(query);
+            link.hidden = !matches;
+            if (matches) visibleCount++;
+        });
+
+        labels.forEach(label => {
+            let sibling = label.nextElementSibling;
+            let hasVisibleLink = false;
+
+            while (sibling && !sibling.classList.contains('nav-label')) {
+                if (sibling.tagName === 'A' && !sibling.hidden) {
+                    hasVisibleLink = true;
+                    break;
+                }
+                sibling = sibling.nextElementSibling;
+            }
+
+            label.hidden = !hasVisibleLink;
+        });
+
+        if (emptyState) emptyState.hidden = !query || visibleCount > 0;
+        if (clearButton) clearButton.classList.toggle('visible', Boolean(query));
+
+        if (hint) {
+            hint.textContent = query
+                ? (visibleCount === 1 ? '1 page found' : visibleCount + ' pages found')
+                : '';
+        }
+    }
+
+    input.addEventListener('input', applyFilter);
+
+    if (clearButton) {
+        clearButton.addEventListener('click', function () {
+            input.value = '';
+            applyFilter();
+            input.focus();
+        });
+    }
+
+    input.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            input.value = '';
+            applyFilter();
+            input.blur();
+        }
+
+        if (event.key === 'Enter') {
+            const firstVisible = links.find(link => !link.hidden);
+            if (firstVisible && input.value.trim()) {
+                event.preventDefault();
+                firstVisible.click();
+            }
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        const target = event.target;
+        const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
+
+        if (!typing && event.key === '/') {
+            event.preventDefault();
+            input.focus();
+        }
+    });
+})();
+</script>
