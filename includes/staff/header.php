@@ -14,6 +14,7 @@ $flash=pull_flash();
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/staff.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/staff-alerts.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/staff-login-polish.css')) ?>">
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/crm-projects.css')) ?>">
 </head>
 <body>
 <div class="app-shell">

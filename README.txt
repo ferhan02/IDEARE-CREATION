@@ -1,197 +1,84 @@
-IDEARE MATERIAL COSTING + QUOTATION PAGE PATCH
-==============================================
-
-Target project:
-
-C:\xampp\htdocs\IDEARE CREATION\
-
-
-BEFORE INSTALLING
------------------
-
-This patch assumes you have already run the SQL that creates:
-
-material_categories
-materials
-material_sizes
-material_cost_history
-material_calculations
-material_calculation_items
-cutting_jobs
-cutting_job_parts
-quotations
-quotation_items
-quotation_charges
-quotation_charge_presets
-quotation_status_history
-
-and the new material/quotation permissions.
-
+IDEARE CREATION — CRM / PROJECTS PHASE 1
+=======================================
 
 INSTALL
--------
-
-1. Extract this ZIP.
-
-2. Copy the contents into:
-
+1. Back up your current IdeaRE project and database.
+2. Extract this ZIP into your existing project root:
    C:\xampp\htdocs\IDEARE CREATION\
+   Allow matching files to be replaced.
+3. In phpMyAdmin select ideare_staff_db and run:
+   database/add_crm_projects.sql
+4. Sign in to the Staff Portal and use the new navigation sections:
+   Customers & Sales / Projects / Staff Calendar.
 
-3. Allow Windows to replace:
+IMPORTANT
+- This package assumes the earlier staff portal, material/quotation tables,
+  passkey update and SweetAlert/UI patches are already installed.
+- The SQL migration adds CRM/project tables and project/customer links to tasks.
+- This is phase 1 of the approved feature roadmap, not the entire roadmap.
 
-   includes\staff\sidebar.php
+PHASE 1 — 10 PRIORITY PAGES
+[✓] staff/pages/customers.php        Customer / Lead CRM list + creation
+[✓] staff/pages/customer-view.php    Customer profile, lead, follow-ups, projects
+[✓] staff/pages/leads.php            Sales pipeline board
+[✓] staff/pages/projects.php         Project register
+[✓] staff/pages/project-view.php     Project workspace + activity + tasks
+[✓] staff/pages/site-measurements.php Site survey / measurements
+[✓] staff/pages/materials.php        Staff-readable material catalogue
+[✓] staff/pages/tasks.php            Employee tasks linked to projects/customers
+[✓] staff/pages/calendar.php         Staff work calendar
+[✓] staff/pages/notifications.php    Improved notification centre
 
-4. Add this ONE line to the <head> section of:
+APPROVED FEATURE CHECKLIST
+[✓] Customer / Lead CRM
+[✓] Leads / Sales Pipeline
+[✓] Follow-Up System
+[✓] Project Management
+[✓] Measurement / Site Survey
+[ ] Cabinet Configurator → Project Integration
+[ ] Automatic Bill of Materials
+[✓] Material Catalogue
+[ ] Suppliers
+[ ] Purchase Orders
+[ ] Inventory
+[ ] Production Board
+[ ] Quality Control
+[ ] Installation Scheduling
+[✓] Employee Task Management
+[✓] Staff Calendar
+[ ] Customer Appointments
+[✓] Improved Quotation System (from previous update)
+[ ] Quotation Versions
+[ ] Approval Workflow
+[ ] Payments / Invoices
+[ ] Customer Portal
+[✓] Project Activity Timeline (included in project workspace)
+[✓] Internal Notes (customer/project notes foundation included)
+[ ] Document Centre
+[ ] Warranty / After-Sales
+[✓] Business Dashboard (existing staff management dashboard)
+[✓] Notification Centre
+[✓] Permissions / Roles (existing role/permission system)
+[ ] Global Search
+[ ] Homepage Project Gallery
+[ ] Cabinet Inspiration Gallery
 
-   includes\staff\header.php
+NEW DATABASE TABLES
+- customers
+- leads
+- follow_ups
+- projects
+- project_activity
+- site_measurements
 
-   directly after your existing staff.css / staff-alerts.css links:
+TASK UPGRADES
+- tasks.project_id
+- tasks.customer_id
 
-   <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/costing-quotation.css')) ?>">
-
-That is the only manual merge step, because your current header already contains the
-SweetAlert2/staff UI changes and this patch avoids overwriting them.
-
-
-NEW STAFF PAGES
----------------
-
-Material calculator:
-
-http://localhost/IDEARE%20CREATION/staff/pages/material-calculator.php
-
-Quotation list:
-
-http://localhost/IDEARE%20CREATION/staff/pages/quotations.php
-
-Create quotation:
-
-http://localhost/IDEARE%20CREATION/staff/pages/quotation-create.php
-
-
-NEW MANAGEMENT PAGES
---------------------
-
-Material catalogue:
-
-http://localhost/IDEARE%20CREATION/staff/admin/materials.php
-
-Quotation settings:
-
-http://localhost/IDEARE%20CREATION/staff/admin/quotation-settings.php
-
-
-MATERIAL CALCULATOR FEATURES
-----------------------------
-
-- select material from database
-- standard material sizes
-- material quantity
-- unit cost
-- default/custom waste %
-- sheet material panel entry
-- rough sheet requirement based on panel area
-- calculate material cost
-- calculate waste allowance
-- save material calculation
-- link calculation to saved customer design
-- create cutting jobs / parts records for sheet materials
-- recent saved calculations
-- normal staff sees own calculations
-- authorized management can see all
-
-
-IMPORTANT ABOUT SHEET WASTE
----------------------------
-
-This first version is NOT a true 2D nesting optimizer yet.
-
-It estimates number of sheets using:
-required panel area + waste allowance / sheet area
-
-The cutting_jobs and cutting_job_parts tables are populated so we can build
-the visual 2D optimizer next without redesigning the database.
-
-
-QUOTATION BUILDER FEATURES
---------------------------
-
-- customer details
-- link saved cabinet design
-- link saved material calculation
-- customer quotation line items
-- material / cabinet / hardware / labour / installation / delivery / service items
-- saved quotation charge presets
-- fixed charges
-- percentage charges
-- internal-only charges
-- overhead %
-- markup %
-- target gross margin %
-- fixed profit option
-- fixed or percentage discount
-- tax %
-- internal notes
-- customer notes
-- terms and conditions
-- live totals
-- permission-aware internal cost information
-
-
-QUOTATION VIEW FEATURES
------------------------
-
-- customer-facing quotation layout
-- printable / browser Save as PDF layout
-- internal cost section visible only to permitted users
-- quotation status workflow
-- approval permission check
-- quotation status history
-
-
-PERMISSIONS USED
-----------------
-
-material.calculate
-material.view_all
-material.manage
-
-quotation.create
-quotation.view
-quotation.view_cost
-quotation.view_margin
-quotation.edit_margin
-quotation.discount
-quotation.approve
-quotation.settings
-
-
-SWEETALERT2
------------
-
-If your earlier IdeaRE SweetAlert patch is installed, confirmation prompts on
-these pages automatically use IdeaREAlert.
-
-If it is not installed, the pages still function and use normal browser behavior.
-
-
-FIRST TEST
-----------
-
-Login as:
-
-owner@ideare.local
-
-Then:
-
-1. Open Material Catalogue
-2. Check that starter materials exist
-3. Open Material Calculator
-4. Add materials and save a MAT- calculation
-5. Open Quotations
-6. New quotation
-7. Select the saved material calculation
-8. Add customer-facing cabinet/work lines
-9. Add Installation and Delivery presets
-10. Save quotation
-11. Print / Save PDF from the quotation view
+NOTES
+- Creating a customer also creates a lead automatically.
+- A customer profile can schedule follow-ups and create projects.
+- Project pages can create project-linked employee tasks.
+- Project task assignment creates a staff notification.
+- Site measurements are stored against projects.
+- Staff Calendar combines assigned tasks, follow-ups and managed project targets.

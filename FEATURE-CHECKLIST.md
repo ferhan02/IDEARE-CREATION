@@ -1,0 +1,34 @@
+# IdeaRE approved feature checklist
+
+- [x] Customer / Lead CRM
+- [x] Leads / Sales Pipeline
+- [x] Follow-Up System
+- [x] Project Management
+- [x] Measurement / Site Survey
+- [ ] Cabinet Configurator → Project Integration
+- [ ] Automatic Bill of Materials
+- [x] Material Catalogue
+- [ ] Suppliers
+- [ ] Purchase Orders
+- [ ] Inventory
+- [ ] Production Board
+- [ ] Quality Control
+- [ ] Installation Scheduling
+- [x] Employee Task Management
+- [x] Staff Calendar
+- [ ] Customer Appointments
+- [x] Improved Quotation System — previous update
+- [ ] Quotation Versions
+- [ ] Approval Workflow
+- [ ] Payments / Invoices
+- [ ] Customer Portal
+- [x] Project Activity Timeline
+- [x] Internal Notes — initial customer/project notes foundation
+- [ ] Document Centre
+- [ ] Warranty / After-Sales
+- [x] Business Dashboard — existing management dashboard
+- [x] Notification Centre
+- [x] Permissions / Roles — existing role/permission system
+- [ ] Global Search
+- [ ] Homepage Project Gallery
+- [ ] Cabinet Inspiration Gallery

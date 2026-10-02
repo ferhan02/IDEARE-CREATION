@@ -18,6 +18,15 @@ function nav_active(string $needle): string {
 <a class="<?= nav_active('/management-dashboard.php') ?>" href="<?= h(ideare_root_url('staff/admin/management-dashboard.php')) ?>">Management Dashboard</a>
 <?php endif;?>
 
+<p class="nav-label">Customers & Sales</p>
+<a class="<?= nav_active('/customers.php') || nav_active('/customer-view.php') ?>" href="<?= h(ideare_root_url('staff/pages/customers.php')) ?>">Customers / CRM</a>
+<a class="<?= nav_active('/leads.php') ?>" href="<?= h(ideare_root_url('staff/pages/leads.php')) ?>">Sales Pipeline</a>
+
+<p class="nav-label">Projects</p>
+<a class="<?= nav_active('/projects.php') || nav_active('/project-view.php') ?>" href="<?= h(ideare_root_url('staff/pages/projects.php')) ?>">Projects</a>
+<a class="<?= nav_active('/site-measurements.php') ?>" href="<?= h(ideare_root_url('staff/pages/site-measurements.php')) ?>">Site Measurements</a>
+<a class="<?= nav_active('/calendar.php') ?>" href="<?= h(ideare_root_url('staff/pages/calendar.php')) ?>">Staff Calendar</a>
+
 <p class="nav-label">Work</p>
 <?php if(can('task.view_own')):?>
 <a class="<?= nav_active('/tasks.php') ?>" href="<?= h(ideare_root_url('staff/pages/tasks.php')) ?>">My Tasks</a>
@@ -37,6 +46,7 @@ function nav_active(string $needle): string {
 <?php if(can('material.calculate')):?>
 <a class="<?= nav_active('/material-calculator.php') ?>" href="<?= h(ideare_root_url('staff/pages/material-calculator.php')) ?>">Material Calculator</a>
 <?php endif;?>
+<a class="<?= nav_active('/pages/materials.php') ?>" href="<?= h(ideare_root_url('staff/pages/materials.php')) ?>">Material Catalogue</a>
 
 <?php if(can('quotation.view')):?>
 <a class="<?= nav_active('/quotations.php') || nav_active('/quotation-create.php') || nav_active('/quotation-view.php') ?>" href="<?= h(ideare_root_url('staff/pages/quotations.php')) ?>">Quotations</a>
