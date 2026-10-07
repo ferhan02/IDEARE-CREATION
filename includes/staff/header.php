@@ -3,6 +3,7 @@ require_once __DIR__.'/auth.php';
 $staff=current_staff();
 $pageTitle=$pageTitle??'IDEARE Staff Portal';
 $flash=pull_flash();
+$taskManagementAssets=$taskManagementAssets??false;
 ?>
 <!doctype html>
 <html lang="en">
@@ -16,6 +17,9 @@ $flash=pull_flash();
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/staff-login-polish.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/crm-projects.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/ui-polish.css')) ?>">
+<?php if($taskManagementAssets): ?>
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/task-management.css')) ?>">
+<?php endif; ?>
 </head>
 <body>
 <div class="app-shell">

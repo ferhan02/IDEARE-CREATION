@@ -25,7 +25,15 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         );
     }
 
-    if(!in_array($priority,['low','normal','high','urgent'],true)){
+    if(strlen($title)>200){
+        flash('error','Task title must be 200 characters or fewer.');
+        staff_redirect(
+            'staff/admin/task-management.php'
+            .($projectId?'?project_id='.$projectId:'')
+        );
+    }
+
+    if(!array_key_exists($priority,task_priorities())){
         $priority='normal';
     }
 
@@ -51,7 +59,13 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
     if($projectId){
         $projectCheck=$pdo->prepare("
-            SELECT p.id,p.customer_id,p.project_code,p.name,c.name customer_name
+            SELECT
+                p.id,
+                p.customer_id,
+                p.project_code,
+                p.name,
+                p.status,
+                c.name customer_name
             FROM projects p
             JOIN customers c ON c.id=p.customer_id
             WHERE p.id=?
@@ -85,71 +99,107 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $due=date('Y-m-d H:i:s',$timestamp);
     }
 
-    $insert=$pdo->prepare("
-        INSERT INTO tasks
-        (
-            title,
-            description,
-            project_id,
-            customer_id,
-            assigned_to,
-            assigned_by,
-            priority,
-            status,
-            due_date
-        )
-        VALUES(?,?,?,?,?,?,?,'todo',?)
-    ");
-
-    $insert->execute([
-        $title,
-        $description!==''?$description:null,
-        $projectId?:null,
-        $customerId,
-        $assignedTo,
-        $me['id'],
-        $priority,
-        $due
-    ]);
-
-    $taskId=(int)$pdo->lastInsertId();
     $assigneeName=trim(
         ($assignee['first_name']??'').' '.($assignee['last_name']??'')
     );
 
-    notify_staff(
-        $pdo,
-        $assignedTo,
-        'New task assigned',
-        $title,
-        'task',
-        'task',
-        $taskId
-    );
+    try{
+        $pdo->beginTransaction();
 
-    if($projectId){
-        project_activity(
+        $insert=$pdo->prepare("
+            INSERT INTO tasks
+            (
+                title,
+                description,
+                project_id,
+                customer_id,
+                assigned_to,
+                assigned_by,
+                priority,
+                status,
+                due_date,
+                deadline
+            )
+            VALUES(?,?,?,?,?,?,?,'todo',?,?)
+        ");
+
+        $insert->execute([
+            $title,
+            $description!==''?$description:null,
+            $projectId?:null,
+            $customerId,
+            $assignedTo,
+            $me['id'],
+            $priority,
+            $due,
+            $due
+        ]);
+
+        $taskId=(int)$pdo->lastInsertId();
+
+        task_record_assignment(
             $pdo,
-            $projectId,
-            'task_created',
-            'Task assigned',
-            $title.' → '.$assigneeName
+            $taskId,
+            $assignedTo,
+            (int)$me['id']
+        );
+
+        task_activity(
+            $pdo,
+            $taskId,
+            'created',
+            'Task created and assigned to '.$assigneeName.'.'
+        );
+
+        notify_staff(
+            $pdo,
+            $assignedTo,
+            'New task assigned',
+            $title,
+            'task',
+            'task',
+            $taskId
+        );
+
+        if($projectId){
+            project_activity(
+                $pdo,
+                $projectId,
+                'task_created',
+                'Task assigned',
+                $title.' → '.$assigneeName
+            );
+        }
+
+        $pdo->commit();
+
+        log_activity(
+            'task.created',
+            'task',
+            (string)$taskId,
+            'Task "'.$title.'" assigned to '.$assigneeName
+        );
+
+        flash('success','Task assigned to '.$assigneeName.'.');
+
+        staff_redirect('staff/pages/task-view.php?id='.$taskId);
+    }catch(Throwable $e){
+        if($pdo->inTransaction()){
+            $pdo->rollBack();
+        }
+
+        error_log('Task creation failed: '.$e->getMessage());
+
+        flash(
+            'error',
+            'The task could not be created. If you have not run the Stage 2 SQL yet, apply it first.'
+        );
+
+        staff_redirect(
+            'staff/admin/task-management.php'
+            .($projectId?'?project_id='.$projectId:'')
         );
     }
-
-    log_activity(
-        'task.created',
-        'task',
-        (string)$taskId,
-        'Task "'.$title.'" assigned to '.$assigneeName
-    );
-
-    flash('success','Task assigned to '.$assigneeName.'.');
-
-    staff_redirect(
-        'staff/admin/task-management.php'
-        .($projectId?'?project_id='.$projectId:'')
-    );
 }
 
 $staffRows=$pdo->query("
@@ -206,16 +256,17 @@ $rows=$pdo->query("
 ")->fetchAll();
 
 $pageTitle='Task Management';
+$taskManagementAssets=true;
 require __DIR__.'/../../includes/staff/header.php';
 ?>
-<main class="staff-content">
+<main class="staff-content task-stage2">
     <div class="page-head">
         <div>
             <p class="eyebrow">Management</p>
             <h1>Task management</h1>
             <p class="muted">
-                Restricted management workspace for assigning staff work and
-                linking it directly to customer projects.
+                Assign work, open a task to edit or reassign it, and keep a
+                complete task lifecycle history.
             </p>
         </div>
 
@@ -247,7 +298,7 @@ require __DIR__.'/../../includes/staff/header.php';
                     <input
                         name="title"
                         required
-                        maxlength="255"
+                        maxlength="200"
                         placeholder="e.g. Complete site measurement"
                     >
                 </label>
@@ -297,10 +348,11 @@ require __DIR__.'/../../includes/staff/header.php';
                     <label>
                         Priority
                         <select name="priority">
-                            <option value="low">Low</option>
-                            <option value="normal" selected>Normal</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
+                            <?php foreach(task_priorities() as $key=>$label): ?>
+                                <option value="<?= h($key) ?>" <?= $key==='normal'?'selected':'' ?>>
+                                    <?= h($label) ?>
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </label>
 
@@ -342,16 +394,32 @@ require __DIR__.'/../../includes/staff/header.php';
                         <th>Assigned to</th>
                         <th>Deadline</th>
                         <th>Status</th>
+                        <th></th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <?php foreach($rows as $row): ?>
+                        <?php
+                        $overdue=
+                            !empty($row['due_date'])
+                            && !in_array($row['status'],['completed','cancelled'],true)
+                            && strtotime($row['due_date'])<time();
+                        ?>
                         <tr>
                             <td>
-                                <b><?= h($row['title']) ?></b>
+                                <a
+                                    class="task-title-link"
+                                    href="<?= h(
+                                        ideare_root_url(
+                                            'staff/pages/task-view.php?id='.$row['id']
+                                        )
+                                    ) ?>"
+                                >
+                                    <b><?= h($row['title']) ?></b>
+                                </a>
                                 <small>
-                                    <?= h(ucfirst($row['priority'])) ?>
+                                    <?= h(task_priorities()[$row['priority']]??$row['priority']) ?>
                                     <?php if($row['assigned_by_name']): ?>
                                         · by <?= h(trim($row['assigned_by_name'])) ?>
                                     <?php endif; ?>
@@ -381,12 +449,15 @@ require __DIR__.'/../../includes/staff/header.php';
 
                             <td><?= h($row['staff_name']?:'—') ?></td>
 
-                            <td>
+                            <td class="<?= $overdue?'deadline-overdue':'' ?>">
                                 <?php if($row['due_date']): ?>
                                     <?= h(date(
                                         'j M Y, g:i A',
                                         strtotime($row['due_date'])
                                     )) ?>
+                                    <?php if($overdue): ?>
+                                        <small>Overdue</small>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     —
                                 <?php endif; ?>
@@ -394,17 +465,28 @@ require __DIR__.'/../../includes/staff/header.php';
 
                             <td>
                                 <span class="pill <?= h($row['status']) ?>">
-                                    <?= h(ucwords(
-                                        str_replace('_',' ',$row['status'])
-                                    )) ?>
+                                    <?= h(task_statuses()[$row['status']]??$row['status']) ?>
                                 </span>
+                            </td>
+
+                            <td class="task-actions-cell">
+                                <a
+                                    class="btn"
+                                    href="<?= h(
+                                        ideare_root_url(
+                                            'staff/pages/task-view.php?id='.$row['id']
+                                        )
+                                    ) ?>"
+                                >
+                                    View
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach; ?>
 
                     <?php if(!$rows): ?>
                         <tr>
-                            <td colspan="5" class="empty-state">
+                            <td colspan="6" class="empty-state">
                                 No tasks have been created yet.
                             </td>
                         </tr>

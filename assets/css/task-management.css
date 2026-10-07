@@ -1,0 +1,234 @@
+/* IDEARE Task Management — Stage 2 */
+
+.task-stage2 .page-head {
+    align-items: flex-start;
+}
+
+.task-stage2 .section-title {
+    align-items: flex-start;
+}
+
+.task-stage2 .section-title h2 {
+    margin-bottom: 4px;
+}
+
+.task-stage2 .task-title-link {
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.task-stage2 .task-title-link:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.task-stage2 .task-actions-cell {
+    white-space: nowrap;
+}
+
+.task-stage2 .deadline-overdue {
+    color: var(--red);
+    font-weight: 800;
+}
+
+.task-stage2 .deadline-overdue small {
+    color: inherit;
+}
+
+.task-stage2 .task-detail-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, .8fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.task-stage2 .task-detail-side {
+    display: grid;
+    gap: 18px;
+}
+
+.task-stage2 .task-detail-side .staff-panel {
+    margin-bottom: 0;
+}
+
+.task-stage2 .task-summary-list {
+    display: grid;
+    gap: 0;
+}
+
+.task-stage2 .task-summary-item {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.task-stage2 .task-summary-item:last-child {
+    border-bottom: 0;
+}
+
+.task-stage2 .task-summary-item span {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.task-stage2 .task-summary-item strong {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.task-stage2 .task-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.task-stage2 .task-edit-form textarea {
+    resize: vertical;
+    min-height: 130px;
+}
+
+.task-stage2 .task-edit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+    margin-top: 16px;
+}
+
+.task-stage2 .task-danger-zone {
+    border-color: #e5c7c3;
+    background: #fffaf9;
+}
+
+.task-stage2 .task-danger-zone p {
+    margin: -6px 0 14px;
+    font-size: 12px;
+}
+
+.task-stage2 .task-history {
+    position: relative;
+    display: grid;
+    gap: 0;
+}
+
+.task-stage2 .task-history-item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 14px minmax(0, 1fr);
+    gap: 12px;
+    padding: 4px 0 18px;
+}
+
+.task-stage2 .task-history-item:last-child {
+    padding-bottom: 0;
+}
+
+.task-stage2 .task-history-marker {
+    position: relative;
+    width: 10px;
+    height: 10px;
+    margin-top: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent2);
+}
+
+.task-stage2 .task-history-item:not(:last-child) .task-history-marker::after {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: 4px;
+    width: 1px;
+    height: calc(100% + 10px);
+    background: var(--line);
+}
+
+.task-stage2 .task-history-copy {
+    min-width: 0;
+}
+
+.task-stage2 .task-history-copy b {
+    display: block;
+    font-size: 12px;
+}
+
+.task-stage2 .task-history-copy p {
+    margin: 4px 0;
+    color: #4f4b45;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.task-stage2 .task-history-copy small {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.task-stage2 .assignment-history {
+    display: grid;
+    gap: 9px;
+}
+
+.task-stage2 .assignment-entry {
+    padding: 10px 11px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fbfaf8;
+}
+
+.task-stage2 .assignment-entry b,
+.task-stage2 .assignment-entry small {
+    display: block;
+}
+
+.task-stage2 .assignment-entry small {
+    margin-top: 3px;
+    color: var(--muted);
+}
+
+.task-stage2 .read-only-description {
+    white-space: pre-wrap;
+    line-height: 1.65;
+}
+
+.task-stage2 .task-card-title {
+    margin: 12px 0 7px;
+}
+
+.task-stage2 .task-card-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.task-stage2 .task-card-title a:hover {
+    color: var(--accent);
+}
+
+.task-stage2 .task-view-link {
+    margin-top: 12px;
+}
+
+@media (max-width: 1050px) {
+    .task-stage2 .task-detail-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .task-stage2 .task-summary-item {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .task-stage2 .task-edit-actions {
+        display: grid;
+    }
+
+    .task-stage2 .task-edit-actions .btn {
+        width: 100%;
+    }
+}

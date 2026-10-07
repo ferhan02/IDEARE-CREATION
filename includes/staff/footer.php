@@ -4,5 +4,8 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="<?= h(ideare_root_url('assets/js/ideare-alerts.js')) ?>"></script>
 <script src="<?= h(ideare_root_url('assets/js/staff.js')) ?>"></script>
+<?php if(!empty($taskManagementAssets)): ?>
+<script src="<?= h(ideare_root_url('assets/js/task-management.js')) ?>"></script>
+<?php endif; ?>
 </body>
 </html>

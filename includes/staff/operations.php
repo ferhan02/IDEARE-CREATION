@@ -40,11 +40,64 @@ function lead_stages(): array
     ];
 }
 
+function task_statuses(): array
+{
+    return [
+        'todo' => 'To do',
+        'in_progress' => 'In progress',
+        'waiting' => 'Waiting',
+        'completed' => 'Completed',
+        'cancelled' => 'Cancelled',
+    ];
+}
+
+function task_priorities(): array
+{
+    return [
+        'low' => 'Low',
+        'normal' => 'Normal',
+        'high' => 'High',
+        'urgent' => 'Urgent',
+    ];
+}
+
 function project_activity(PDO $pdo, int $projectId, string $type, string $title, ?string $description = null): void
 {
     $st = current_staff();
     $q = $pdo->prepare('INSERT INTO project_activity(project_id, staff_id, activity_type, title, description) VALUES(?, ?, ?, ?, ?)');
     $q->execute([$projectId, $st['id'] ?? null, $type, $title, $description]);
+}
+
+function task_activity(
+    PDO $pdo,
+    int $taskId,
+    string $action,
+    ?string $details = null,
+    ?int $staffId = null
+): void {
+    if ($staffId === null) {
+        $st = current_staff();
+        $staffId = isset($st['id']) ? (int) $st['id'] : null;
+    }
+
+    $q = $pdo->prepare(
+        'INSERT INTO task_activity(task_id, staff_id, action, details)
+         VALUES(?, ?, ?, ?)'
+    );
+    $q->execute([$taskId, $staffId, $action, $details]);
+}
+
+function task_record_assignment(
+    PDO $pdo,
+    int $taskId,
+    int $staffId,
+    ?int $assignedBy = null
+): void {
+    $q = $pdo->prepare(
+        'INSERT INTO task_assignments(task_id, staff_id, assigned_by, assigned_at)
+         VALUES(?, ?, ?, NOW())'
+    );
+    $q->execute([$taskId, $staffId, $assignedBy]);
 }
 
 function notify_staff(PDO $pdo, ?int $staffId, string $title, string $message, ?string $type = null, ?string $relatedType = null, ?int $relatedId = null): void
