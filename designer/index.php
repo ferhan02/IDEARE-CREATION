@@ -1,6 +1,6 @@
-<?php $pageTitle='IdeaRE | Cabinet Designer'; require __DIR__.'/../includes/customer/header.php'; ?>
+<?php $pageTitle='IDEARE | Cabinet Designer'; require __DIR__.'/../includes/customer/header.php'; ?>
 <main class="designer-page">
-<section class="designer-heading site-wrap"><div><p class="eyebrow">Interactive prototype</p><h1>IdeaRE Cabinet Designer</h1><p>Choose a cabinet, customize it, add it to a layout, then save or print the design.</p></div><span class="mode-badge" id="modeBadge">Loading…</span></section>
+<section class="designer-heading site-wrap"><div><p class="eyebrow">Interactive prototype</p><h1>IDEARE Cabinet Designer</h1><p>Choose a cabinet, customize it, add it to a layout, then save or print the design.</p></div><span class="mode-badge" id="modeBadge">Loading…</span></section>
 <div class="designer-shell site-wrap">
 <aside class="designer-controls">
 <section class="panel"><h2>1. Cabinet</h2><label>Cabinet type<select id="template"></select></label><div class="three"><label>Width (mm)<input id="width" type="number"></label><label>Height (mm)<input id="height" type="number"></label><label>Depth (mm)<input id="depth" type="number"></label></div><small id="limits"></small></section>

@@ -2,15 +2,23 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IdeaRE Cabinet Designer</title>
+<title>IDEARE Cabinet Designer</title>
 <link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/ui-polish.css">
 </head>
 <body>
-<header class="topbar"><div class="wrap nav"><a href="index.php"><strong>IdeaRE</strong></a><a href="designer.php">Cabinet Designer</a></div></header>
+<header class="topbar">
+  <div class="wrap nav">
+    <a href="index.php" class="brand logo-link" aria-label="IDEARE home">
+      <img class="brand-logo-image legacy-brand-logo" src="assets/images/ideare-logo.png" alt="IDEARE">
+    </a>
+    <a href="designer.php">Cabinet Designer</a>
+  </div>
+</header>
 
 <main class="wrap designer">
 <section class="designer-title">
-<div><p class="eyebrow">Interactive prototype</p><h1>IdeaRE Cabinet Designer</h1><p>Build a quick cabinet arrangement for the customer.</p></div>
+<div><p class="eyebrow">Interactive prototype</p><h1>IDEARE Cabinet Designer</h1><p>Build a quick cabinet arrangement for the customer.</p></div>
 <span id="modeBadge" class="badge">Loading…</span>
 </section>
 

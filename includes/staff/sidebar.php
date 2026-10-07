@@ -4,7 +4,9 @@ function nav_active(string $needle):string{global $path;return str_contains($pat
 ?>
 <aside class="sidebar" id="sidebar">
     <div class="brand-wrap">
-        <a class="brand" href="<?=h(ideare_root_url('staff/index.php'))?>">IdeaRE</a>
+        <a class="brand logo-link" href="<?=h(ideare_root_url('staff/index.php'))?>" aria-label="IDEARE Staff Portal">
+            <img class="brand-logo-image sidebar-brand-logo" src="<?=h(ideare_root_url('assets/images/ideare-logo.png'))?>" alt="IDEARE">
+        </a>
         <span>Staff Portal</span>
     </div>
 

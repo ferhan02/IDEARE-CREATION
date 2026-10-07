@@ -1,0 +1,434 @@
+/* ==========================================================
+   IDEARE shared UI polish
+   Loaded after existing site/staff styles so it can improve
+   controls without requiring every page to be rewritten.
+   ========================================================== */
+
+:root {
+    --ideare-focus: rgba(108, 83, 56, .18);
+    --ideare-button-shadow: 0 7px 18px rgba(45, 35, 24, .08);
+    --ideare-button-shadow-hover: 0 11px 26px rgba(45, 35, 24, .12);
+}
+
+/* ---------- Brand mark ---------- */
+.brand.logo-link,
+.login-logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+.brand-logo-image {
+    display: block;
+    height: auto;
+    object-fit: contain;
+    background: #000;
+}
+
+.sidebar-brand-logo {
+    width: 176px;
+    max-width: 100%;
+}
+
+.site-brand-logo {
+    width: 156px;
+}
+
+.login-brand-logo {
+    width: 190px;
+    max-width: 58vw;
+}
+
+.legacy-brand-logo {
+    width: 150px;
+}
+
+.passkey-login-card .login-brand {
+    align-items: center;
+    gap: 12px;
+}
+
+.passkey-login-card .login-brand > span {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .02em;
+    color: #585149;
+}
+
+/* ---------- Global control behavior ---------- */
+button,
+.btn,
+.staff-link,
+.charge-preset,
+.forget-account-btn,
+.top-icon {
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+}
+
+button:not(:disabled),
+.btn:not(.disabled),
+.staff-link,
+.charge-preset,
+.forget-account-btn,
+.top-icon {
+    cursor: pointer;
+}
+
+button:focus-visible,
+.btn:focus-visible,
+.staff-link:focus-visible,
+.charge-preset:focus-visible,
+.forget-account-btn:focus-visible,
+.top-icon:focus-visible,
+.profile-trigger:focus-visible,
+.profile-dropdown a:focus-visible {
+    outline: 0;
+    box-shadow: 0 0 0 4px var(--ideare-focus);
+}
+
+/* ---------- Main button family ---------- */
+.btn {
+    min-height: 39px;
+    gap: 7px;
+    padding: 9px 14px;
+    border-radius: 11px;
+    border: 1px solid var(--line, var(--border, #ded7cc));
+    background: #fff;
+    color: var(--ink, var(--text, #191816));
+    font-size: 12px;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.005em;
+    box-shadow: 0 1px 2px rgba(25, 20, 16, .03);
+    transition:
+        transform .16s ease,
+        border-color .16s ease,
+        background .16s ease,
+        color .16s ease,
+        box-shadow .16s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    border-color: #c7b9a7;
+    background: #fdfbf8;
+    box-shadow: var(--ideare-button-shadow);
+}
+
+.btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(45, 35, 24, .06);
+}
+
+.btn.primary,
+.btn.btn-primary {
+    border-color: var(--accent, #6c5338);
+    background: var(--accent, #6c5338);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(82, 58, 36, .15);
+}
+
+.btn.primary:hover,
+.btn.btn-primary:hover {
+    border-color: #5d452f;
+    background: #5d452f;
+    box-shadow: 0 11px 24px rgba(82, 58, 36, .22);
+}
+
+.btn.approve {
+    border-color: #bcd7c4;
+    background: #f4faf6;
+    color: var(--green, #2f6b48);
+}
+
+.btn.approve:hover {
+    border-color: #91bda0;
+    background: #eaf5ed;
+}
+
+.btn.danger {
+    border-color: #e1c1bd;
+    background: #fff9f8;
+    color: var(--red, #9d3c38);
+}
+
+.btn.danger:hover {
+    border-color: #cb9690;
+    background: #faecea;
+}
+
+.btn:disabled,
+.btn.disabled,
+button:disabled {
+    cursor: not-allowed;
+    opacity: .52;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* ---------- Utility / header buttons ---------- */
+.menu-btn,
+.nav-toggle {
+    min-width: 40px;
+    height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--line, var(--border, #ded7cc));
+    border-radius: 11px;
+    background: #fff;
+    color: var(--ink, var(--text, #191816));
+    font-size: 18px;
+    line-height: 1;
+    transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.menu-btn:hover,
+.nav-toggle:hover {
+    border-color: #c7b9a7;
+    background: #f8f4ee;
+    box-shadow: var(--ideare-button-shadow);
+}
+
+.top-icon {
+    padding: 8px 10px;
+    border-radius: 9px;
+    transition: background .16s ease, color .16s ease;
+}
+
+.top-icon:hover {
+    background: #f4f0ea;
+    color: var(--ink, #191816);
+}
+
+.site-nav .staff-link {
+    min-height: 38px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: #fff;
+    transition: transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.site-nav .staff-link:hover {
+    transform: translateY(-1px);
+    border-color: #c7b9a7;
+    background: #faf7f2;
+    box-shadow: var(--ideare-button-shadow);
+}
+
+.charge-preset {
+    min-height: 34px;
+    transition: transform .16s ease, border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.charge-preset:hover {
+    transform: translateY(-1px);
+    border-color: #c7b9a7;
+    background: #fff;
+    box-shadow: 0 5px 14px rgba(45, 35, 24, .08);
+}
+
+.forget-account-btn:hover {
+    transform: translateY(-1px);
+}
+
+.sidebar-nav-search-clear {
+    transition: background .16s ease, color .16s ease, transform .16s ease;
+}
+
+.sidebar-nav-search-clear:hover {
+    transform: scale(1.04);
+}
+
+/* ---------- Top-right profile dropdown ---------- */
+.profile-menu {
+    position: relative;
+    margin-left: 3px;
+}
+
+.profile-trigger {
+    position: relative;
+    border: 1px solid transparent;
+    background: transparent;
+    color: inherit;
+    padding: 6px 9px;
+    border-radius: 13px;
+    text-align: left;
+    transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.profile-trigger:hover,
+.profile-menu.is-open .profile-trigger,
+.profile-menu:focus-within .profile-trigger {
+    border-color: #e3dcd2;
+    background: #f8f5f0;
+}
+
+.profile-trigger .avatar {
+    flex: 0 0 auto;
+}
+
+.profile-trigger-copy {
+    min-width: 0;
+    display: grid;
+    line-height: 1.25;
+}
+
+.profile-trigger-copy b,
+.profile-trigger-copy small {
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-caret {
+    margin-left: 3px;
+    color: var(--muted, #706b63);
+    font-size: 12px;
+    transition: transform .16s ease;
+}
+
+.profile-menu:hover .profile-caret,
+.profile-menu:focus-within .profile-caret,
+.profile-menu.is-open .profile-caret {
+    transform: rotate(180deg);
+}
+
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 120;
+    width: 205px;
+    padding: 7px;
+    border: 1px solid var(--line, #ded7cc);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .985);
+    box-shadow: 0 18px 48px rgba(31, 25, 19, .16);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-5px) scale(.985);
+    transform-origin: top right;
+    transition:
+        opacity .14s ease,
+        visibility .14s ease,
+        transform .14s ease;
+}
+
+.profile-menu:hover .profile-dropdown,
+.profile-menu:focus-within .profile-dropdown,
+.profile-menu.is-open .profile-dropdown {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+.profile-dropdown::before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    right: 17px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-top: 1px solid var(--line, #ded7cc);
+    border-left: 1px solid var(--line, #ded7cc);
+    transform: rotate(45deg);
+}
+
+.profile-dropdown a {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    color: var(--ink, #191816);
+    font-size: 12px;
+    font-weight: 750;
+    text-decoration: none;
+    transition: background .14s ease, color .14s ease;
+}
+
+.profile-dropdown a:hover {
+    background: #f4f0ea;
+}
+
+.profile-dropdown a.sign-out {
+    color: var(--red, #9d3c38);
+}
+
+.profile-dropdown a.sign-out:hover {
+    background: #faecea;
+}
+
+.profile-dropdown svg {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+}
+
+/* Keep header search tidy beside the improved controls. */
+.top-search {
+    width: min(360px, 32vw);
+    margin-left: 12px;
+}
+
+.top-search input {
+    height: 39px;
+    margin: 0;
+    border-radius: 11px;
+    background: #fbfaf8;
+    transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.top-search input:focus {
+    outline: none;
+    border-color: #b9a58c;
+    background: #fff;
+    box-shadow: 0 0 0 4px var(--ideare-focus);
+}
+
+@media (max-width: 800px) {
+    .top-search {
+        width: min(320px, 46vw);
+        margin-left: 8px;
+    }
+
+    .profile-trigger-copy {
+        display: none;
+    }
+
+    .profile-caret {
+        display: none;
+    }
+
+    .profile-trigger {
+        padding: 4px;
+    }
+}
+
+@media (max-width: 560px) {
+    .site-brand-logo {
+        width: 136px;
+    }
+
+    .sidebar-brand-logo {
+        width: 164px;
+    }
+
+    .top-search {
+        display: none;
+    }
+
+    .profile-dropdown {
+        position: fixed;
+        top: 64px;
+        right: 10px;
+        width: min(220px, calc(100vw - 20px));
+    }
+}

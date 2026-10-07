@@ -7,7 +7,9 @@ function nav_active(string $needle): string {
 ?>
 <aside class="sidebar" id="sidebar">
   <div class="brand-wrap">
-    <a class="brand" href="<?= h(base_url('staff/index.php')) ?>">IdeaRE</a>
+    <a class="brand logo-link" href="<?= h(base_url('staff/index.php')) ?>" aria-label="IDEARE Staff Portal">
+      <img class="brand-logo-image sidebar-brand-logo" src="<?= h(base_url('assets/images/ideare-logo.png')) ?>" alt="IDEARE">
+    </a>
     <span>Staff Portal</span>
   </div>
 

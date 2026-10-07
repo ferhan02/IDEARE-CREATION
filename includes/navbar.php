@@ -3,7 +3,13 @@ $root = str_contains($_SERVER['PHP_SELF'], '/pages/') ? '../' : '';
 ?>
 <header class="site-header">
     <div class="container nav-wrap">
-        <a class="brand" href="<?= $root ?>index.php">IdeaRE</a>
+        <a class="brand logo-link" href="<?= $root ?>index.php" aria-label="IDEARE home">
+            <img
+                src="<?= $root ?>assets/images/ideare-logo.png"
+                alt="IDEARE"
+                style="display:block;width:156px;max-width:42vw;height:auto;background:#000"
+            >
+        </a>
 
         <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">
             ☰

@@ -89,7 +89,13 @@ require __DIR__.'/../includes/staff/header.php';
 <section class="login-card passkey-login-card">
 
     <div class="login-brand">
-        <b>IdeaRE</b>
+        <a class="login-logo-link" href="<?= h(ideare_root_url('index.php')) ?>" aria-label="IDEARE home">
+            <img
+                class="brand-logo-image login-brand-logo"
+                src="<?= h(ideare_root_url('assets/images/ideare-logo.png')) ?>"
+                alt="IDEARE"
+            >
+        </a>
         <span>Staff Portal</span>
     </div>
 
@@ -219,7 +225,7 @@ require __DIR__.'/../includes/staff/header.php';
         <span class="security-dot"></span>
 
         <p>
-            IdeaRE remembers only the last account name and email.
+            IDEARE remembers only the last account name and email.
             Passwords stay protected by your browser/password manager.
         </p>
     </div>

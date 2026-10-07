@@ -1,5 +1,5 @@
 <?php
-$pageTitle = $pageTitle ?? 'IdeaRE';
+$pageTitle = $pageTitle ?? 'IDEARE';
 $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/public/pages/') ? '../../' :
                 (str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/designer/') ? '../' : '');
 ?>
@@ -10,12 +10,17 @@ $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= htmlspecialchars($pageTitle) ?></title>
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/site.css">
+<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/ui-polish.css">
 </head>
 <body>
 <header class="site-header">
   <div class="site-wrap nav-wrap">
-    <a class="brand" href="<?= $customerRoot ?>index.php">IdeaRE</a>
-    <button class="nav-toggle" type="button" aria-label="Toggle navigation">☰</button>
+    <a class="brand logo-link" href="<?= $customerRoot ?>index.php" aria-label="IDEARE home">
+      <img class="brand-logo-image site-brand-logo" src="<?= $customerRoot ?>assets/images/ideare-logo.png" alt="IDEARE">
+    </a>
+
+    <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+
     <nav class="site-nav">
       <a href="<?= $customerRoot ?>index.php">Home</a>
       <a href="<?= $customerRoot ?>public/pages/about.php">About</a>
