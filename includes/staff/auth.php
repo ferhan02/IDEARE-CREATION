@@ -73,24 +73,12 @@ function permission_keys(): array
 
     /*
      * Direct staff overrides take precedence over role permissions.
-     * If no override exists, normal role_permissions behavior is preserved.
+     *
+     * Do not probe information_schema. We simply try the override-aware query.
+     * If the optional override table does not exist, fall back to role-only
+     * permissions. This keeps the website independent of information_schema.
      */
-    $hasOverrides=false;
-
     try {
-        $check=$pdo->query("
-            SELECT 1
-            FROM information_schema.TABLES
-            WHERE TABLE_SCHEMA=DATABASE()
-              AND TABLE_NAME='staff_permission_overrides'
-            LIMIT 1
-        ");
-        $hasOverrides=(bool)$check->fetchColumn();
-    } catch(Throwable $e) {
-        $hasOverrides=false;
-    }
-
-    if($hasOverrides){
         $s=$pdo->prepare("
             SELECT DISTINCT p.permission_key
             FROM permissions p
@@ -108,7 +96,7 @@ function permission_keys(): array
                 END = 1
         ");
         $s->execute([$st['role_id'],$st['id']]);
-    } else {
+    } catch(Throwable $e) {
         $s=$pdo->prepare("
             SELECT p.permission_key
             FROM role_permissions rp

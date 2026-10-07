@@ -261,20 +261,23 @@ function notify_staff(PDO $pdo, ?int $staffId, string $title, string $message, ?
 
 function db_table_exists(PDO $pdo, string $table): bool
 {
+    /*
+     * Do not query information_schema.
+     * Some local/phpMyAdmin MariaDB setups restrict direct access to that
+     * system database even though SHOW TABLES is available normally.
+     */
+    if(!preg_match('/^[A-Za-z0-9_]+$/',$table)){
+        return false;
+    }
+
     try {
-        $q = $pdo->prepare(
-            'SELECT 1
-             FROM information_schema.TABLES
-             WHERE TABLE_SCHEMA = DATABASE()
-               AND TABLE_NAME = ?
-             LIMIT 1'
+        $q=$pdo->query(
+            'SHOW TABLES LIKE '.$pdo->quote($table)
         );
 
-        $q->execute([$table]);
-
-        return (bool) $q->fetchColumn();
+        return (bool)$q->fetchColumn();
     } catch (Throwable $e) {
-        error_log('db_table_exists failed: ' . $e->getMessage());
+        error_log('db_table_exists failed: '.$e->getMessage());
         return false;
     }
 }
