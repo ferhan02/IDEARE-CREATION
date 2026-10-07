@@ -12,6 +12,10 @@ $costingQuotationAssets=$costingQuotationAssets??(
     str_ends_with($scriptPath,'/material-calculator.php')
 );
 $quotationCentreAssets=$quotationCentreAssets??str_ends_with($scriptPath,'/quotation-centre.php');
+$quotationCreateAssets=$quotationCreateAssets??(
+    str_ends_with($scriptPath,'/quotation-create.php') ||
+    str_ends_with($scriptPath,'/quotation-view.php')
+);
 ?>
 <!doctype html>
 <html lang="en">
@@ -30,6 +34,9 @@ $quotationCentreAssets=$quotationCentreAssets??str_ends_with($scriptPath,'/quota
 <?php endif; ?>
 <?php if($quotationCentreAssets): ?>
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/quotation-centre.css')) ?>">
+<?php endif; ?>
+<?php if($quotationCreateAssets): ?>
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/quotation-create.css')) ?>">
 <?php endif; ?>
 <?php if($taskManagementAssets): ?>
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/task-management.css')) ?>">

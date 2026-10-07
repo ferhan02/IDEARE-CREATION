@@ -48,9 +48,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             $id,
             'status_change',
             'Status changed',
-            ucwords(str_replace('_',' ',$old))
-            .' → '
-            .ucwords(str_replace('_',' ',$new))
+            ucwords(str_replace('_',' ',$old)).' → '.ucwords(str_replace('_',' ',$new))
         );
 
         flash('success','Project status updated.');
@@ -89,21 +87,27 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
     }
 }
 
-$designs=$pdo->query("
-    SELECT id,design_code,title
-    FROM designs
-    ORDER BY updated_at DESC
-")->fetchAll();
+$designs=[];
+try{
+    $designs=$pdo->query("
+        SELECT id,design_code,COALESCE(NULLIF(design_name,''),design_code) design_title
+        FROM designs
+        ORDER BY updated_at DESC
+    ")->fetchAll();
+}catch(Throwable $e){}
 
-$dq=$pdo->prepare("
-    SELECT pd.*,d.design_code,d.title
-    FROM project_designs pd
-    JOIN designs d ON d.id=pd.design_id
-    WHERE pd.project_id=?
-    ORDER BY pd.is_primary DESC,pd.created_at DESC
-");
-$dq->execute([$id]);
-$linkedDesigns=$dq->fetchAll();
+$linkedDesigns=[];
+try{
+    $dq=$pdo->prepare("
+        SELECT pd.*,d.design_code,COALESCE(NULLIF(d.design_name,''),d.design_code) design_title
+        FROM project_designs pd
+        JOIN designs d ON d.id=pd.design_id
+        WHERE pd.project_id=?
+        ORDER BY pd.is_primary DESC,pd.created_at DESC
+    ");
+    $dq->execute([$id]);
+    $linkedDesigns=$dq->fetchAll();
+}catch(Throwable $e){}
 
 $mq=$pdo->prepare("
     SELECT
@@ -144,6 +148,21 @@ $aq=$pdo->prepare("
 $aq->execute([$id]);
 $activity=$aq->fetchAll();
 
+$projectQuotations=[];
+if(can('quotation.view')){
+    try{
+        $qq=$pdo->prepare("
+            SELECT id,quotation_code,quotation_title,status,final_total,current_version_no,valid_until,updated_at
+            FROM quotations
+            WHERE project_id=?
+            ORDER BY updated_at DESC,id DESC
+            LIMIT 12
+        ");
+        $qq->execute([$id]);
+        $projectQuotations=$qq->fetchAll();
+    }catch(Throwable $e){}
+}
+
 $statuses=array_keys(project_statuses());
 $currentIndex=array_search($p['status'],$statuses,true);
 
@@ -156,11 +175,7 @@ require __DIR__.'/../../includes/staff/header.php';
             <p class="eyebrow"><?= h($p['project_code']) ?></p>
             <h1><?= h($p['name']) ?></h1>
             <p class="muted">
-                <a href="<?= h(
-                    ideare_root_url(
-                        'staff/pages/customer-view.php?id='.$p['customer_id']
-                    )
-                ) ?>">
+                <a href="<?= h(ideare_root_url('staff/pages/customer-view.php?id='.$p['customer_id'])) ?>">
                     <?= h($p['customer_name']) ?>
                 </a>
                 · <?= h($p['project_type']?:'General project') ?>
@@ -168,17 +183,17 @@ require __DIR__.'/../../includes/staff/header.php';
         </div>
 
         <div class="actions">
-            <a class="btn" href="<?= h(
-                ideare_root_url(
-                    'staff/pages/site-measurements.php?project_id='.$id
-                )
-            ) ?>">
+            <?php if(can('quotation.create')): ?>
+            <a class="btn primary" href="<?= h(ideare_root_url('staff/pages/quotation-create.php?project_id='.$id)) ?>">
+                New quotation
+            </a>
+            <?php endif; ?>
+
+            <a class="btn" href="<?= h(ideare_root_url('staff/pages/site-measurements.php?project_id='.$id)) ?>">
                 Add measurement
             </a>
 
-            <a class="btn" href="<?= h(
-                ideare_root_url('staff/pages/projects.php')
-            ) ?>">
+            <a class="btn" href="<?= h(ideare_root_url('staff/pages/projects.php')) ?>">
                 All projects
             </a>
         </div>
@@ -197,12 +212,7 @@ require __DIR__.'/../../includes/staff/header.php';
 
                 <select name="status">
                     <?php foreach(project_statuses() as $key=>$value): ?>
-                        <option
-                            value="<?= h($key) ?>"
-                            <?= $p['status']===$key?'selected':'' ?>
-                        >
-                            <?= h($value) ?>
-                        </option>
+                        <option value="<?= h($key) ?>" <?= $p['status']===$key?'selected':'' ?>><?= h($value) ?></option>
                     <?php endforeach; ?>
                 </select>
 
@@ -213,32 +223,53 @@ require __DIR__.'/../../includes/staff/header.php';
         <div class="progress-track">
             <?php foreach($statuses as $i=>$status): ?>
                 <?php if(in_array($status,['on_hold','cancelled'],true)) continue; ?>
-                <span
-                    class="progress-step <?= $currentIndex!==false&&$i<=$currentIndex?'done':'' ?>"
-                    title="<?= h(project_statuses()[$status]) ?>"
-                ></span>
+                <span class="progress-step <?= $currentIndex!==false&&$i<=$currentIndex?'done':'' ?>" title="<?= h(project_statuses()[$status]) ?>"></span>
             <?php endforeach; ?>
         </div>
 
         <div class="kpi-inline" style="margin-top:18px">
-            <span>
-                <small>Manager</small>
-                <strong><?= h($p['manager_name']?:'Unassigned') ?></strong>
-            </span>
-            <span>
-                <small>Target</small>
-                <strong>
-                    <?= $p['target_date']
-                        ?h(date('j M Y',strtotime($p['target_date'])))
-                        :'—' ?>
-                </strong>
-            </span>
-            <span>
-                <small>Value</small>
-                <strong><?= money($p['estimated_value']) ?></strong>
-            </span>
+            <span><small>Manager</small><strong><?= h($p['manager_name']?:'Unassigned') ?></strong></span>
+            <span><small>Target</small><strong><?= $p['target_date']?h(date('j M Y',strtotime($p['target_date']))):'—' ?></strong></span>
+            <span><small>Value</small><strong><?= money($p['estimated_value']) ?></strong></span>
         </div>
     </section>
+
+    <?php if(can('quotation.view')): ?>
+    <section class="staff-panel">
+        <div class="section-title">
+            <div>
+                <p class="eyebrow">Commercial</p>
+                <h2>Project quotations</h2>
+                <p class="muted">Quotations created from this project stay attached to the project record.</p>
+            </div>
+            <div class="actions">
+                <a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-centre.php?q='.urlencode($p['project_code']))) ?>">Quotation Centre</a>
+                <?php if(can('quotation.create')): ?>
+                <a class="btn primary" href="<?= h(ideare_root_url('staff/pages/quotation-create.php?project_id='.$id)) ?>">Create quotation</a>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="list">
+            <?php foreach($projectQuotations as $quote): ?>
+                <div class="list-row">
+                    <div>
+                        <a href="<?= h(ideare_root_url('staff/pages/quotation-view.php?id='.$quote['id'])) ?>"><b><?= h($quote['quotation_code']) ?></b></a>
+                        <small>
+                            <?= h($quote['quotation_title']?:'Quotation') ?> · v<?= max(1,(int)$quote['current_version_no']) ?> · <?= h(ucwords(str_replace('_',' ',$quote['status']))) ?>
+                            <?= $quote['valid_until']?' · Valid to '.h(date('j M Y',strtotime($quote['valid_until']))):'' ?>
+                        </small>
+                    </div>
+                    <strong><?= money($quote['final_total']) ?></strong>
+                </div>
+            <?php endforeach; ?>
+
+            <?php if(!$projectQuotations): ?>
+                <p class="muted">No quotation has been created for this project yet.</p>
+            <?php endif; ?>
+        </div>
+    </section>
+    <?php endif; ?>
 
     <div class="split-grid">
         <section class="staff-panel">
@@ -246,29 +277,13 @@ require __DIR__.'/../../includes/staff/header.php';
                 <div>
                     <p class="eyebrow">Work</p>
                     <h2>Project tasks</h2>
-                    <p class="muted">
-                        Tasks linked to this project are managed centrally.
-                    </p>
+                    <p class="muted">Tasks linked to this project are managed centrally.</p>
                 </div>
 
                 <?php if(can_manage_tasks()): ?>
-                    <a
-                        class="btn primary"
-                        href="<?= h(
-                            ideare_root_url(
-                                'staff/admin/task-management.php?project_id='.$id
-                            )
-                        ) ?>"
-                    >
-                        Assign task
-                    </a>
+                    <a class="btn primary" href="<?= h(ideare_root_url('staff/admin/task-management.php?project_id='.$id)) ?>">Assign task</a>
                 <?php else: ?>
-                    <a
-                        class="btn"
-                        href="<?= h(ideare_root_url('staff/pages/tasks.php')) ?>"
-                    >
-                        My tasks
-                    </a>
+                    <a class="btn" href="<?= h(ideare_root_url('staff/pages/tasks.php')) ?>">My tasks</a>
                 <?php endif; ?>
             </div>
 
@@ -278,40 +293,22 @@ require __DIR__.'/../../includes/staff/header.php';
                         <div>
                             <b><?= h($task['title']) ?></b>
                             <small>
-                                <?= h($task['assigned_name']?:'Unassigned') ?>
-                                · <?= h(ucwords(
-                                    str_replace('_',' ',$task['status'])
-                                )) ?>
-                                <?= $task['due_date']
-                                    ?' · '.h(date(
-                                        'j M, g:i A',
-                                        strtotime($task['due_date'])
-                                    ))
-                                    :'' ?>
+                                <?= h($task['assigned_name']?:'Unassigned') ?> · <?= h(ucwords(str_replace('_',' ',$task['status']))) ?>
+                                <?= $task['due_date']?' · '.h(date('j M, g:i A',strtotime($task['due_date']))):'' ?>
                             </small>
                         </div>
-                        <span class="pill <?= h($task['priority']) ?>">
-                            <?= h($task['priority']) ?>
-                        </span>
+                        <span class="pill <?= h($task['priority']) ?>"><?= h($task['priority']) ?></span>
                     </div>
                 <?php endforeach; ?>
 
-                <?php if(!$tasks): ?>
-                    <p class="muted">No tasks linked to this project yet.</p>
-                <?php endif; ?>
+                <?php if(!$tasks): ?><p class="muted">No tasks linked to this project yet.</p><?php endif; ?>
             </div>
         </section>
 
         <section class="staff-panel">
             <div class="section-title">
                 <h2>Site measurements</h2>
-                <a href="<?= h(
-                    ideare_root_url(
-                        'staff/pages/site-measurements.php?project_id='.$id
-                    )
-                ) ?>">
-                    Open survey
-                </a>
+                <a href="<?= h(ideare_root_url('staff/pages/site-measurements.php?project_id='.$id)) ?>">Open survey</a>
             </div>
 
             <div class="list">
@@ -319,27 +316,18 @@ require __DIR__.'/../../includes/staff/header.php';
                     <div class="list-row">
                         <div>
                             <b><?= h($measurement['room_name']) ?></b>
-                            <small>
-                                <?= h(date(
-                                    'j M Y, g:i A',
-                                    strtotime($measurement['measured_at'])
-                                )) ?>
-                                · <?= h(
-                                    $measurement['measured_by_name']?:'Unknown'
-                                ) ?>
-                            </small>
+                            <small><?= h(date('j M Y, g:i A',strtotime($measurement['measured_at']))) ?> · <?= h($measurement['measured_by_name']?:'Unknown') ?></small>
                         </div>
-                        <span>
-                            <?= $measurement['wall_a_mm']
-                                ?h($measurement['wall_a_mm'].' mm')
-                                :'' ?>
-                        </span>
+                        <div class="actions">
+                            <span><?= $measurement['wall_a_mm']?h($measurement['wall_a_mm'].' mm'):'' ?></span>
+                            <?php if(can('quotation.create')): ?>
+                            <a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-create.php?project_id='.$id.'&measurement_id='.(int)$measurement['id'])) ?>">Use in quote</a>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
 
-                <?php if(!$measurements): ?>
-                    <p class="muted">No measurements yet.</p>
-                <?php endif; ?>
+                <?php if(!$measurements): ?><p class="muted">No measurements yet.</p><?php endif; ?>
             </div>
         </section>
     </div>
@@ -347,9 +335,7 @@ require __DIR__.'/../../includes/staff/header.php';
     <section class="staff-panel">
         <div class="section-title">
             <h2>Cabinet designs</h2>
-            <a href="<?= h(ideare_root_url('designer/index.php')) ?>">
-                Open configurator ↗
-            </a>
+            <a href="<?= h(ideare_root_url('designer/index.php')) ?>">Open configurator ↗</a>
         </div>
 
         <form method="post" class="mini-form">
@@ -361,12 +347,7 @@ require __DIR__.'/../../includes/staff/header.php';
                 <select name="design_id" required>
                     <option value="">Choose design...</option>
                     <?php foreach($designs as $design): ?>
-                        <option value="<?= (int)$design['id'] ?>">
-                            <?= h(
-                                $design['design_code']
-                                .' · '.$design['title']
-                            ) ?>
-                        </option>
+                        <option value="<?= (int)$design['id'] ?>"><?= h($design['design_code'].' · '.$design['design_title']) ?></option>
                     <?php endforeach; ?>
                 </select>
             </label>
@@ -382,11 +363,7 @@ require __DIR__.'/../../includes/staff/header.php';
                 </select>
             </label>
 
-            <label>
-                <input type="checkbox" name="is_primary">
-                Primary design
-            </label>
-
+            <label><input type="checkbox" name="is_primary"> Primary design</label>
             <button class="btn">Link design</button>
         </form>
 
@@ -394,61 +371,29 @@ require __DIR__.'/../../includes/staff/header.php';
             <?php foreach($linkedDesigns as $design): ?>
                 <div class="list-row">
                     <div>
-                        <b>
-                            <?= h(
-                                $design['design_code'].' · '.$design['title']
-                            ) ?>
-                        </b>
-                        <small>
-                            <?= h($design['purpose']) ?>
-                            <?= $design['is_primary']?' · Primary':'' ?>
-                        </small>
+                        <b><?= h($design['design_code'].' · '.$design['design_title']) ?></b>
+                        <small><?= h($design['purpose']) ?><?= $design['is_primary']?' · Primary':'' ?></small>
                     </div>
-
-                    <a
-                        class="btn"
-                        href="<?= h(
-                            ideare_root_url(
-                                'designer/index.php?design_id='
-                                .$design['design_id']
-                            )
-                        ) ?>"
-                    >
-                        Open
-                    </a>
+                    <a class="btn" href="<?= h(ideare_root_url('designer/index.php?design_id='.$design['design_id'])) ?>">Open</a>
                 </div>
             <?php endforeach; ?>
 
-            <?php if(!$linkedDesigns): ?>
-                <p class="muted">No configurator design linked yet.</p>
-            <?php endif; ?>
+            <?php if(!$linkedDesigns): ?><p class="muted">No configurator design linked yet.</p><?php endif; ?>
         </div>
     </section>
 
     <section class="staff-panel">
         <h2>Project activity</h2>
-
         <div class="timeline">
             <?php foreach($activity as $entry): ?>
                 <div class="timeline-item">
                     <b><?= h($entry['title']) ?></b>
-                    <small class="muted">
-                        <?= h(date(
-                            'j M Y, g:i A',
-                            strtotime($entry['created_at'])
-                        )) ?>
-                        · <?= h($entry['staff_name']?:'System') ?>
-                    </small>
-
-                    <?php if($entry['description']): ?>
-                        <p><?= h($entry['description']) ?></p>
-                    <?php endif; ?>
+                    <small class="muted"><?= h(date('j M Y, g:i A',strtotime($entry['created_at']))) ?> · <?= h($entry['staff_name']?:'System') ?></small>
+                    <?php if($entry['description']): ?><p><?= h($entry['description']) ?></p><?php endif; ?>
                 </div>
             <?php endforeach; ?>
 
-            <?php if(!$activity): ?>
-                <p class="muted">No activity yet.</p>
-            <?php endif; ?>
+            <?php if(!$activity): ?><p class="muted">No activity yet.</p><?php endif; ?>
         </div>
     </section>
 </main>

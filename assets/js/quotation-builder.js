@@ -184,20 +184,12 @@
 
   function calculate() {
     items.forEach(item => {
-      item.amount =
-        Number(item.quantity || 0) *
-        Number(item.unit_price || 0);
-
-      item.internal_total_cost =
-        Number(item.quantity || 0) *
-        Number(item.internal_unit_cost || 0);
+      item.amount = Number(item.quantity || 0) * Number(item.unit_price || 0);
+      item.internal_total_cost = Number(item.quantity || 0) * Number(item.internal_unit_cost || 0);
     });
 
-    const itemInternalCost =
-      items.reduce((sum,i)=>sum+Number(i.internal_total_cost||0),0);
-
-    const customerLineTotal =
-      items.reduce((sum,i)=>sum+Number(i.amount||0),0);
+    const itemInternalCost = items.reduce((sum,i)=>sum+Number(i.internal_total_cost||0),0);
+    const customerLineTotal = items.reduce((sum,i)=>sum+Number(i.amount||0),0);
 
     let externalChargeTotal=0;
     let internalChargeTotal=0;
@@ -209,15 +201,11 @@
         : 0;
 
       charge.base_amount=base;
+      charge.amount = charge.calculation_type==='percentage'
+        ? base * (Number(charge.rate||0)/100)
+        : Number(charge.rate||0);
 
-      charge.amount =
-        charge.calculation_type==='percentage'
-          ? base * (Number(charge.rate||0)/100)
-          : Number(charge.rate||0);
-
-      if(charge.charge_category==='waste'){
-        wasteCost += charge.amount;
-      }
+      if(charge.charge_category==='waste') wasteCost += charge.amount;
 
       if(charge.internal_only){
         internalChargeTotal += charge.amount;
@@ -227,18 +215,11 @@
     });
 
     let directCost = itemInternalCost;
-    if(!canViewCost){
-      directCost = 0;
-    }
+    if(!canViewCost) directCost = 0;
 
     const overheadPct = Number($('quoteOverheadPct')?.value || 0);
     const overheadAmount = directCost * overheadPct / 100;
-
-    const internalCost =
-      directCost +
-      internalChargeTotal +
-      wasteCost +
-      overheadAmount;
+    const internalCost = directCost + internalChargeTotal + wasteCost + overheadAmount;
 
     const markupType = $('quoteMarkupType')?.value || 'percentage';
     const markupValue = Number($('quoteMarkupValue')?.value || 0);
@@ -259,16 +240,11 @@
         markupAmount = calculatedSelling - internalCost;
       }
 
-      // Explicit customer-facing items/charges should never be lost.
-      calculatedSelling = Math.max(
-        calculatedSelling,
-        customerLineTotal + externalChargeTotal
-      );
+      calculatedSelling = Math.max(calculatedSelling, customerLineTotal + externalChargeTotal);
     }
 
     const discountType = $('quoteDiscountType')?.value || 'none';
     const discountValue = Number($('quoteDiscountValue')?.value || 0);
-
     let discountAmount=0;
 
     if(discountType==='percentage'){
@@ -316,16 +292,19 @@
   }
 
   function useDesign() {
-    const option =
-      $('quoteDesign').options[$('quoteDesign').selectedIndex];
+    const select=$('quoteDesign');
+    const option=select.options[select.selectedIndex];
+    if(!select.value) return;
 
-    if(!$('quoteDesign').value) return;
+    // CRM/customer snapshots now come from Stage 2 context and should not be
+    // silently replaced by older design snapshot data.
+    if(!$('quoteCustomerId')?.value){
+      $('quoteCustomerName').value=option.dataset.customer||'';
+      $('quoteCustomerEmail').value=option.dataset.email||'';
+      $('quoteCustomerPhone').value=option.dataset.phone||'';
+    }
 
-    $('quoteCustomerName').value=option.dataset.customer||'';
-    $('quoteCustomerEmail').value=option.dataset.email||'';
-    $('quoteCustomerPhone').value=option.dataset.phone||'';
-
-    if(option.dataset.room){
+    if(option.dataset.room && !$('quoteProjectType')?.value){
       $('quoteProjectType').value=option.dataset.room;
     }
 
@@ -342,10 +321,9 @@
   }
 
   function useMaterialCalculation() {
-    const option =
-      $('quoteMaterialCalc').options[$('quoteMaterialCalc').selectedIndex];
-
-    if(!$('quoteMaterialCalc').value) return;
+    const select=$('quoteMaterialCalc');
+    const option=select.options[select.selectedIndex];
+    if(!select.value) return;
 
     const cost=Number(option.dataset.total||0);
 
@@ -353,7 +331,6 @@
       $('quoteCustomerName').value=option.dataset.customer;
     }
 
-    // Add or update one internal material-cost reference line.
     const existing=items.find(i=>i.notes==='material_calculation_reference');
 
     if(existing){
@@ -374,24 +351,42 @@
     renderItems();
   }
 
+
+  function clearInvalidSourceReferences() {
+    if(!$('quoteMaterialCalc')?.value){
+      const before=items.length;
+      items=items.filter(item=>item.notes!=='material_calculation_reference');
+      if(items.length!==before) renderItems();
+    }
+  }
+
   function payload() {
     const totals=calculate();
-
-    const designOption =
-      $('quoteDesign').options[$('quoteDesign').selectedIndex];
+    const designSelect=$('quoteDesign');
+    const designOption=designSelect?.options[designSelect.selectedIndex];
 
     return {
-      design_id: $('quoteDesign').value || null,
+      customer_id: $('quoteCustomerId')?.value || null,
+      project_id: $('quoteProjectId')?.value || null,
+      site_measurement_id: $('quoteMeasurementId')?.value || null,
+      salesperson_id: $('quoteSalespersonId')?.value || null,
+
+      design_id: designSelect?.value || null,
       design_code: designOption?.dataset.code || '',
-      material_calculation_id: $('quoteMaterialCalc').value || null,
+      material_calculation_id: $('quoteMaterialCalc')?.value || null,
 
       customer_name: $('quoteCustomerName').value.trim(),
       customer_email: $('quoteCustomerEmail').value.trim(),
       customer_phone: $('quoteCustomerPhone').value.trim(),
+      customer_billing_address_snapshot: $('quoteCustomerBillingAddress')?.value.trim() || '',
+      customer_site_address_snapshot: $('quoteCustomerSiteAddress')?.value.trim() || '',
 
       project_name: $('quoteProjectName').value.trim(),
-      project_type: $('quoteProjectType').value,
+      project_type: $('quoteProjectType').value.trim(),
+      site_address_snapshot: $('quoteSiteAddress')?.value.trim() || '',
 
+      quotation_title: $('quoteTitle')?.value.trim() || '',
+      reference_no: $('quoteReferenceNo')?.value.trim() || '',
       quotation_date: $('quoteDate').value,
       valid_until: $('quoteValidUntil').value,
 
@@ -412,14 +407,14 @@
 
   document.querySelectorAll('[data-preset]').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      try{
-        addCharge(JSON.parse(btn.dataset.preset));
-      }catch(e){}
+      try{ addCharge(JSON.parse(btn.dataset.preset)); }catch(e){}
     });
   });
 
-  $('quoteDesign').addEventListener('change',useDesign);
-  $('quoteMaterialCalc').addEventListener('change',useMaterialCalculation);
+  $('quoteDesign')?.addEventListener('change',useDesign);
+  $('quoteMaterialCalc')?.addEventListener('change',useMaterialCalculation);
+  $('quoteCustomerId')?.addEventListener('change',clearInvalidSourceReferences);
+  $('quoteProjectId')?.addEventListener('change',clearInvalidSourceReferences);
 
   [
     'quoteOverheadPct',
@@ -436,23 +431,28 @@
   $('saveQuoteForm').addEventListener('submit',e=>{
     const p=payload();
 
+    if(!p.customer_id){
+      e.preventDefault();
+      window.IdeaREAlert
+        ? IdeaREAlert.warning('CRM customer required','Choose a customer from CRM before saving the quotation.')
+        : alert('Choose a customer from CRM before saving the quotation.');
+      $('quoteCustomerId')?.focus();
+      return;
+    }
+
     if(!p.customer_name){
       e.preventDefault();
-
       window.IdeaREAlert
-        ? IdeaREAlert.warning('Customer required','Enter the customer name before saving.')
+        ? IdeaREAlert.warning('Customer name required','Enter the customer name that should appear on this quotation.')
         : alert('Enter the customer name before saving.');
-
       return;
     }
 
     if(!p.items.length && !p.charges.length){
       e.preventDefault();
-
       window.IdeaREAlert
         ? IdeaREAlert.warning('Quotation is empty','Add at least one quotation item or charge.')
         : alert('Add at least one quotation item or charge.');
-
       return;
     }
 
