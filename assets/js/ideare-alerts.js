@@ -5,6 +5,7 @@
     buttonsStyling: false,
     reverseButtons: true,
     focusCancel: false,
+    heightAuto: false,
     showClass: {
       popup: 'ideare-swal-in'
     },
@@ -32,6 +33,7 @@
 
   async function fire(options = {}) {
     const type = options.icon || 'info';
+    const singleAction = !options.showCancelButton;
 
     return Swal.fire({
       ...base,
@@ -42,6 +44,7 @@
         popup: [
           base.customClass.popup,
           toneClass(type),
+          singleAction ? 'ideare-swal-single-action' : 'ideare-swal-dialog',
           options.customClass?.popup || ''
         ].filter(Boolean).join(' ')
       }
@@ -109,7 +112,6 @@
     }
   };
 
-  // Convert existing PHP flash messages into the polished popup automatically.
   document.querySelectorAll('[data-ideare-flash]').forEach(el => {
     const type = el.dataset.flashType || 'info';
     const message = el.dataset.flashMessage || el.textContent.trim();
@@ -122,6 +124,8 @@
       IdeaREAlert.success('Done', message);
     } else if (type === 'error') {
       IdeaREAlert.error('Something went wrong', message);
+    } else if (type === 'warning') {
+      IdeaREAlert.warning('Notice', message);
     } else {
       IdeaREAlert.info('Notice', message);
     }

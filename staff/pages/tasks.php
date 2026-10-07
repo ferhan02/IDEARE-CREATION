@@ -10,15 +10,23 @@ $staff=current_staff();
 if($_SERVER['REQUEST_METHOD']==='POST'){
     $id=(int)($_POST['task_id']??0);
     $status=$_POST['status']??'todo';
-    $allowed=['todo','in_progress','waiting','completed'];
+    $allowed=['todo','in_progress','waiting'];
 
     if(!in_array($status,$allowed,true)){
-        flash('error','Choose a valid task status.');
+        flash(
+            'error',
+            'Use the task detail page to complete a task so a completion note can be recorded.'
+        );
         staff_redirect('staff/pages/tasks.php');
     }
 
     $q=$pdo->prepare("
-        SELECT id,project_id,title,status,assigned_by
+        SELECT
+            id,
+            project_id,
+            title,
+            status,
+            assigned_by
         FROM tasks
         WHERE id=? AND assigned_to=?
         LIMIT 1
@@ -31,8 +39,11 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         staff_redirect('staff/pages/tasks.php');
     }
 
-    if($task['status']==='cancelled'){
-        flash('error','A cancelled task cannot be updated.');
+    if(in_array($task['status'],['completed','cancelled'],true)){
+        flash(
+            'error',
+            'Completed or cancelled tasks cannot be changed from the quick status control.'
+        );
         staff_redirect('staff/pages/tasks.php');
     }
 
@@ -49,17 +60,9 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
 
         $pdo->prepare("
             UPDATE tasks
-            SET
-                status=?,
-                completed_at=
-                    CASE
-                        WHEN ?='completed'
-                        THEN COALESCE(completed_at,NOW())
-                        ELSE NULL
-                    END
+            SET status=?
             WHERE id=? AND assigned_to=?
         ")->execute([
-            $status,
             $status,
             $id,
             $staff['id']
@@ -83,15 +86,14 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         }
 
         if(
-            $status==='completed'
-            && $task['assigned_by']
+            $task['assigned_by']
             && (int)$task['assigned_by']!==(int)$staff['id']
         ){
             notify_staff(
                 $pdo,
                 (int)$task['assigned_by'],
-                'Task completed',
-                $task['title'],
+                'Task status updated',
+                $task['title'].' · '.$newLabel,
                 'task',
                 'task',
                 $id
@@ -125,7 +127,18 @@ $s=$pdo->prepare("
         t.*,
         p.project_code,
         p.name project_name,
-        c.name customer_name
+        c.name customer_name,
+        (
+            SELECT COUNT(*)
+            FROM task_checklist_items ci
+            WHERE ci.task_id=t.id
+        ) checklist_total,
+        (
+            SELECT COUNT(*)
+            FROM task_checklist_items ci
+            WHERE ci.task_id=t.id
+              AND ci.is_completed=1
+        ) checklist_done
     FROM tasks t
     LEFT JOIN projects p ON p.id=t.project_id
     LEFT JOIN customers c ON c.id=t.customer_id
@@ -142,13 +155,14 @@ $pageTitle='My Tasks';
 $taskManagementAssets=true;
 require __DIR__.'/../../includes/staff/header.php';
 ?>
-<main class="staff-content task-stage2">
+<main class="staff-content task-stage2 task-stage3">
     <div class="page-head">
         <div>
             <p class="eyebrow">Work</p>
             <h1>My tasks</h1>
             <p class="muted">
-                Tasks assigned to you, including linked customer projects.
+                Open a task to work through its checklist, post progress,
+                upload files and record completion.
             </p>
         </div>
 
@@ -208,6 +222,30 @@ require __DIR__.'/../../includes/staff/header.php';
 
                 <p><?= h($row['description']?:'') ?></p>
 
+                <div class="task-card-progress">
+                    <div>
+                        <span>Progress</span>
+                        <strong><?= (int)$row['progress_percent'] ?>%</strong>
+                    </div>
+
+                    <div
+                        class="task-mini-progress"
+                        role="progressbar"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        aria-valuenow="<?= (int)$row['progress_percent'] ?>"
+                    >
+                        <span style="width:<?= (int)$row['progress_percent'] ?>%"></span>
+                    </div>
+
+                    <?php if((int)$row['checklist_total']>0): ?>
+                        <small>
+                            Checklist:
+                            <?= (int)$row['checklist_done'] ?>/<?= (int)$row['checklist_total'] ?>
+                        </small>
+                    <?php endif; ?>
+                </div>
+
                 <small class="<?= $overdue?'deadline-overdue':'' ?>">
                     <?= $row['due_date']
                         ?h(date(
@@ -215,11 +253,10 @@ require __DIR__.'/../../includes/staff/header.php';
                             strtotime($row['due_date'])
                         ))
                         :'No due date' ?>
-
                     <?= $overdue?' · Overdue':'' ?>
                 </small>
 
-                <?php if($row['status']!=='cancelled'): ?>
+                <?php if(!in_array($row['status'],['completed','cancelled'],true)): ?>
                     <form
                         method="post"
                         class="inline-form"
@@ -236,8 +273,7 @@ require __DIR__.'/../../includes/staff/header.php';
                             <?php foreach([
                                 'todo'=>'To do',
                                 'in_progress'=>'In progress',
-                                'waiting'=>'Waiting',
-                                'completed'=>'Completed'
+                                'waiting'=>'Waiting'
                             ] as $key=>$label): ?>
                                 <option
                                     value="<?= h($key) ?>"
@@ -248,19 +284,21 @@ require __DIR__.'/../../includes/staff/header.php';
                             <?php endforeach; ?>
                         </select>
 
-                        <button class="btn" type="submit">Update</button>
+                        <button class="btn" type="submit">
+                            Update status
+                        </button>
                     </form>
                 <?php endif; ?>
 
                 <a
-                    class="btn task-view-link"
+                    class="btn primary task-view-link"
                     href="<?= h(
                         ideare_root_url(
                             'staff/pages/task-view.php?id='.$row['id']
                         )
                     ) ?>"
                 >
-                    View details &amp; history
+                    Open task workspace
                 </a>
             </article>
         <?php endforeach; ?>

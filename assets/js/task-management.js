@@ -35,4 +35,35 @@
             }
         });
     });
+
+    document.querySelectorAll('[data-comment-type]').forEach(select => {
+        const form = select.closest('form');
+        const progressField = form?.querySelector('[data-progress-field]');
+
+        if (!progressField) return;
+
+        const sync = () => {
+            progressField.hidden = select.value !== 'progress';
+        };
+
+        select.addEventListener('change', sync);
+        sync();
+    });
+
+    document.querySelectorAll('[data-task-edit-form]').forEach(form => {
+        const status = form.querySelector('[data-task-status-select]');
+        const completionWrap = form.querySelector('[data-completion-note-wrap]');
+        const completionNote = completionWrap?.querySelector('textarea');
+
+        if (!status || !completionWrap || !completionNote) return;
+
+        const sync = () => {
+            const needsNote = status.value === 'completed';
+            completionWrap.classList.toggle('is-required', needsNote);
+            completionNote.required = needsNote;
+        };
+
+        status.addEventListener('change', sync);
+        sync();
+    });
 })();

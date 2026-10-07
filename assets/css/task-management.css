@@ -232,3 +232,537 @@
         width: 100%;
     }
 }
+
+
+/* ==========================================================
+   Stage 3: full-width manager overview + employee execution
+   ========================================================== */
+
+/* Task Management page: Assignment first, Overview directly below it. */
+.task-management-page .task-management-stack {
+    display: grid;
+    gap: 18px;
+}
+
+.task-management-page .task-assignment-panel,
+.task-management-page .task-overview-panel {
+    width: 100%;
+    min-width: 0;
+}
+
+.task-management-page .task-assignment-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 14px;
+}
+
+.task-management-page .task-assignment-form > label:first-of-type,
+.task-management-page .task-assignment-form > label:last-of-type,
+.task-management-page .task-assignment-form > .two,
+.task-management-page .task-assignment-form > .btn {
+    grid-column: 1 / -1;
+}
+
+.task-management-page .task-assignment-form > .btn {
+    width: max-content;
+    min-width: 150px;
+    margin-top: 5px;
+}
+
+.task-management-page .task-overview-panel {
+    overflow: visible;
+}
+
+.task-management-page .task-overview-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.task-management-page .task-overview-table th,
+.task-management-page .task-overview-table td {
+    overflow-wrap: anywhere;
+}
+
+.task-management-page .task-overview-table th:nth-child(1),
+.task-management-page .task-overview-table td:nth-child(1) {
+    width: 27%;
+}
+
+.task-management-page .task-overview-table th:nth-child(2),
+.task-management-page .task-overview-table td:nth-child(2) {
+    width: 23%;
+}
+
+.task-management-page .task-overview-table th:nth-child(3),
+.task-management-page .task-overview-table td:nth-child(3) {
+    width: 16%;
+}
+
+.task-management-page .task-overview-table th:nth-child(4),
+.task-management-page .task-overview-table td:nth-child(4) {
+    width: 16%;
+}
+
+.task-management-page .task-overview-table th:nth-child(5),
+.task-management-page .task-overview-table td:nth-child(5) {
+    width: 11%;
+}
+
+.task-management-page .task-overview-table th:nth-child(6),
+.task-management-page .task-overview-table td:nth-child(6) {
+    width: 7%;
+    text-align: right;
+}
+
+.task-management-page .task-overview-table .btn {
+    min-height: 34px;
+    padding: 7px 10px;
+}
+
+/* Execution progress */
+.task-stage3 .task-progress-panel {
+    padding: 18px 20px;
+}
+
+.task-stage3 .task-progress-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: flex-end;
+    margin-bottom: 12px;
+}
+
+.task-stage3 .task-progress-head h2 {
+    margin: 3px 0 0;
+    font-size: 20px;
+}
+
+.task-stage3 .task-progress-track,
+.task-stage3 .task-mini-progress {
+    overflow: hidden;
+    width: 100%;
+    border-radius: 999px;
+    background: #ece7df;
+}
+
+.task-stage3 .task-progress-track {
+    height: 9px;
+}
+
+.task-stage3 .task-progress-track > span,
+.task-stage3 .task-mini-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+    transition: width .2s ease;
+}
+
+.task-stage3 .task-mini-progress {
+    height: 6px;
+}
+
+.task-stage3 .task-card-progress {
+    display: grid;
+    gap: 6px;
+    margin: 13px 0;
+}
+
+.task-stage3 .task-card-progress > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.task-stage3 .task-card-progress strong {
+    color: var(--ink);
+}
+
+/* Checklist */
+.task-stage3 .task-checklist-add {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 9px;
+    margin: 12px 0 16px;
+}
+
+.task-stage3 .task-checklist-add input {
+    margin: 0;
+}
+
+.task-stage3 .task-checklist {
+    display: grid;
+}
+
+.task-stage3 .task-checklist-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 11px 0;
+    border-top: 1px solid var(--line);
+}
+
+.task-stage3 .task-checklist-row:first-child {
+    border-top: 0;
+}
+
+.task-stage3 .task-checklist-toggle {
+    margin: 0;
+}
+
+.task-stage3 .task-check-button {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border: 1px solid #cfc5b8;
+    border-radius: 9px;
+    background: #fff;
+    color: var(--green);
+    font-weight: 900;
+    transition: background .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.task-stage3 .task-check-button:hover {
+    transform: translateY(-1px);
+    border-color: #a9967d;
+    background: #faf7f2;
+}
+
+.task-stage3 .task-checklist-row.is-complete .task-check-button {
+    border-color: #acd0b7;
+    background: #e9f4ec;
+}
+
+.task-stage3 .task-checklist-copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.task-stage3 .task-checklist-copy b {
+    font-size: 12px;
+}
+
+.task-stage3 .task-checklist-copy small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.task-stage3 .task-checklist-row.is-complete .task-checklist-copy b {
+    color: var(--muted);
+    text-decoration: line-through;
+}
+
+.task-stage3 .task-row-action {
+    border: 0;
+    background: transparent;
+    padding: 5px 3px;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.task-stage3 .danger-link {
+    color: var(--red);
+}
+
+.task-stage3 .task-empty-block {
+    padding: 18px;
+    border: 1px dashed #d9d1c7;
+    border-radius: 11px;
+    background: #fbfaf8;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+}
+
+/* Conversation / progress updates */
+.task-stage3 .task-update-form {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fbfaf8;
+}
+
+.task-stage3 .task-update-form textarea {
+    resize: vertical;
+}
+
+.task-stage3 .task-conversation {
+    display: grid;
+    gap: 14px;
+}
+
+.task-stage3 .task-comment {
+    display: grid;
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 11px;
+}
+
+.task-stage3 .task-comment-avatar {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--accent2);
+    color: var(--accent);
+    font-weight: 900;
+    font-size: 12px;
+}
+
+.task-stage3 .task-comment-body {
+    min-width: 0;
+    padding: 12px 13px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.task-stage3 .task-comment-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.task-stage3 .task-comment-head > div:first-child {
+    display: grid;
+}
+
+.task-stage3 .task-comment-head b {
+    font-size: 12px;
+}
+
+.task-stage3 .task-comment-head small {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+.task-stage3 .task-comment-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
+.task-stage3 .task-comment-body p {
+    margin: 9px 0 7px;
+    font-size: 12px;
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+.task-stage3 .task-comment-body > small {
+    color: var(--muted);
+    font-size: 9px;
+}
+
+/* Files */
+.task-stage3 .task-upload-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(180px, .7fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-bottom: 18px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fbfaf8;
+}
+
+.task-stage3 .task-upload-form label {
+    margin: 0;
+}
+
+.task-stage3 .task-file-list {
+    display: grid;
+}
+
+.task-stage3 .task-file-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 11px 0;
+    border-top: 1px solid var(--line);
+}
+
+.task-stage3 .task-file-row:first-child {
+    border-top: 0;
+}
+
+.task-stage3 .task-file-icon {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: #f0ebe4;
+    color: var(--accent);
+    font-weight: 900;
+}
+
+.task-stage3 .task-file-copy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+}
+
+.task-stage3 .task-file-copy a {
+    color: var(--ink);
+    font-size: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.task-stage3 .task-file-copy a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.task-stage3 .task-file-copy small {
+    color: var(--muted);
+    font-size: 9px;
+    overflow-wrap: anywhere;
+}
+
+/* Completion */
+.task-stage3 .task-completion-panel {
+    border-color: #c9dfcf;
+    background: #fbfffc;
+}
+
+.task-stage3 .task-completion-panel.is-complete {
+    background: #f6fbf7;
+}
+
+.task-stage3 .task-completion-panel textarea {
+    resize: vertical;
+}
+
+/* Manager completion note helper */
+.task-stage3 [data-completion-note-wrap] {
+    padding: 12px;
+    border-radius: 11px;
+    background: #faf7f2;
+}
+
+.task-stage3 [data-completion-note-wrap].is-required {
+    background: #fff5ef;
+    box-shadow: inset 0 0 0 1px #e4c2ad;
+}
+
+/* Make My Tasks cards breathe a little more. */
+.task-stage3 .task-card {
+    min-width: 0;
+}
+
+/* Responsive: no horizontal slider for All Tasks. Turn rows into cards. */
+@media (max-width: 850px) {
+    .task-management-page .task-assignment-form {
+        grid-template-columns: 1fr;
+    }
+
+    .task-management-page .task-assignment-form > * {
+        grid-column: 1 !important;
+    }
+
+    .task-management-page .task-overview-table,
+    .task-management-page .task-overview-table thead,
+    .task-management-page .task-overview-table tbody,
+    .task-management-page .task-overview-table tr,
+    .task-management-page .task-overview-table td {
+        display: block;
+        width: 100% !important;
+    }
+
+    .task-management-page .task-overview-table thead {
+        position: absolute;
+        width: 1px !important;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .task-management-page .task-overview-table tr {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .task-management-page .task-overview-table td {
+        display: grid;
+        grid-template-columns: 100px minmax(0, 1fr);
+        gap: 10px;
+        padding: 7px 0;
+        border: 0;
+        text-align: left !important;
+    }
+
+    .task-management-page .task-overview-table td::before {
+        color: var(--muted);
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .task-management-page .task-overview-table td:nth-child(1)::before { content: "Task"; }
+    .task-management-page .task-overview-table td:nth-child(2)::before { content: "Project"; }
+    .task-management-page .task-overview-table td:nth-child(3)::before { content: "Assigned to"; }
+    .task-management-page .task-overview-table td:nth-child(4)::before { content: "Deadline"; }
+    .task-management-page .task-overview-table td:nth-child(5)::before { content: "Status"; }
+    .task-management-page .task-overview-table td:nth-child(6)::before { content: "Action"; }
+
+    .task-management-page .task-actions-cell .btn {
+        width: max-content;
+    }
+
+    .task-stage3 .task-upload-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .task-stage3 .task-progress-head,
+    .task-stage3 .task-comment-head {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .task-stage3 .task-checklist-add {
+        grid-template-columns: 1fr;
+    }
+
+    .task-stage3 .task-checklist-add .btn {
+        width: 100%;
+    }
+
+    .task-stage3 .task-checklist-row,
+    .task-stage3 .task-file-row {
+        grid-template-columns: 34px minmax(0, 1fr);
+    }
+
+    .task-stage3 .task-checklist-row > form:last-child,
+    .task-stage3 .task-file-row > form:last-child {
+        grid-column: 2;
+        justify-self: start;
+    }
+
+    .task-stage3 .task-comment {
+        grid-template-columns: 1fr;
+    }
+
+    .task-stage3 .task-comment-avatar {
+        display: none;
+    }
+}

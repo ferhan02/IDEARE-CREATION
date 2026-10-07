@@ -1,142 +1,146 @@
 /* -----------------------------------------------------------
-   IdeaRE SweetAlert2 styling
+   IDEARE SweetAlert2 styling
+   Compact, centered, consistent with the staff portal.
 ------------------------------------------------------------ */
 
 .ideare-swal {
-    width: min(390px, calc(100vw - 28px)) !important;
-
-    border: 1px solid rgba(220, 213, 204, .8) !important;
-    border-radius: 22px !important;
-
-    padding: 28px 25px 22px !important;
-
+    width: min(380px, calc(100vw - 28px)) !important;
+    border: 1px solid rgba(220, 213, 204, .92) !important;
+    border-radius: 20px !important;
+    padding: 24px 24px 22px !important;
+    background: #fff !important;
     box-shadow:
-        0 26px 80px rgba(24, 21, 18, .16),
-        0 3px 10px rgba(24, 21, 18, .04) !important;
-
-    background:
-        radial-gradient(
-            circle at 50% 3%,
-            rgba(230, 228, 255, .42),
-            rgba(255,255,255,0) 40%
-        ),
-        #fff !important;
+        0 24px 70px rgba(24, 21, 18, .16),
+        0 3px 12px rgba(24, 21, 18, .05) !important;
 }
 
 .ideare-swal-success {
     background:
-        radial-gradient(
-            circle at 50% 4%,
-            rgba(218, 255, 229, .67),
-            rgba(255,255,255,0) 41%
-        ),
+        linear-gradient(180deg, rgba(232, 248, 235, .82), rgba(255,255,255,0) 112px),
         #fff !important;
 }
 
 .ideare-swal-warning {
     background:
-        radial-gradient(
-            circle at 50% 4%,
-            rgba(255, 232, 210, .67),
-            rgba(255,255,255,0) 41%
-        ),
+        linear-gradient(180deg, rgba(255, 243, 227, .86), rgba(255,255,255,0) 112px),
         #fff !important;
 }
 
 .ideare-swal-error {
     background:
-        radial-gradient(
-            circle at 50% 4%,
-            rgba(255, 221, 231, .7),
-            rgba(255,255,255,0) 41%
-        ),
+        linear-gradient(180deg, rgba(253, 235, 233, .88), rgba(255,255,255,0) 112px),
         #fff !important;
 }
 
 .ideare-swal-info {
     background:
-        radial-gradient(
-            circle at 50% 4%,
-            rgba(229, 225, 255, .65),
-            rgba(255,255,255,0) 41%
-        ),
+        linear-gradient(180deg, rgba(239, 236, 250, .82), rgba(255,255,255,0) 112px),
         #fff !important;
 }
 
-.ideare-swal-icon {
-    width: 48px !important;
-    height: 48px !important;
-
-    margin: 3px auto 17px !important;
-
+/*
+ * Do not scale the SweetAlert icon itself. Scaling the whole icon was causing
+ * the success tick/ring pieces to drift apart in some browsers.
+ */
+.swal2-icon.ideare-swal-icon {
+    width: 52px !important;
+    height: 52px !important;
+    margin: 0 auto 15px !important;
     border-width: 2px !important;
+    transform: none !important;
+}
 
-    transform: scale(.78);
+.swal2-icon.ideare-swal-icon.swal2-success {
+    border-color: #b9ddb0 !important;
+    color: #7fbf69 !important;
+}
+
+.swal2-icon.ideare-swal-icon.swal2-success .swal2-success-ring {
+    border-color: rgba(127, 191, 105, .26) !important;
+}
+
+.swal2-icon.ideare-swal-icon.swal2-success [class^=swal2-success-line] {
+    background-color: #7fbf69 !important;
+}
+
+.swal2-icon.ideare-swal-icon.swal2-error {
+    border-color: #dba7a1 !important;
+    color: #a74740 !important;
+}
+
+.swal2-icon.ideare-swal-icon.swal2-warning {
+    border-color: #d7b36c !important;
+    color: #9a6d1e !important;
+}
+
+.swal2-icon.ideare-swal-icon.swal2-info {
+    border-color: #a9a0c8 !important;
+    color: #675d8e !important;
 }
 
 .ideare-swal-title {
     padding: 0 !important;
     margin: 0 !important;
-
     color: #171614 !important;
-
-    font-size: 17px !important;
+    font-size: 18px !important;
     font-weight: 850 !important;
-    letter-spacing: -0.025em !important;
+    letter-spacing: -.025em !important;
+    line-height: 1.2 !important;
 }
 
 .ideare-swal-text {
-    max-width: 300px !important;
-
+    max-width: 310px !important;
     margin: 8px auto 0 !important;
     padding: 0 !important;
-
-    color: #77716a !important;
-
-    font-size: 11px !important;
-    line-height: 1.48 !important;
+    color: #706b63 !important;
+    font-size: 12px !important;
+    line-height: 1.5 !important;
 }
 
 .ideare-swal-actions {
     width: 100% !important;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
     gap: 9px !important;
-
-    margin: 24px 0 0 !important;
-}
-
-.ideare-swal-actions:has(.ideare-swal-confirm:only-child) {
-    grid-template-columns: 1fr !important;
+    margin: 22px 0 0 !important;
 }
 
 .ideare-swal-confirm,
 .ideare-swal-cancel {
-    min-height: 41px;
-
+    min-height: 42px;
+    min-width: 0;
+    flex: 1 1 0;
     border: 0;
     border-radius: 999px;
-
-    padding: 0 16px;
-
+    padding: 0 18px;
     font: inherit;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 850;
-
     cursor: pointer;
-
     transition:
         transform .15s ease,
         background .15s ease,
         box-shadow .15s ease;
 }
 
+.ideare-swal-single-action .ideare-swal-actions {
+    justify-content: center !important;
+}
+
+.ideare-swal-single-action .ideare-swal-confirm {
+    flex: 0 1 230px;
+    width: min(230px, 100%);
+}
+
+.ideare-swal-single-action .ideare-swal-cancel {
+    display: none !important;
+}
+
 .ideare-swal-confirm {
     background: #181719;
     color: #fff;
-
-    box-shadow:
-        0 8px 20px rgba(18, 17, 18, .14);
+    box-shadow: 0 8px 20px rgba(18, 17, 18, .14);
 }
 
 .ideare-swal-confirm:hover {
@@ -145,20 +149,20 @@
 }
 
 .ideare-swal-cancel {
-    background: #f1f1f1;
+    background: #f0eeeb;
     color: #373432;
 }
 
 .ideare-swal-cancel:hover {
-    background: #e8e8e8;
+    background: #e5e1dc;
 }
 
 .ideare-swal-danger {
-    background: #2a2020;
+    background: #4a2523;
 }
 
 .ideare-swal-danger:hover {
-    background: #3a2424;
+    background: #5d2d2a;
 }
 
 .ideare-swal-in {
@@ -195,4 +199,22 @@
 
 .swal2-container {
     backdrop-filter: blur(3px);
+}
+
+@media (max-width: 520px) {
+    .ideare-swal {
+        width: calc(100vw - 22px) !important;
+        padding: 22px 18px 18px !important;
+    }
+
+    .ideare-swal-actions {
+        flex-direction: column-reverse !important;
+    }
+
+    .ideare-swal-confirm,
+    .ideare-swal-cancel,
+    .ideare-swal-single-action .ideare-swal-confirm {
+        width: 100%;
+        flex: 1 1 auto;
+    }
 }

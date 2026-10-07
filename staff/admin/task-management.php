@@ -259,7 +259,7 @@ $pageTitle='Task Management';
 $taskManagementAssets=true;
 require __DIR__.'/../../includes/staff/header.php';
 ?>
-<main class="staff-content task-stage2">
+<main class="staff-content task-stage2 task-management-page">
     <div class="page-head">
         <div>
             <p class="eyebrow">Management</p>
@@ -280,8 +280,8 @@ require __DIR__.'/../../includes/staff/header.php';
         </div>
     </div>
 
-    <div class="split-grid">
-        <section class="staff-panel">
+    <div class="task-management-stack">
+        <section class="staff-panel task-assignment-panel">
             <div class="section-title">
                 <div>
                     <p class="eyebrow">Create</p>
@@ -290,7 +290,7 @@ require __DIR__.'/../../includes/staff/header.php';
                 <span class="pill approved">Management only</span>
             </div>
 
-            <form method="post">
+            <form method="post" class="task-assignment-form">
                 <?= csrf_field() ?>
 
                 <label>
@@ -377,7 +377,7 @@ require __DIR__.'/../../includes/staff/header.php';
             </form>
         </section>
 
-        <section class="staff-panel table-panel">
+        <section class="staff-panel task-overview-panel">
             <div class="section-title">
                 <div>
                     <p class="eyebrow">Overview</p>
@@ -386,7 +386,7 @@ require __DIR__.'/../../includes/staff/header.php';
                 <span class="muted"><?= count($rows) ?> total</span>
             </div>
 
-            <table>
+            <table class="task-overview-table">
                 <thead>
                     <tr>
                         <th>Task</th>
