@@ -63,18 +63,61 @@ function current_staff(): ?array
 function permission_keys(): array
 {
     static $p=null;
+
     if($p!==null) return $p;
 
     $st=current_staff();
     if(!$st) return [];
 
-    $s=staff_db()->prepare("
-        SELECT p.permission_key
-        FROM role_permissions rp
-        JOIN permissions p ON p.id=rp.permission_id
-        WHERE rp.role_id=?
-    ");
-    $s->execute([$st['role_id']]);
+    $pdo=staff_db();
+
+    /*
+     * Direct staff overrides take precedence over role permissions.
+     * If no override exists, normal role_permissions behavior is preserved.
+     */
+    $hasOverrides=false;
+
+    try {
+        $check=$pdo->query("
+            SELECT 1
+            FROM information_schema.TABLES
+            WHERE TABLE_SCHEMA=DATABASE()
+              AND TABLE_NAME='staff_permission_overrides'
+            LIMIT 1
+        ");
+        $hasOverrides=(bool)$check->fetchColumn();
+    } catch(Throwable $e) {
+        $hasOverrides=false;
+    }
+
+    if($hasOverrides){
+        $s=$pdo->prepare("
+            SELECT DISTINCT p.permission_key
+            FROM permissions p
+            LEFT JOIN role_permissions rp
+                ON rp.permission_id=p.id
+               AND rp.role_id=?
+            LEFT JOIN staff_permission_overrides spo
+                ON spo.permission_id=p.id
+               AND spo.staff_id=?
+            WHERE
+                CASE
+                    WHEN spo.permission_id IS NOT NULL THEN spo.is_granted
+                    WHEN rp.permission_id IS NOT NULL THEN 1
+                    ELSE 0
+                END = 1
+        ");
+        $s->execute([$st['role_id'],$st['id']]);
+    } else {
+        $s=$pdo->prepare("
+            SELECT p.permission_key
+            FROM role_permissions rp
+            JOIN permissions p ON p.id=rp.permission_id
+            WHERE rp.role_id=?
+        ");
+        $s->execute([$st['role_id']]);
+    }
+
     $p=array_column($s->fetchAll(),'permission_key');
 
     return $p;
@@ -91,37 +134,16 @@ function require_login(): void
 }
 
 /**
- * Task Management is intentionally restricted to:
- * - Hafiz — Owner
- * - Hazlin Suraya — Operations Manager
+ * Task Management access is now database-driven.
+ * Stage 1.1 grants tasks.manage directly only to Hafiz and Hazlin Suraya.
  */
 function can_manage_tasks(?array $staff=null): bool
 {
     $staff=$staff??current_staff();
+
     if(!$staff) return false;
 
-    $fullName=strtolower(trim(preg_replace(
-        '/\s+/',
-        ' ',
-        trim(($staff['first_name']??'').' '.($staff['last_name']??''))
-    )));
-
-    $jobTitle=strtolower(trim(preg_replace(
-        '/\s+/',
-        ' ',
-        (string)($staff['job_title']??'')
-    )));
-
-    $isHafiz=
-        $jobTitle==='owner'
-        && preg_match('/\bhafiz\b/i',$fullName)===1;
-
-    $isHazlinSuraya=
-        $jobTitle==='operations manager'
-        && str_contains($fullName,'hazlin')
-        && str_contains($fullName,'suraya');
-
-    return $isHafiz || $isHazlinSuraya;
+    return can('tasks.manage');
 }
 
 function render_access_denied(
@@ -153,7 +175,7 @@ function require_task_manager_access(): void
     if(!can_manage_tasks()) {
         render_access_denied(
             'Task Management restricted',
-            'Only Hafiz (Owner) and Hazlin Suraya (Operations Manager) can access Task Management.'
+            'Your account has not been granted Task Management access.'
         );
     }
 }
@@ -161,6 +183,7 @@ function require_task_manager_access(): void
 function require_permission(string $permission): void
 {
     require_login();
+
     if(!can($permission)) render_access_denied();
 }
 
@@ -169,6 +192,7 @@ function csrf_token(): string
     if(empty($_SESSION['csrf_token'])) {
         $_SESSION['csrf_token']=bin2hex(random_bytes(32));
     }
+
     return $_SESSION['csrf_token'];
 }
 
@@ -181,6 +205,7 @@ function verify_csrf(): void
 {
     if($_SERVER['REQUEST_METHOD']==='POST'){
         $t=$_POST['csrf_token']??'';
+
         if(!$t||!hash_equals($_SESSION['csrf_token']??'',$t)){
             http_response_code(419);
             exit('Invalid CSRF token.');
@@ -197,12 +222,14 @@ function pull_flash(): ?array
 {
     $f=$_SESSION['flash']??null;
     unset($_SESSION['flash']);
+
     return $f;
 }
 
 function remember_last_staff_account(array $staff): void
 {
     $secure=!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off';
+
     $o=[
         'expires'=>time()+15552000,
         'path'=>'/',
@@ -210,6 +237,7 @@ function remember_last_staff_account(array $staff): void
         'httponly'=>true,
         'samesite'=>'Lax'
     ];
+
     setcookie('ideare_last_staff_email',(string)$staff['email'],$o);
     setcookie(
         'ideare_last_staff_name',
