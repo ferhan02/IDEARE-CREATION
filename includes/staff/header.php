@@ -11,10 +11,14 @@ $costingQuotationAssets=$costingQuotationAssets??(
     str_ends_with($scriptPath,'/quotations.php') ||
     str_ends_with($scriptPath,'/material-calculator.php')
 );
-$quotationCentreAssets=$quotationCentreAssets??str_ends_with($scriptPath,'/quotation-centre.php');
+$quotationCentreAssets=$quotationCentreAssets??(
+    str_ends_with($scriptPath,'/quotation-centre.php') ||
+    str_ends_with($scriptPath,'/quotation-rate-book.php')
+);
 $quotationCreateAssets=$quotationCreateAssets??(
     str_ends_with($scriptPath,'/quotation-create.php') ||
-    str_ends_with($scriptPath,'/quotation-view.php')
+    str_ends_with($scriptPath,'/quotation-view.php') ||
+    str_ends_with($scriptPath,'/quotation-rate-book.php')
 );
 ?>
 <!doctype html>

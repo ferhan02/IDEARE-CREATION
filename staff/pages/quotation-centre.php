@@ -7,15 +7,16 @@ $staff=current_staff();
 $pageTitle='Quotation Centre';
 
 /*
- * Stage 1 of the rebuilt Quotation Centre is the commercial dashboard/index.
- * It intentionally reads the V2 schema but does not yet mutate quotation
- * pricing, revisions or approval decisions. Those come in later stages.
+ * Quotation Centre dashboard/register. Stage 3 adds section-based scope, the
+ * Rate Book, package/FOC pricing and server-verified internal costing while
+ * revisions and approval automation remain for Stage 4.
  */
 $requiredV2Tables=[
     'quotation_groups',
     'quotation_sections',
     'quotation_rate_items',
     'quotation_adjustments',
+    'quotation_cost_components',
 ];
 
 foreach($requiredV2Tables as $requiredTable){
@@ -42,6 +43,7 @@ $canViewCost=can('quotation.view_cost');
 $canViewMargin=can('quotation.view_margin');
 $canCreate=can('quotation.create');
 $canManageSettings=can('quotation.settings');
+$canManageRateBook=can('quotation.manage_rate_book') || $canManageSettings;
 $canApprove=can('quotation.approve');
 
 $statusLabels=[
@@ -256,6 +258,9 @@ require __DIR__.'/../../includes/staff/header.php';
         <div class="quotation-head-actions">
             <?php if($canManageSettings): ?>
                 <a class="btn" href="<?= h(ideare_root_url('staff/admin/quotation-settings.php')) ?>">Settings</a>
+            <?php endif; ?>
+            <?php if($canManageRateBook): ?>
+                <a class="btn" href="<?= h(ideare_root_url('staff/admin/quotation-rate-book.php')) ?>">Rate Book</a>
             <?php endif; ?>
             <?php if($canApprove): ?>
                 <a class="btn" href="<?= h(ideare_root_url('staff/admin/approvals.php')) ?>">Approvals</a>
@@ -540,11 +545,11 @@ require __DIR__.'/../../includes/staff/header.php';
             </section>
 
             <section class="staff-panel quotation-stage-card">
-                <p class="eyebrow">Stage 1</p>
-                <h2>Quotation register foundation</h2>
+                <p class="eyebrow">Stage 3</p>
+                <h2>Scope &amp; pricing is live</h2>
                 <p class="muted">
-                    The centre is now consolidated around the V2 quotation schema. Creation, section building,
-                    pricing, revisions and customer-document generation will be layered onto this foundation next.
+                    New quotations now support customer-facing sections, Rate Book pricing, multiple measurement methods,
+                    FOC lines, package totals and detailed internal cost tracking. Revisions and approval automation come next.
                 </p>
             </section>
         </aside>

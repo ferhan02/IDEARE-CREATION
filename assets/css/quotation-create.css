@@ -370,3 +370,103 @@
     letter-spacing:.02em;
     text-transform:uppercase;
 }
+
+/* Stage 3 — sections, Rate Book, package pricing and internal costing */
+.quotation-create-stage3 .quotation-scope-panel{overflow:visible}
+.quotation-scope-head{align-items:flex-start}
+.quotation-builder-legend{display:flex;flex-wrap:wrap;gap:7px;margin:4px 0 16px}
+.quotation-builder-legend span{font-size:10px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:var(--accent2)}
+.quote-group-card{border:1px solid var(--line);border-radius:16px;background:var(--paper);overflow:hidden;margin-top:15px}
+.quote-group-head{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;background:color-mix(in srgb,var(--accent2) 65%,var(--paper));border-bottom:1px solid var(--line)}
+.quote-group-title-fields{display:grid;grid-template-columns:90px minmax(220px,1fr);gap:8px;flex:1}
+.quote-group-code,.quote-section-code{text-transform:uppercase;font-weight:900;letter-spacing:.04em}
+.quote-group-name,.quote-section-name{font-weight:900}
+.quote-group-controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.quote-group-controls select{width:auto;min-width:130px}
+.quote-group-commercial{display:grid;grid-template-columns:repeat(4,minmax(135px,1fr)) auto;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--paper) 94%,var(--accent2))}
+.quote-group-commercial label{margin:0}
+.quote-group-commercial.is-itemized label:nth-child(2){opacity:.55}
+.quote-section-stack{padding:14px}
+.quote-section-card{border:1px solid var(--line);border-radius:13px;margin-bottom:12px;overflow:hidden;background:var(--paper)}
+.quote-section-card:last-child{margin-bottom:0}
+.quote-section-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 12px;background:color-mix(in srgb,var(--accent2) 45%,var(--paper));border-bottom:1px solid var(--line)}
+.quote-section-title-fields{display:grid;grid-template-columns:62px minmax(200px,1fr);gap:7px;flex:1}
+.quote-section-description{border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 12px;resize:vertical;background:transparent}
+.quote-item-table-head{display:grid;grid-template-columns:minmax(240px,1.8fr) minmax(130px,.8fr) minmax(210px,1.2fr) minmax(120px,.7fr) minmax(120px,.7fr) 80px 42px;gap:8px;padding:8px 12px;background:color-mix(in srgb,var(--paper) 92%,var(--accent2));font-size:9px;font-weight:900;text-transform:uppercase;color:var(--muted);letter-spacing:.04em}
+.quotation-create-stage3:not(:has(.quote-item-cost-cell)) .quote-item-table-head{grid-template-columns:minmax(240px,1.8fr) minmax(130px,.8fr) minmax(210px,1.2fr) minmax(120px,.7fr) 80px 42px}
+.quote-scope-item{display:grid;grid-template-columns:minmax(240px,1.8fr) minmax(130px,.8fr) minmax(210px,1.2fr) minmax(120px,.7fr) minmax(120px,.7fr) 80px 42px;gap:8px;align-items:start;padding:12px;border-bottom:1px solid var(--line);position:relative}
+.quote-scope-item:last-child{border-bottom:0}
+.quote-scope-item.is-foc{box-shadow:inset 3px 0 0 var(--green);background:color-mix(in srgb,var(--green) 4%,var(--paper))}
+.quote-scope-item.is-overridden{box-shadow:inset 3px 0 0 var(--yellow)}
+.quote-scope-item.is-foc.is-overridden{box-shadow:inset 3px 0 0 var(--green),inset 6px 0 0 var(--yellow)}
+.quote-scope-item input,.quote-scope-item select{margin:0}
+.quote-item-description-cell,.quote-item-pricing-cell,.quote-item-measure-cell,.quote-item-selling-cell,.quote-item-cost-cell,.quote-item-foc-cell{display:grid;gap:6px;min-width:0}
+.quote-item-selling-cell strong,.quote-item-cost-cell strong{font-size:12px;text-align:right}
+.quote-item-pricing-cell small,.quote-item-measure-cell small,.quote-item-selling-cell small{font-size:9px;color:var(--muted)}
+.quote-source-line{display:flex;gap:5px;flex-wrap:wrap;min-height:20px}
+.quote-source-badge{display:inline-flex;width:max-content;max-width:100%;padding:3px 6px;border-radius:999px;background:var(--accent2);color:var(--accent);font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quote-source-badge.is-manual{color:var(--muted)}
+.quote-source-badge.is-warning{color:var(--yellow);border:1px solid color-mix(in srgb,var(--yellow) 30%,var(--line))}
+.quote-dimension-grid{display:grid;grid-template-columns:repeat(3,1fr) 64px;gap:4px}
+.quote-qty-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px}
+.quote-item-foc-cell .check{margin:0;font-size:10px}
+.quote-item-remove{padding:8px 0;width:36px}
+.quote-item-reasons{grid-column:1/-1;display:none;grid-template-columns:repeat(3,1fr);gap:8px;padding:9px;border-radius:10px;background:color-mix(in srgb,var(--accent2) 45%,var(--paper));border:1px dashed var(--line)}
+.quote-item-reasons.is-visible{display:grid}
+.quote-item-reasons label{margin:0}
+.quote-items-empty{padding:24px 12px;text-align:center;color:var(--muted);font-size:11px}
+.quote-section-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:color-mix(in srgb,var(--paper) 94%,var(--accent2))}
+.quote-section-foot .check{margin:0}
+.quote-section-foot strong{font-size:14px}
+.stage3-charge{grid-template-columns:minmax(150px,1.5fr) minmax(105px,1fr) minmax(95px,.8fr) minmax(110px,1fr) 92px 92px 110px 70px 42px}
+.stage3-charge strong{align-self:center;text-align:right;font-size:11px}
+.quote-margin-health{display:grid;gap:4px;margin:14px 0;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--accent2) 65%,var(--paper));border:1px solid var(--line)}
+.quote-margin-health span{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:900}
+.quote-margin-health strong{font-size:24px;color:var(--accent)}
+.quote-margin-health small{font-size:9px;color:var(--muted)}
+.quote-rate-modal{position:fixed;inset:0;background:rgba(18,16,13,.56);z-index:120;display:grid;place-items:center;padding:24px}
+.quote-rate-modal[hidden]{display:none}
+.quote-rate-dialog{width:min(980px,100%);max-height:min(780px,88vh);display:grid;grid-template-rows:auto auto minmax(0,1fr);background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.24);overflow:hidden}
+.quote-rate-head{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:20px 22px;border-bottom:1px solid var(--line)}
+.quote-rate-head h2{margin:3px 0 0}
+.quote-rate-toolbar{display:grid;grid-template-columns:1fr 220px;gap:9px;padding:12px 16px;border-bottom:1px solid var(--line);background:color-mix(in srgb,var(--accent2) 38%,var(--paper))}
+.quote-rate-results{overflow:auto;padding:12px}
+.quote-rate-result{width:100%;display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:14px;align-items:center;text-align:left;border:1px solid var(--line);background:var(--paper);padding:12px 14px;border-radius:12px;margin-bottom:8px;cursor:pointer;color:inherit}
+.quote-rate-result:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent2) 42%,var(--paper))}
+.quote-rate-result>span:first-child{display:grid;gap:3px;min-width:0}
+.quote-rate-result small,.quote-rate-result em{font-size:9px;color:var(--muted);font-style:normal}
+.quote-rate-result b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.quote-rate-result-price{text-align:right;display:grid;gap:2px}
+.quote-rate-result-price b{font-size:15px;color:var(--accent)}
+.quote-modal-open{overflow:hidden}
+
+@media(max-width:1450px){
+  .quote-item-table-head{display:none}
+  .quote-scope-item{grid-template-columns:1.5fr 1fr 1.2fr 1fr 1fr 82px 38px}
+  .stage3-charge{grid-template-columns:repeat(4,minmax(130px,1fr))}
+  .stage3-charge>*:nth-child(n+9){grid-column:auto}
+}
+@media(max-width:1100px){
+  .quote-group-head,.quote-section-head{align-items:flex-start;flex-direction:column}
+  .quote-group-controls{width:100%}
+  .quote-group-commercial{grid-template-columns:repeat(2,1fr)}
+  .quote-scope-item{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .quote-item-reasons{grid-template-columns:1fr}
+  .quote-item-remove{position:absolute;right:10px;top:10px}
+  .quote-item-foc-cell{padding-right:42px}
+}
+@media(max-width:720px){
+  .quote-group-title-fields,.quote-section-title-fields,.quote-group-commercial,.quote-scope-item,.stage3-charge,.quote-rate-toolbar,.quote-rate-result{grid-template-columns:1fr}
+  .quote-group-controls select,.quote-group-controls .btn{width:100%}
+  .quote-dimension-grid{grid-template-columns:repeat(2,1fr)}
+  .quote-rate-modal{padding:8px}
+  .quote-rate-result-price{text-align:left}
+}
+
+/* Stage 3 quotation view */
+.quote-document-title{display:grid;gap:3px;padding:24px 0 4px}.quote-document-title small{text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-size:9px;font-weight:900}.quote-document-title strong{font-size:22px;letter-spacing:-.02em}.quote-scope-document{display:grid;gap:22px}.quote-doc-group{break-inside:avoid}.quote-doc-group-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:10px 0 8px;border-bottom:2px solid #1d1a17}.quote-doc-group-head small{font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:#8b8379}.quote-doc-group-head h2{margin:2px 0 0;font-size:16px}.quote-doc-group-head>strong{font-size:16px}.quote-doc-section{padding-top:12px}.quote-doc-section-title{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:7px 9px;background:#f6f2ec}.quote-doc-section-title>div{display:flex;gap:7px}.quote-doc-section-title span{font-weight:800}.quote-doc-section-desc{font-size:10px;color:#6e675f;margin:8px 0}.stage3-quote-table{margin-top:7px}.stage3-quote-table td:first-child b{display:block}.stage3-quote-table td:first-child small{display:block}.quote-foc-label{color:#2f6b48}.quote-foc-row{background:#f5faf6}.quote-package-summary{display:flex;justify-content:flex-end;align-items:center;gap:20px;padding:10px 0;font-size:10px}.quote-package-summary span{color:#777067}.quote-package-summary strong{font-size:12px}.stage3-internal-grid{grid-template-columns:repeat(5,1fr)}.stage3-audit-grid{margin-top:20px}.stage3-audit-grid h3{margin:0 0 8px}.quote-cost-component-list{display:grid}.quote-cost-component-list>div{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-top:1px solid var(--line)}.quote-cost-component-list>div:first-child{border-top:0}.quote-cost-component-list span{display:grid}.quote-cost-component-list small{color:var(--muted)}
+
+/* Stage 3 Rate Book admin */
+.quote-rate-admin-page{max-width:1680px}.quote-rate-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.quote-rate-admin-grid{grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr)}.quote-rate-history{margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}.quote-rate-history-row{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.quote-rate-history-row>div,.quote-rate-history-row>span{display:grid}.quote-rate-history-row small{color:var(--muted);font-size:9px}.quote-rate-register tr.is-archived{opacity:.58}.quote-rate-register .actions{display:flex;gap:5px;align-items:center}.quote-rate-register form{margin:0}
+@media(max-width:1000px){.stage3-internal-grid{grid-template-columns:repeat(2,1fr)}.quote-rate-admin-grid{grid-template-columns:1fr}.quote-rate-kpis{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:720px){.stage3-internal-grid,.quote-rate-kpis{grid-template-columns:1fr}.quote-doc-group-head,.quote-doc-section-title,.quote-package-summary{align-items:flex-start;flex-direction:column}}
