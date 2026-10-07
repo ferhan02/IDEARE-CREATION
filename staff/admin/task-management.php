@@ -1,5 +1,417 @@
 <?php
-require_once __DIR__.'/../../includes/staff/operations.php';require_permission('task.create');verify_csrf();$pdo=staff_db();$me=current_staff();
-if($_SERVER['REQUEST_METHOD']==='POST'){$projectId=$_POST['project_id']!==''?(int)$_POST['project_id']:null;$customerId=null;if($projectId){$q=$pdo->prepare('SELECT customer_id FROM projects WHERE id=?');$q->execute([$projectId]);$customerId=(int)$q->fetchColumn();}$due=$_POST['due_date']?str_replace('T',' ',$_POST['due_date']):null;$pdo->prepare("INSERT INTO tasks(title,description,project_id,customer_id,assigned_to,assigned_by,priority,status,due_date) VALUES(?,?,?,?,?,?,?,'todo',?)")->execute([trim($_POST['title']),trim($_POST['description'])?:null,$projectId,$customerId,(int)$_POST['assigned_to'],$me['id'],$_POST['priority'],$due]);$tid=(int)$pdo->lastInsertId();notify_staff($pdo,(int)$_POST['assigned_to'],'New task assigned',trim($_POST['title']),'task','task',$tid);if($projectId)project_activity($pdo,$projectId,'task_created','Task assigned',trim($_POST['title']));flash('success','Task assigned.');staff_redirect('staff/admin/task-management.php');}
-$staff=$pdo->query("SELECT id,first_name,last_name FROM staff WHERE is_active=1 ORDER BY first_name")->fetchAll();$projects=db_table_exists($pdo,'projects')?$pdo->query("SELECT p.id,p.project_code,p.name,c.name customer_name FROM projects p JOIN customers c ON c.id=p.customer_id WHERE p.status NOT IN('completed','cancelled') ORDER BY p.updated_at DESC")->fetchAll():[];$rows=$pdo->query("SELECT t.*,CONCAT(s.first_name,' ',COALESCE(s.last_name,'')) staff_name,p.project_code,p.name project_name,c.name customer_name FROM tasks t LEFT JOIN staff s ON s.id=t.assigned_to LEFT JOIN projects p ON p.id=t.project_id LEFT JOIN customers c ON c.id=t.customer_id ORDER BY t.created_at DESC")->fetchAll();$pageTitle='Task Management';require __DIR__.'/../../includes/staff/header.php';?>
-<main class="staff-content"><div class="page-head"><div><p class="eyebrow">Management</p><h1>Task management</h1><p class="muted">Assign work to employees and tie it directly to customer projects.</p></div><a class="btn" href="<?= h(ideare_root_url('staff/pages/calendar.php')) ?>">Calendar</a></div><div class="split-grid"><section class="staff-panel"><h2>Assign task</h2><form method="post"><?= csrf_field() ?><label>Title<input name="title" required></label><label>Project<select name="project_id"><option value="">General / no project</option><?php foreach($projects as $p):?><option value="<?= $p['id'] ?>"><?= h($p['project_code'].' · '.$p['customer_name'].' · '.$p['name']) ?></option><?php endforeach;?></select></label><label>Assign to<select name="assigned_to"><?php foreach($staff as $s):?><option value="<?= $s['id'] ?>"><?= h(trim($s['first_name'].' '.$s['last_name'])) ?></option><?php endforeach;?></select></label><div class="two"><label>Priority<select name="priority"><option>low</option><option selected>normal</option><option>high</option><option>urgent</option></select></label><label>Deadline<input type="datetime-local" name="due_date"></label></div><label>Description<textarea name="description"></textarea></label><button class="btn primary">Assign task</button></form></section><section class="staff-panel table-panel"><table><thead><tr><th>Task</th><th>Project</th><th>Staff</th><th>Deadline</th><th>Status</th></tr></thead><tbody><?php foreach($rows as $r):?><tr><td><b><?= h($r['title']) ?></b><small><?= h($r['priority']) ?></small></td><td><?php if($r['project_id']):?><a href="<?= h(ideare_root_url('staff/pages/project-view.php?id='.$r['project_id'])) ?>"><?= h($r['project_code']) ?></a><small><?= h($r['customer_name'].' · '.$r['project_name']) ?></small><?php else:?>—<?php endif;?></td><td><?= h($r['staff_name']?:'—') ?></td><td><?= $r['due_date']?h(date('j M Y, g:i A',strtotime($r['due_date']))):'—' ?></td><td><span class="pill <?= h($r['status']) ?>"><?= h(str_replace('_',' ',$r['status'])) ?></span></td></tr><?php endforeach;?></tbody></table></section></div></main><?php require __DIR__.'/../../includes/staff/footer.php';?>
+require_once __DIR__.'/../../includes/staff/operations.php';
+
+require_task_manager_access();
+verify_csrf();
+
+$pdo=staff_db();
+$me=current_staff();
+
+$selectedProjectId=(int)($_GET['project_id']??0);
+
+if($_SERVER['REQUEST_METHOD']==='POST'){
+    $title=trim($_POST['title']??'');
+    $projectId=(int)($_POST['project_id']??0);
+    $assignedTo=(int)($_POST['assigned_to']??0);
+    $priority=$_POST['priority']??'normal';
+    $rawDue=trim($_POST['due_date']??'');
+    $description=trim($_POST['description']??'');
+
+    if($title===''){
+        flash('error','Task title is required.');
+        staff_redirect(
+            'staff/admin/task-management.php'
+            .($projectId?'?project_id='.$projectId:'')
+        );
+    }
+
+    if(!in_array($priority,['low','normal','high','urgent'],true)){
+        $priority='normal';
+    }
+
+    $staffCheck=$pdo->prepare("
+        SELECT id,first_name,last_name
+        FROM staff
+        WHERE id=? AND is_active=1
+        LIMIT 1
+    ");
+    $staffCheck->execute([$assignedTo]);
+    $assignee=$staffCheck->fetch();
+
+    if(!$assignee){
+        flash('error','Choose an active employee to assign the task to.');
+        staff_redirect(
+            'staff/admin/task-management.php'
+            .($projectId?'?project_id='.$projectId:'')
+        );
+    }
+
+    $customerId=null;
+    $project=null;
+
+    if($projectId){
+        $projectCheck=$pdo->prepare("
+            SELECT p.id,p.customer_id,p.project_code,p.name,c.name customer_name
+            FROM projects p
+            JOIN customers c ON c.id=p.customer_id
+            WHERE p.id=?
+              AND p.status NOT IN('completed','cancelled')
+            LIMIT 1
+        ");
+        $projectCheck->execute([$projectId]);
+        $project=$projectCheck->fetch();
+
+        if(!$project){
+            flash('error','That project is unavailable or already closed.');
+            staff_redirect('staff/admin/task-management.php');
+        }
+
+        $customerId=(int)$project['customer_id'];
+    }
+
+    $due=null;
+
+    if($rawDue!==''){
+        $timestamp=strtotime(str_replace('T',' ',$rawDue));
+
+        if($timestamp===false){
+            flash('error','The task deadline is invalid.');
+            staff_redirect(
+                'staff/admin/task-management.php'
+                .($projectId?'?project_id='.$projectId:'')
+            );
+        }
+
+        $due=date('Y-m-d H:i:s',$timestamp);
+    }
+
+    $insert=$pdo->prepare("
+        INSERT INTO tasks
+        (
+            title,
+            description,
+            project_id,
+            customer_id,
+            assigned_to,
+            assigned_by,
+            priority,
+            status,
+            due_date
+        )
+        VALUES(?,?,?,?,?,?,?,'todo',?)
+    ");
+
+    $insert->execute([
+        $title,
+        $description!==''?$description:null,
+        $projectId?:null,
+        $customerId,
+        $assignedTo,
+        $me['id'],
+        $priority,
+        $due
+    ]);
+
+    $taskId=(int)$pdo->lastInsertId();
+    $assigneeName=trim(
+        ($assignee['first_name']??'').' '.($assignee['last_name']??'')
+    );
+
+    notify_staff(
+        $pdo,
+        $assignedTo,
+        'New task assigned',
+        $title,
+        'task',
+        'task',
+        $taskId
+    );
+
+    if($projectId){
+        project_activity(
+            $pdo,
+            $projectId,
+            'task_created',
+            'Task assigned',
+            $title.' → '.$assigneeName
+        );
+    }
+
+    log_activity(
+        'task.created',
+        'task',
+        (string)$taskId,
+        'Task "'.$title.'" assigned to '.$assigneeName
+    );
+
+    flash('success','Task assigned to '.$assigneeName.'.');
+
+    staff_redirect(
+        'staff/admin/task-management.php'
+        .($projectId?'?project_id='.$projectId:'')
+    );
+}
+
+$staffRows=$pdo->query("
+    SELECT id,first_name,last_name,job_title
+    FROM staff
+    WHERE is_active=1
+    ORDER BY first_name,last_name
+")->fetchAll();
+
+$projects=db_table_exists($pdo,'projects')
+    ? $pdo->query("
+        SELECT
+            p.id,
+            p.project_code,
+            p.name,
+            c.name customer_name
+        FROM projects p
+        JOIN customers c ON c.id=p.customer_id
+        WHERE p.status NOT IN('completed','cancelled')
+        ORDER BY p.updated_at DESC
+    ")->fetchAll()
+    : [];
+
+$validProjectIds=array_map(
+    static fn(array $project): int => (int)$project['id'],
+    $projects
+);
+
+if(
+    $selectedProjectId
+    && !in_array($selectedProjectId,$validProjectIds,true)
+){
+    $selectedProjectId=0;
+}
+
+$rows=$pdo->query("
+    SELECT
+        t.*,
+        CONCAT(s.first_name,' ',COALESCE(s.last_name,'')) staff_name,
+        CONCAT(a.first_name,' ',COALESCE(a.last_name,'')) assigned_by_name,
+        p.project_code,
+        p.name project_name,
+        c.name customer_name
+    FROM tasks t
+    LEFT JOIN staff s ON s.id=t.assigned_to
+    LEFT JOIN staff a ON a.id=t.assigned_by
+    LEFT JOIN projects p ON p.id=t.project_id
+    LEFT JOIN customers c ON c.id=t.customer_id
+    ORDER BY
+        FIELD(t.status,'in_progress','todo','waiting','completed','cancelled'),
+        t.due_date IS NULL,
+        t.due_date,
+        t.created_at DESC
+")->fetchAll();
+
+$pageTitle='Task Management';
+require __DIR__.'/../../includes/staff/header.php';
+?>
+<main class="staff-content">
+    <div class="page-head">
+        <div>
+            <p class="eyebrow">Management</p>
+            <h1>Task management</h1>
+            <p class="muted">
+                Restricted management workspace for assigning staff work and
+                linking it directly to customer projects.
+            </p>
+        </div>
+
+        <div class="actions">
+            <a class="btn" href="<?= h(ideare_root_url('staff/pages/calendar.php')) ?>">
+                Calendar
+            </a>
+            <a class="btn" href="<?= h(ideare_root_url('staff/pages/projects.php')) ?>">
+                Projects
+            </a>
+        </div>
+    </div>
+
+    <div class="split-grid">
+        <section class="staff-panel">
+            <div class="section-title">
+                <div>
+                    <p class="eyebrow">Create</p>
+                    <h2>Assign task</h2>
+                </div>
+                <span class="pill approved">Management only</span>
+            </div>
+
+            <form method="post">
+                <?= csrf_field() ?>
+
+                <label>
+                    Title
+                    <input
+                        name="title"
+                        required
+                        maxlength="255"
+                        placeholder="e.g. Complete site measurement"
+                    >
+                </label>
+
+                <label>
+                    Project
+                    <select name="project_id">
+                        <option value="">General / no project</option>
+
+                        <?php foreach($projects as $project): ?>
+                            <option
+                                value="<?= (int)$project['id'] ?>"
+                                <?= $selectedProjectId===(int)$project['id']?'selected':'' ?>
+                            >
+                                <?= h(
+                                    $project['project_code']
+                                    .' · '.$project['customer_name']
+                                    .' · '.$project['name']
+                                ) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+
+                <label>
+                    Assign to
+                    <select name="assigned_to" required>
+                        <option value="">Choose employee...</option>
+
+                        <?php foreach($staffRows as $staffRow): ?>
+                            <option value="<?= (int)$staffRow['id'] ?>">
+                                <?= h(
+                                    trim(
+                                        $staffRow['first_name']
+                                        .' '.($staffRow['last_name']??'')
+                                    )
+                                    .($staffRow['job_title']
+                                        ? ' · '.$staffRow['job_title']
+                                        : '')
+                                ) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+
+                <div class="two">
+                    <label>
+                        Priority
+                        <select name="priority">
+                            <option value="low">Low</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="high">High</option>
+                            <option value="urgent">Urgent</option>
+                        </select>
+                    </label>
+
+                    <label>
+                        Deadline
+                        <input type="datetime-local" name="due_date">
+                    </label>
+                </div>
+
+                <label>
+                    Description
+                    <textarea
+                        name="description"
+                        rows="5"
+                        placeholder="Add instructions, requirements or useful context for the employee."
+                    ></textarea>
+                </label>
+
+                <button class="btn primary" type="submit">
+                    Assign task
+                </button>
+            </form>
+        </section>
+
+        <section class="staff-panel table-panel">
+            <div class="section-title">
+                <div>
+                    <p class="eyebrow">Overview</p>
+                    <h2>All tasks</h2>
+                </div>
+                <span class="muted"><?= count($rows) ?> total</span>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Project</th>
+                        <th>Assigned to</th>
+                        <th>Deadline</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <?php foreach($rows as $row): ?>
+                        <tr>
+                            <td>
+                                <b><?= h($row['title']) ?></b>
+                                <small>
+                                    <?= h(ucfirst($row['priority'])) ?>
+                                    <?php if($row['assigned_by_name']): ?>
+                                        · by <?= h(trim($row['assigned_by_name'])) ?>
+                                    <?php endif; ?>
+                                </small>
+                            </td>
+
+                            <td>
+                                <?php if($row['project_id']): ?>
+                                    <a href="<?= h(
+                                        ideare_root_url(
+                                            'staff/pages/project-view.php?id='
+                                            .$row['project_id']
+                                        )
+                                    ) ?>">
+                                        <?= h($row['project_code']) ?>
+                                    </a>
+                                    <small>
+                                        <?= h(
+                                            $row['customer_name']
+                                            .' · '.$row['project_name']
+                                        ) ?>
+                                    </small>
+                                <?php else: ?>
+                                    <span class="muted">General</span>
+                                <?php endif; ?>
+                            </td>
+
+                            <td><?= h($row['staff_name']?:'—') ?></td>
+
+                            <td>
+                                <?php if($row['due_date']): ?>
+                                    <?= h(date(
+                                        'j M Y, g:i A',
+                                        strtotime($row['due_date'])
+                                    )) ?>
+                                <?php else: ?>
+                                    —
+                                <?php endif; ?>
+                            </td>
+
+                            <td>
+                                <span class="pill <?= h($row['status']) ?>">
+                                    <?= h(ucwords(
+                                        str_replace('_',' ',$row['status'])
+                                    )) ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+
+                    <?php if(!$rows): ?>
+                        <tr>
+                            <td colspan="5" class="empty-state">
+                                No tasks have been created yet.
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</main>
+<?php require __DIR__.'/../../includes/staff/footer.php'; ?>

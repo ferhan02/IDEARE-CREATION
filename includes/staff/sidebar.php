@@ -1,6 +1,11 @@
 <?php
 $path=str_replace('\\','/',$_SERVER['PHP_SELF']??'');
-function nav_active(string $needle):string{global $path;return str_contains($path,$needle)?'active':'';}
+
+function nav_active(string $needle):string
+{
+    global $path;
+    return str_contains($path,$needle)?'active':'';
+}
 ?>
 <aside class="sidebar" id="sidebar">
     <div class="brand-wrap">
@@ -61,7 +66,9 @@ function nav_active(string $needle):string{global $path;return str_contains($pat
 
         <p class="nav-label">Work</p>
         <a href="<?=h(ideare_root_url('staff/pages/tasks.php'))?>">My Tasks</a>
-        <a href="<?=h(ideare_root_url('staff/admin/task-management.php'))?>">Task Management</a>
+        <?php if(can_manage_tasks()): ?>
+            <a href="<?=h(ideare_root_url('staff/admin/task-management.php'))?>">Task Management</a>
+        <?php endif; ?>
         <a href="<?=h(ideare_root_url('staff/pages/calendar.php'))?>">Staff Calendar</a>
         <a href="<?=h(ideare_root_url('staff/pages/warranty.php'))?>">Warranty / After-Sales</a>
 
@@ -83,7 +90,9 @@ function nav_active(string $needle):string{global $path;return str_contains($pat
         </div>
     </nav>
 
-    <div class="sidebar-footer"><a href="<?=h(ideare_root_url('auth/logout.php'))?>">Sign out</a></div>
+    <div class="sidebar-footer">
+        <a href="<?=h(ideare_root_url('auth/logout.php'))?>">Sign out</a>
+    </div>
 </aside>
 
 <script>
