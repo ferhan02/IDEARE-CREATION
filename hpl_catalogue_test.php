@@ -31,10 +31,15 @@ function e(?string $value): string {
 
 function imageUrl(array $product, string $baseUrl): string {
     $path = trim((string)($product['image_path'] ?? ''));
-    if ($path === '') return '';
+
+    if ($path === '') {
+        return '';
+    }
+
     $path = str_replace('\\', '/', $path);
     $path = ltrim($path, '/');
-    return rtrim($baseUrl, '/') . '/' . $path;
+
+    return $path;
 }
 
 $search   = trim((string)($_GET['q'] ?? ''));
