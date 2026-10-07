@@ -106,6 +106,9 @@
 }
 
 .catalogue-filter-panel {
+    position: sticky;
+    top: 82px;
+    z-index: 24;
     display: grid;
     grid-template-columns: minmax(260px, 1.65fr) repeat(4, minmax(135px, .7fr)) auto;
     gap: 12px;
@@ -113,8 +116,10 @@
     padding: 16px;
     border: 1px solid var(--line);
     border-radius: 18px;
-    background: #fff;
-    box-shadow: var(--shadow);
+    background: rgba(255,255,255,.97);
+    box-shadow: 0 16px 38px rgba(50,35,20,.12);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .catalogue-filter-panel label,
@@ -596,6 +601,18 @@
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+@media (max-width: 900px) {
+    .catalogue-filter-panel {
+        top: 78px;
+    }
+}
+
+@media (max-width: 620px) {
+    .catalogue-filter-panel {
+        top: 76px;
+    }
 }
 
 @media (max-width: 1180px) {
