@@ -4,6 +4,14 @@ $staff=current_staff();
 $pageTitle=$pageTitle??'IDEARE Staff Portal';
 $flash=pull_flash();
 $taskManagementAssets=$taskManagementAssets??false;
+
+$scriptPath=str_replace('\\','/',$_SERVER['PHP_SELF']??'');
+$costingQuotationAssets=$costingQuotationAssets??(
+    str_contains($scriptPath,'/quotation-') ||
+    str_ends_with($scriptPath,'/quotations.php') ||
+    str_ends_with($scriptPath,'/material-calculator.php')
+);
+$quotationCentreAssets=$quotationCentreAssets??str_ends_with($scriptPath,'/quotation-centre.php');
 ?>
 <!doctype html>
 <html lang="en">
@@ -17,6 +25,12 @@ $taskManagementAssets=$taskManagementAssets??false;
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/staff-login-polish.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/crm-projects.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/ui-polish.css')) ?>">
+<?php if($costingQuotationAssets): ?>
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/costing-quotation.css')) ?>">
+<?php endif; ?>
+<?php if($quotationCentreAssets): ?>
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/quotation-centre.css')) ?>">
+<?php endif; ?>
 <?php if($taskManagementAssets): ?>
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/task-management.css')) ?>">
 <?php endif; ?>

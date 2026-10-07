@@ -1,0 +1,444 @@
+/* IdeaRE Quotation Centre — Stage 1 dashboard/register */
+
+.quotation-centre-page {
+    max-width:1680px;
+}
+
+.quotation-centre-head {
+    align-items:center;
+}
+
+.quotation-head-actions {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.quotation-kpi-grid {
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    gap:12px;
+    margin-bottom:18px;
+}
+
+.quotation-kpi-card {
+    min-width:0;
+    padding:18px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:var(--paper);
+    box-shadow:var(--shadow);
+    display:grid;
+    gap:5px;
+}
+
+.quotation-kpi-card span {
+    font-size:10px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+}
+
+.quotation-kpi-card strong {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:clamp(22px,2.1vw,31px);
+    line-height:1.05;
+    letter-spacing:-.035em;
+}
+
+.quotation-kpi-card small {
+    font-size:10px;
+    color:var(--muted);
+}
+
+.quotation-kpi-primary {
+    background:linear-gradient(145deg,var(--paper),var(--accent2));
+}
+
+.quotation-kpi-primary strong {
+    color:var(--accent);
+}
+
+.quotation-kpi-success {
+    border-color:color-mix(in srgb,var(--green) 28%,var(--line));
+}
+
+.quotation-kpi-success strong {
+    color:var(--green);
+}
+
+.quotation-kpi-warning {
+    border-color:color-mix(in srgb,var(--yellow) 36%,var(--line));
+}
+
+.quotation-kpi-warning strong {
+    color:var(--yellow);
+}
+
+.quotation-filter-panel {
+    padding:14px 18px;
+}
+
+.quotation-filter-form {
+    display:grid;
+    grid-template-columns:minmax(280px,2fr) repeat(3,minmax(150px,1fr)) auto;
+    align-items:end;
+    gap:10px;
+}
+
+.quotation-filter-form label {
+    margin:0;
+}
+
+.quotation-filter-actions {
+    display:flex;
+    gap:7px;
+    padding-bottom:1px;
+}
+
+.quotation-centre-layout {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 315px;
+    gap:18px;
+    align-items:start;
+}
+
+.quotation-list-panel {
+    min-width:0;
+    padding:0;
+    overflow:hidden;
+}
+
+.quotation-list-title {
+    padding:19px 20px 14px;
+    align-items:end;
+    border-bottom:1px solid var(--line);
+}
+
+.quotation-list-title h2 {
+    margin:3px 0 0;
+}
+
+.quotation-list-note {
+    color:var(--muted);
+    font-size:10px;
+}
+
+.quotation-register-wrap {
+    overflow:auto;
+}
+
+.quotation-register-table {
+    min-width:1120px;
+}
+
+.quotation-register-table th,
+.quotation-register-table td {
+    padding:14px 12px;
+}
+
+.quotation-register-table tbody tr {
+    transition:background .15s ease;
+}
+
+.quotation-register-table tbody tr:hover {
+    background:var(--accent2);
+}
+
+.quotation-register-table tbody tr.has-pending-approval {
+    box-shadow:inset 3px 0 0 var(--yellow);
+}
+
+.quotation-code-link {
+    color:var(--ink);
+    font-weight:900;
+    text-decoration:none;
+}
+
+.quotation-code-link:hover {
+    color:var(--accent);
+    text-decoration:underline;
+    text-underline-offset:3px;
+}
+
+.money-col {
+    text-align:right;
+    white-space:nowrap;
+}
+
+.sensitive-col {
+    background:color-mix(in srgb,var(--accent2) 45%,transparent);
+}
+
+.quote-status {
+    display:inline-flex;
+    align-items:center;
+    width:max-content;
+    max-width:100%;
+    padding:5px 9px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:var(--accent2);
+    color:var(--muted);
+    font-size:9px;
+    line-height:1;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:.045em;
+    white-space:nowrap;
+}
+
+.quote-status-draft {
+    background:var(--accent2);
+    color:var(--muted);
+}
+
+.quote-status-pending_approval {
+    color:var(--yellow);
+    border-color:color-mix(in srgb,var(--yellow) 30%,var(--line));
+}
+
+.quote-status-approved,
+.quote-status-accepted {
+    color:var(--green);
+    border-color:color-mix(in srgb,var(--green) 30%,var(--line));
+}
+
+.quote-status-sent {
+    color:var(--accent);
+    border-color:color-mix(in srgb,var(--accent) 28%,var(--line));
+}
+
+.quote-status-rejected,
+.quote-status-expired,
+.quote-status-cancelled {
+    color:var(--red);
+    border-color:color-mix(in srgb,var(--red) 28%,var(--line));
+}
+
+.quotation-attention-text {
+    margin-top:5px;
+    color:var(--yellow);
+    font-weight:800;
+}
+
+.quotation-validity {
+    display:inline-flex;
+    font-weight:800;
+    white-space:nowrap;
+}
+
+.quotation-validity.is-warning {
+    color:var(--yellow);
+}
+
+.quotation-validity.is-urgent,
+.quotation-validity.is-overdue {
+    color:var(--red);
+}
+
+.quotation-row-actions {
+    text-align:right;
+    white-space:nowrap;
+}
+
+.quotation-empty-state {
+    min-height:180px;
+    display:grid;
+    place-content:center;
+    justify-items:center;
+    gap:5px;
+    text-align:center;
+}
+
+.quotation-empty-state strong {
+    font-size:17px;
+}
+
+.quotation-empty-state span {
+    color:var(--muted);
+}
+
+.quotation-attention-column {
+    position:sticky;
+    top:86px;
+}
+
+.quotation-attention-panel .section-title {
+    align-items:flex-start;
+}
+
+.quotation-attention-panel .section-title h2,
+.quotation-stage-card h2 {
+    margin:3px 0 0;
+    font-size:17px;
+}
+
+.quotation-attention-panel .section-title > a {
+    color:var(--accent);
+    font-size:10px;
+    font-weight:900;
+    text-decoration:none;
+}
+
+.quotation-attention-list {
+    display:grid;
+}
+
+.quotation-attention-item {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:3px 10px;
+    padding:12px 0;
+    border-top:1px solid var(--line);
+    color:inherit;
+    text-decoration:none;
+}
+
+.quotation-attention-item:first-child {
+    border-top:0;
+}
+
+.quotation-attention-item:hover b {
+    color:var(--accent);
+}
+
+.quotation-attention-item > div {
+    min-width:0;
+    display:grid;
+}
+
+.quotation-attention-item b,
+.quotation-attention-item span {
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.quotation-attention-item span,
+.quotation-attention-item small {
+    color:var(--muted);
+    font-size:10px;
+}
+
+.quotation-attention-item > strong {
+    font-size:11px;
+    white-space:nowrap;
+}
+
+.quotation-attention-item > small {
+    grid-column:1/-1;
+}
+
+.quotation-mini-empty {
+    padding:17px 0 3px;
+    color:var(--muted);
+    font-size:11px;
+}
+
+.quotation-stage-card {
+    border-style:dashed;
+}
+
+.quotation-stage-card p:last-child {
+    margin-bottom:0;
+    font-size:11px;
+    line-height:1.6;
+}
+
+.quotation-db-warning {
+    max-width:780px;
+    margin:60px auto;
+}
+
+.quotation-db-warning h1 {
+    margin-bottom:8px;
+}
+
+.quotation-db-warning code {
+    padding:2px 5px;
+    border-radius:5px;
+    background:var(--accent2);
+}
+
+@media(max-width:1400px){
+    .quotation-kpi-grid {
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+
+    .quotation-filter-form {
+        grid-template-columns:minmax(250px,2fr) repeat(2,minmax(150px,1fr));
+    }
+
+    .quotation-filter-form > label:nth-child(4),
+    .quotation-filter-actions {
+        grid-row:2;
+    }
+}
+
+@media(max-width:1120px){
+    .quotation-centre-layout {
+        grid-template-columns:1fr;
+    }
+
+    .quotation-attention-column {
+        position:static;
+        display:grid;
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:18px;
+    }
+
+    .quotation-stage-card {
+        grid-column:1/-1;
+    }
+
+    .quotation-filter-form {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .quotation-search-field {
+        grid-column:1/-1;
+    }
+
+    .quotation-filter-form > label:nth-child(4),
+    .quotation-filter-actions {
+        grid-row:auto;
+    }
+}
+
+@media(max-width:720px){
+    .quotation-kpi-grid,
+    .quotation-attention-column,
+    .quotation-filter-form {
+        grid-template-columns:1fr;
+    }
+
+    .quotation-kpi-grid {
+        gap:9px;
+    }
+
+    .quotation-kpi-card {
+        padding:15px;
+    }
+
+    .quotation-search-field,
+    .quotation-stage-card {
+        grid-column:auto;
+    }
+
+    .quotation-filter-actions {
+        width:100%;
+    }
+
+    .quotation-filter-actions .btn {
+        flex:1;
+    }
+
+    .quotation-list-title {
+        align-items:flex-start;
+        flex-direction:column;
+    }
+}
