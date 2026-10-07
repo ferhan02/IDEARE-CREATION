@@ -51,6 +51,7 @@ function nav_active(string $needle):string{global $path;return str_contains($pat
 
         <p class="nav-label">Procurement &amp; Workshop</p>
         <a href="<?=h(ideare_root_url('staff/pages/materials.php'))?>">Material Catalogue</a>
+        <a href="<?=h(ideare_root_url('material-catalogue.php'))?>">HPL Finish Catalogue ↗</a>
         <a href="<?=h(ideare_root_url('staff/pages/suppliers.php'))?>">Suppliers</a>
         <a href="<?=h(ideare_root_url('staff/pages/purchase-orders.php'))?>">Purchase Orders</a>
         <a href="<?=h(ideare_root_url('staff/pages/inventory.php'))?>">Inventory</a>

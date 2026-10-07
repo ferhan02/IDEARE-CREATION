@@ -1,7 +1,13 @@
 <?php
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
 $pageTitle = $pageTitle ?? 'IDEARE';
 $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/public/pages/') ? '../../' :
                 (str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/designer/') ? '../' : '');
+
+$customerStaffSignedIn = !empty($_SESSION['staff_id']);
 ?>
 <!doctype html>
 <html lang="en">
@@ -26,9 +32,13 @@ $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '
       <a href="<?= $customerRoot ?>public/pages/about.php">About</a>
       <a href="<?= $customerRoot ?>public/pages/services.php">Services</a>
       <a href="<?= $customerRoot ?>public/pages/portfolio.php">Portfolio</a>
+      <a href="<?= $customerRoot ?>material-catalogue.php">Materials</a>
       <a href="<?= $customerRoot ?>designer/index.php">Cabinet Designer</a>
       <a href="<?= $customerRoot ?>public/pages/contact.php">Contact</a>
-      <a class="staff-link" href="<?= $customerRoot ?>auth/login.php">Staff Login</a>
+      <a
+        class="staff-link"
+        href="<?= $customerRoot ?><?= $customerStaffSignedIn ? 'staff/index.php' : 'auth/login.php' ?>"
+      ><?= $customerStaffSignedIn ? 'Staff Portal' : 'Staff Login' ?></a>
     </nav>
   </div>
 </header>
