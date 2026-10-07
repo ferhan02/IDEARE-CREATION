@@ -7,5 +7,6 @@ $customerRoot = $customerRoot ?? '';
     <span>Prototype website</span>
   </div>
 </footer>
+<script src="<?= $customerRoot ?>assets/js/theme-icons.js"></script>
 <script src="<?= $customerRoot ?>assets/js/site.js"></script>
 </body></html>

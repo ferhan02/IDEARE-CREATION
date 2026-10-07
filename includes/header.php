@@ -10,8 +10,10 @@ $flash = pull_flash();
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= h($pageTitle) ?> · IDEARE</title>
+<script>(function(){try{document.documentElement.dataset.theme=localStorage.getItem('ideare-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}})();</script>
 <link rel="stylesheet" href="<?= h(base_url('assets/css/staff.css')) ?>">
 <link rel="stylesheet" href="<?= h(base_url('assets/css/ui-polish.css')) ?>">
+<link rel="stylesheet" href="<?= h(base_url('assets/css/theme-icons.css')) ?>">
 </head>
 <body>
 <div class="app-shell">
@@ -22,41 +24,19 @@ $flash = pull_flash();
   <button class="menu-btn" id="menuBtn" aria-label="Toggle menu">☰</button>
   <div class="topbar-spacer"></div>
   <a class="top-icon" href="<?= h(base_url('staff/pages/notifications.php')) ?>">Notifications</a>
-
+  <a class="top-icon" href="<?= h(base_url('index.php')) ?>">Customer Site</a>
+  <button class="theme-toggle staff-theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Switch to dark mode"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M8.2 14.7A7 7 0 1 1 15.8 14.7C14.7 15.5 14 16.5 14 18h-4c0-1.5-.7-2.5-1.8-3.3Z"/></svg></button>
   <div class="profile-menu">
-    <button
-      type="button"
-      class="user-pill profile-trigger"
-      aria-haspopup="true"
-      aria-expanded="false"
-      aria-label="Open account menu"
-    >
+    <button type="button" class="user-pill profile-trigger" aria-haspopup="true" aria-expanded="false" aria-label="Open account menu">
       <span class="avatar"><?= h(strtoupper(substr($staff['first_name'],0,1))) ?></span>
-      <span class="profile-trigger-copy">
-        <b><?= h($staff['first_name']) ?></b>
-        <small><?= h(($staff['job_title']??'') ?: $staff['role_name']) ?></small>
-      </span>
+      <span class="profile-trigger-copy"><b><?= h($staff['first_name']) ?></b><small><?= h(($staff['job_title']??'') ?: $staff['role_name']) ?></small></span>
       <span class="profile-caret" aria-hidden="true">⌄</span>
     </button>
-
     <div class="profile-dropdown" role="menu">
-      <a role="menuitem" href="<?= h(base_url('staff/pages/profile.php')) ?>">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7 8a7 7 0 0 0-14 0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
-        Manage profile
-      </a>
-
-      <a role="menuitem" class="sign-out" href="<?= h(base_url('auth/logout.php')) ?>">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M10 5H5v14h5M14 8l4 4-4 4m4-4H9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Sign out
-      </a>
+      <a role="menuitem" href="<?= h(base_url('staff/pages/profile.php')) ?>">Manage profile</a>
+      <a role="menuitem" class="sign-out" href="<?= h(base_url('auth/logout.php')) ?>">Sign out</a>
     </div>
   </div>
 </header>
 <?php endif; ?>
-<?php if ($flash): ?>
-<div class="flash <?= h($flash['type']) ?>"><?= h($flash['message']) ?></div>
-<?php endif; ?>
+<?php if ($flash): ?><div class="flash <?= h($flash['type']) ?>"><?= h($flash['message']) ?></div><?php endif; ?>

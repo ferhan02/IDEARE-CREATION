@@ -15,8 +15,10 @@ $customerStaffSignedIn = !empty($_SESSION['staff_id']);
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title><?= htmlspecialchars($pageTitle) ?></title>
+<script>(function(){try{document.documentElement.dataset.theme=localStorage.getItem('ideare-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}})();</script>
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/site.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/ui-polish.css">
+<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/theme-icons.css">
 </head>
 <body>
 <header class="site-header">
@@ -35,10 +37,10 @@ $customerStaffSignedIn = !empty($_SESSION['staff_id']);
       <a href="<?= $customerRoot ?>material-catalogue.php">Materials</a>
       <a href="<?= $customerRoot ?>designer/index.php">Cabinet Designer</a>
       <a href="<?= $customerRoot ?>public/pages/contact.php">Contact</a>
-      <a
-        class="staff-link"
-        href="<?= $customerRoot ?><?= $customerStaffSignedIn ? 'staff/index.php' : 'auth/login.php' ?>"
-      ><?= $customerStaffSignedIn ? 'Staff Portal' : 'Staff Login' ?></a>
+      <button class="theme-toggle site-theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Switch to dark mode">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 22h4"/><path d="M8.2 14.7A7 7 0 1 1 15.8 14.7C14.7 15.5 14 16.5 14 18h-4c0-1.5-.7-2.5-1.8-3.3Z"/></svg>
+      </button>
+      <a class="staff-link" href="<?= $customerRoot ?><?= $customerStaffSignedIn ? 'staff/index.php' : 'auth/login.php' ?>"><?= $customerStaffSignedIn ? 'Staff Portal' : 'Staff Login' ?></a>
     </nav>
   </div>
 </header>
