@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__.'/../../includes/staff/operations.php';
 require_once __DIR__.'/../../includes/staff/quotation-pricing.php';
+require_once __DIR__.'/../../includes/staff/quotation-payments.php';
 require_permission('quotation.create');
 verify_csrf();
 
@@ -9,7 +10,7 @@ $staff=current_staff();
 
 $requiredV2Tables=[
     'quotation_groups','quotation_sections','quotation_rate_items',
-    'quotation_cost_components','quotation_adjustments'
+    'quotation_cost_components','quotation_adjustments','quotation_payment_milestones'
 ];
 foreach($requiredV2Tables as $requiredTable){
     if(!db_table_exists($pdo,$requiredTable)){
@@ -219,6 +220,10 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
             'discount'=>can('quotation.discount'),
             'edit_margin'=>can('quotation.edit_margin'),
         ]);
+        $paymentMilestones=quotation_payment_prepare(
+            is_array($payload['payment_milestones']??null)?$payload['payment_milestones']:[],
+            (float)$pricing['final_total']
+        );
 
         $pdo->beginTransaction();
 
@@ -375,6 +380,8 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
                 $adjustment['customer_visible'],$adjustment['requires_approval'],$adjustment['reason'],$staff['id'],$adjustment['sort_order']
             ]);
         }
+
+        quotation_payment_replace_master($pdo,$quoteId,$paymentMilestones);
 
         $pdo->prepare("INSERT INTO quotation_status_history (quotation_id,old_status,new_status,changed_by,notes) VALUES(?,NULL,'draft',?,'Quotation created')")
             ->execute([$quoteId,$staff['id']]);
@@ -578,6 +585,29 @@ require __DIR__.'/../../includes/staff/header.php';
 <input id="quoteDiscountValue" type="hidden" value="0">
 <?php endif; ?>
 
+<section class="staff-panel quote-payment-panel">
+    <div class="section-title">
+        <div>
+            <p class="eyebrow">Stage 5 · Customer payment plan</p>
+            <h2>Payment schedule</h2>
+            <p class="muted">Optional, but recommended before approval. The schedule is frozen into each issued quotation revision and can create milestone invoices after acceptance.</p>
+        </div>
+        <button class="btn" type="button" id="addPaymentMilestoneBtn">Add milestone</button>
+    </div>
+    <div class="quote-payment-presets">
+        <span>Quick schedule:</span>
+        <button class="btn" type="button" data-payment-preset="50-40-10">50 / 40 / 10</button>
+        <button class="btn" type="button" data-payment-preset="40-40-20">40 / 40 / 20</button>
+        <button class="btn" type="button" data-payment-preset="100">100% on acceptance</button>
+    </div>
+    <div class="quote-payment-head" aria-hidden="true"><span>Milestone</span><span>Calculation</span><span>Due trigger</span><span>Amount</span><span>Customer</span><span></span></div>
+    <div id="quoteMilestoneRows"></div>
+    <div class="quote-payment-totals">
+        <span>Scheduled <strong id="quoteMilestoneTotal">RM 0.00</strong></span>
+        <span>Difference <strong id="quoteMilestoneBalance">RM 0.00</strong></span>
+    </div>
+</section>
+
 <section class="staff-panel">
     <p class="eyebrow">Tax &amp; notes</p><h2>Finishing details</h2>
     <div class="form-grid"><label>Tax name<input id="quoteTaxName" value="Tax"></label><label>Tax %<input id="quoteTaxPct" type="number" step=".01" min="0" value="<?= h((string)$defaultTax) ?>"></label></div>
@@ -614,4 +644,5 @@ window.IDEARE_QUOTE_STAGE3 = <?= json_encode($pricingPayload,JSON_UNESCAPED_SLAS
 </script>
 <script src="<?= h(ideare_root_url('assets/js/quotation-context.js')) ?>"></script>
 <script src="<?= h(ideare_root_url('assets/js/quotation-builder.js')) ?>"></script>
+<script src="<?= h(ideare_root_url('assets/js/quotation-milestones.js')) ?>"></script>
 <?php require __DIR__.'/../../includes/staff/footer.php'; ?>

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/../../includes/staff/operations.php';
+require_once __DIR__.'/../../includes/staff/quotation-payments.php';
 require_permission('quotation.view');
 $pdo=staff_db();
 $id=(int)($_GET['id']??0);
@@ -23,6 +24,8 @@ $items=$fetch('SELECT * FROM quotation_version_items WHERE quotation_version_id=
 $charges=$fetch('SELECT * FROM quotation_version_charges WHERE quotation_version_id=? ORDER BY sort_order,id');
 $costs=$fetch('SELECT * FROM quotation_version_cost_components WHERE quotation_version_id=? ORDER BY sort_order,id');
 $adjustments=$fetch('SELECT * FROM quotation_version_adjustments WHERE quotation_version_id=? ORDER BY sort_order,id');
+$milestones=$fetch('SELECT * FROM quotation_version_payment_milestones WHERE quotation_version_id=? ORDER BY sort_order,id');
+$customerMilestones=array_values(array_filter($milestones,fn($m)=>(int)($m['customer_visible']??1)===1));
 $events=$fetch("SELECT e.*,CONCAT(s.first_name,' ',COALESCE(s.last_name,'')) staff_name FROM quotation_version_events e LEFT JOIN staff s ON s.id=e.staff_id WHERE e.quotation_version_id=? ORDER BY e.created_at DESC,e.id DESC");
 $approvals=$fetch("SELECT a.*,CONCAT(r.first_name,' ',COALESCE(r.last_name,'')) requester_name,CONCAT(ap.first_name,' ',COALESCE(ap.last_name,'')) approver_name,
     (SELECT aa.comment FROM approval_actions aa WHERE aa.approval_request_id=a.id ORDER BY aa.created_at DESC,aa.id DESC LIMIT 1) latest_action_comment,
@@ -41,7 +44,7 @@ $pageTitle=$v['quotation_code'].' v'.$v['version_no'];
 require __DIR__.'/../../includes/staff/header.php';
 ?>
 <main class="staff-content quotation-version-page">
-<div class="page-head no-print"><div><p class="eyebrow">Frozen quotation revision</p><h1><?= h($v['quotation_code']) ?> · v<?= (int)$v['version_no'] ?></h1><p class="muted"><?= h($v['version_label']?:'Revision '.$v['version_no']) ?> · <?= h(ucwords(str_replace('_',' ',$v['status']))) ?><?= (int)$v['is_locked']?' · Locked snapshot':'' ?></p></div><div class="actions"><button class="btn" type="button" onclick="window.print()">Print / Save PDF</button><a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-view.php?id='.(int)$v['quotation_id'])) ?>">Back to live quotation</a></div></div>
+<div class="page-head no-print"><div><p class="eyebrow">Frozen quotation revision · Stage 5</p><h1><?= h($v['quotation_code']) ?> · v<?= (int)$v['version_no'] ?></h1><p class="muted"><?= h($v['version_label']?:'Revision '.$v['version_no']) ?> · <?= h(ucwords(str_replace('_',' ',$v['status']))) ?><?= (int)$v['is_locked']?' · Locked snapshot':'' ?></p></div><div class="actions"><button class="btn primary" type="button" onclick="window.print()">Print / Save customer PDF</button><?php if($v['status']==='accepted'): ?><a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-handoff.php?id='.(int)$v['quotation_id'])) ?>">Open accepted hand-off</a><?php endif; ?><a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-view.php?id='.(int)$v['quotation_id'])) ?>">Back to live quotation</a></div></div>
 
 <?php if($previous): ?>
 <section class="staff-panel no-print version-delta-panel"><div class="section-title"><div><p class="eyebrow">Revision comparison</p><h2>Changes from v<?= (int)$previous['version_no'] ?></h2></div><a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-version-view.php?id='.(int)$previous['id'])) ?>">Open v<?= (int)$previous['version_no'] ?></a></div><div class="version-delta-grid">
@@ -53,7 +56,7 @@ require __DIR__.'/../../includes/staff/header.php';
 <?php endif; ?>
 
 <section class="customer-quote-sheet stage3-customer-quote">
-<header class="quote-document-header"><div><div class="quote-logo">IdeaRE</div><span>Architecture · Interior Design · Cabinetry</span></div><div class="quote-doc-meta"><b>QUOTATION</b><span><?= h($v['quotation_code']) ?> · Revision <?= (int)$v['version_no'] ?></span><?php if($v['reference_no_snapshot']): ?><span>Ref: <?= h($v['reference_no_snapshot']) ?></span><?php endif; ?><?php if($v['snapshot_hash']): ?><span class="version-hash">Snapshot <?= h(substr($v['snapshot_hash'],0,12)) ?></span><?php endif; ?></div></header>
+<header class="quote-document-header"><div><div class="quote-logo">IdeaRE</div><span>Architecture · Interior Design · Cabinetry</span></div><div class="quote-doc-meta"><b>QUOTATION</b><span><?= h($v['quotation_code']) ?> · Revision <?= (int)$v['version_no'] ?></span><?php if($v['reference_no_snapshot']): ?><span>Ref: <?= h($v['reference_no_snapshot']) ?></span><?php endif; ?><?php if($v['snapshot_hash']): ?><span class="version-hash no-print">Snapshot <?= h(substr($v['snapshot_hash'],0,12)) ?></span><?php endif; ?></div></header>
 <div class="quote-document-title"><small><?= h($v['quotation_title_snapshot']?:$v['live_quotation_title']?:'Quotation') ?></small><strong><?= h($v['project_name_snapshot']?:$v['project_type_snapshot']?:'Project') ?></strong></div>
 <div class="quote-customer-grid"><div><small>Prepared for</small><strong><?= h($v['customer_name_snapshot']) ?></strong><?php if($v['customer_phone_snapshot']): ?><span><?= h($v['customer_phone_snapshot']) ?></span><?php endif; ?><?php if($v['customer_email_snapshot']): ?><span><?= h($v['customer_email_snapshot']) ?></span><?php endif; ?><?php if($v['customer_billing_address_snapshot']): ?><span><?= nl2br(h($v['customer_billing_address_snapshot'])) ?></span><?php endif; ?></div><div><small>Project / Site</small><strong><?= h($v['project_code_snapshot']?:'General quotation') ?></strong><?php if($v['site_address_snapshot']): ?><span><?= nl2br(h($v['site_address_snapshot'])) ?></span><?php endif; ?></div><div><small>Revision</small><strong>v<?= (int)$v['version_no'] ?> · <?= h(ucwords(str_replace('_',' ',$v['status']))) ?></strong><?php if($v['quotation_date']): ?><span><?= h(date('j M Y',strtotime($v['quotation_date']))) ?></span><?php endif; ?><?php if($v['valid_until']): ?><span>Valid until <?= h(date('j M Y',strtotime($v['valid_until']))) ?></span><?php endif; ?></div></div>
 
@@ -61,14 +64,42 @@ require __DIR__.'/../../includes/staff/header.php';
 <?php foreach($groups as $g): if(!(int)$g['show_on_customer_quote'])continue; ?>
 <section class="quote-doc-group"><div class="quote-doc-group-head"><div><small><?= h(ucwords(str_replace('_',' ',$g['group_type']))) ?></small><h2><?= h($g['group_name']) ?></h2></div><?php if($g['pricing_mode']!=='itemized'): ?><strong><?= money($g['final_total']) ?></strong><?php endif; ?></div>
 <?php if(!(int)$g['show_breakdown']): ?><table class="customer-quote-table stage3-quote-table"><tbody><tr><td><b><?= h($g['group_name']) ?></b></td><td>1</td><td>package</td><td><?= money($g['final_total']) ?></td><td><?= money($g['final_total']) ?></td></tr></tbody></table><?php else: ?>
-<?php foreach($sectionsByGroup[(int)$g['id']]??[] as $s): if(!(int)$s['show_on_customer_quote'])continue; ?><div class="quote-doc-section"><div class="quote-doc-section-title"><div><b><?= h($s['section_code']) ?>.</b><strong><?= h($s['section_name']) ?></strong></div><?php if((int)$s['show_section_total']): ?><span><?= money($s['final_total']) ?></span><?php endif; ?></div><?php if($s['description']): ?><p class="quote-doc-section-desc"><?= nl2br(h($s['description'])) ?></p><?php endif; ?><table class="customer-quote-table stage3-quote-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody><?php foreach($itemsBySection[(int)$s['id']]??[] as $i): if(!(int)($i['show_on_customer_quote']??1)) continue; ?><tr class="<?= (int)$i['is_foc']?'quote-foc-row':'' ?>"><td><b><?= h($i['description']) ?></b><?php if($i['measurement_text']): ?><small><?= h($i['measurement_text']) ?></small><?php endif; ?><?php if((int)$i['is_foc'] && $i['foc_reason']): ?><small>FOC: <?= h($i['foc_reason']) ?></small><?php endif; ?></td><td><?= h(rtrim(rtrim(number_format((float)$i['quantity'],3,'.',''),'0'),'.')) ?></td><td><?= h($i['unit']?:'—') ?></td><td><?= (int)$i['is_foc']?'<b class="quote-foc-label">FOC</b>':money($i['unit_price']) ?></td><td><?= (int)$i['is_foc']?'<b class="quote-foc-label">FOC</b>':money($i['line_total']) ?></td></tr><?php endforeach; ?></tbody></table></div><?php endforeach; ?>
+<?php foreach($sectionsByGroup[(int)$g['id']]??[] as $s): if(!(int)$s['show_on_customer_quote'])continue; ?><div class="quote-doc-section"><div class="quote-doc-section-title"><div><b><?= h($s['section_code']) ?>.</b><strong><?= h($s['section_name']) ?></strong></div><?php if((int)$s['show_section_total']): ?><span><?= money($s['final_total']) ?></span><?php endif; ?></div><?php if($s['description']): ?><p class="quote-doc-section-desc"><?= nl2br(h($s['description'])) ?></p><?php endif; ?><table class="customer-quote-table stage3-quote-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody><?php foreach($itemsBySection[(int)$s['id']]??[] as $i): if(!(int)($i['show_on_customer_quote']??1)) continue; ?><tr class="<?= (int)$i['is_foc']?'quote-foc-row':'' ?>"><td><b><?= h($i['description']) ?></b><?php if($i['measurement_text']): ?><small><?= h($i['measurement_text']) ?></small><?php endif; ?></td><td><?= h(rtrim(rtrim(number_format((float)$i['quantity'],3,'.',''),'0'),'.')) ?></td><td><?= h($i['unit']?:'—') ?></td><td><?= (int)$i['is_foc']?'<b class="quote-foc-label">FOC</b>':money($i['unit_price']) ?></td><td><?= (int)$i['is_foc']?'<b class="quote-foc-label">FOC</b>':money($i['line_total']) ?></td></tr><?php endforeach; ?></tbody></table></div><?php endforeach; ?>
 <?php if($g['pricing_mode']!=='itemized'): ?><div class="quote-package-summary"><span>Itemized scope value <?= money($g['item_subtotal']) ?></span><strong>Group price <?= money($g['final_total']) ?></strong></div><?php endif; ?>
 <?php endif; ?></section><?php endforeach; ?>
 <?php if($customerCharges): ?><section class="quote-doc-group"><div class="quote-doc-group-head"><div><small>Charges</small><h2>Additional Charges</h2></div></div><table class="customer-quote-table stage3-quote-table"><tbody><?php foreach($customerCharges as $c): ?><tr><td><?= h($c['label']) ?></td><td>1</td><td><?= h($c['calculation_type']==='percentage'?'%':'charge') ?></td><td><?= $c['calculation_type']==='percentage'?h($c['rate'].'%'):money($c['customer_amount']?:$c['amount']) ?></td><td><?= money($c['customer_amount']?:$c['amount']) ?></td></tr><?php endforeach; ?></tbody></table></section><?php endif; ?>
 </div>
 <div class="quote-document-totals"><?php if((float)$v['discount_amount']>0): ?><div><span>Before discount</span><strong><?= money($v['selling_price_before_discount']) ?></strong></div><div><span>Discount</span><strong>- <?= money($v['discount_amount']) ?></strong></div><?php endif; ?><div><span>Subtotal</span><strong><?= money($v['subtotal']) ?></strong></div><?php if((float)$v['tax_amount']>0): ?><div><span><?= h($v['tax_name']?:'Tax') ?> (<?= h($v['tax_percent']) ?>%)</span><strong><?= money($v['tax_amount']) ?></strong></div><?php endif; ?><div class="final"><span>Total</span><strong><?= money($v['total_amount']) ?></strong></div></div>
+<?php if($customerMilestones): ?>
+<div class="quote-payment-document">
+    <div class="quote-payment-document-head"><div><small>Payment terms</small><strong>Payment schedule</strong></div><span><?= count($customerMilestones) ?> milestone<?= count($customerMilestones)===1?'':'s' ?></span></div>
+    <table class="quote-payment-document-table">
+        <thead><tr><th>Stage</th><th>Due</th><th>Basis</th><th>Amount</th></tr></thead>
+        <tbody>
+        <?php foreach($customerMilestones as $m): ?>
+            <tr>
+                <td><b><?= h($m['label']) ?></b><?php if($m['notes']): ?><small><?= h($m['notes']) ?></small><?php endif; ?></td>
+                <td><?= h(quotation_payment_trigger_label($m['due_trigger'])) ?><?= $m['due_date']?' · '.h(date('j M Y',strtotime($m['due_date']))):'' ?></td>
+                <td><?= $m['calculation_type']==='percentage'?h(rtrim(rtrim(number_format((float)$m['value'],2,'.',''),'0'),'.')).'%':'Fixed' ?></td>
+                <td><strong><?= money($m['amount']) ?></strong></td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+<?php endif; ?>
+<?php if($v['status']==='accepted'): ?>
+<div class="quote-acceptance-document">
+    <div><small>Customer decision</small><strong>Accepted quotation</strong></div>
+    <div><span>Accepted by</span><b><?= h($v['customer_decision_by']?:$v['customer_name_snapshot']) ?></b></div>
+    <div><span>Method</span><b><?= h(ucwords(str_replace('_',' ',$v['customer_decision_method']?:'manual'))) ?></b></div>
+    <div><span>Date</span><b><?= $v['customer_decision_at']?h(date('j M Y, g:i A',strtotime($v['customer_decision_at']))):'—' ?></b></div>
+    <?php if($v['customer_decision_notes']): ?><p><?= nl2br(h($v['customer_decision_notes'])) ?></p><?php endif; ?>
+</div>
+<?php endif; ?>
+
 <?php if($v['customer_notes']): ?><div class="quote-note-block"><b>Notes</b><p><?= nl2br(h($v['customer_notes'])) ?></p></div><?php endif; ?><?php if($v['terms']): ?><div class="quote-note-block terms"><b>Terms &amp; conditions</b><p><?= nl2br(h($v['terms'])) ?></p></div><?php endif; ?>
-<footer class="quote-document-footer"><span>IdeaRE</span><span>Frozen revision v<?= (int)$v['version_no'] ?> · <?= h(ucwords(str_replace('_',' ',$v['status']))) ?></span></footer>
+<footer class="quote-document-footer"><span>IdeaRE</span><span>Immutable revision v<?= (int)$v['version_no'] ?> · <?= h(ucwords(str_replace('_',' ',$v['status']))) ?></span></footer>
 </section>
 
 <div class="split-grid no-print">

@@ -40,7 +40,8 @@ function revision_load(PDO $pdo,int $quotationId): array
     $s=$pdo->prepare('SELECT * FROM quotation_sections WHERE quotation_id=? ORDER BY sort_order,id');$s->execute([$quotationId]);$sections=$s->fetchAll(PDO::FETCH_ASSOC);
     $i=$pdo->prepare("SELECT qi.*,ri.pricing_method rate_pricing_method,ri.default_unit rate_default_unit,ri.rate_code,ri.name rate_name FROM quotation_items qi LEFT JOIN quotation_rate_items ri ON ri.id=qi.rate_book_item_id WHERE qi.quotation_id=? ORDER BY qi.sort_order,qi.id");$i->execute([$quotationId]);$items=$i->fetchAll(PDO::FETCH_ASSOC);
     $c=$pdo->prepare('SELECT * FROM quotation_charges WHERE quotation_id=? ORDER BY sort_order,id');$c->execute([$quotationId]);$charges=$c->fetchAll(PDO::FETCH_ASSOC);
-    return compact('quote','groups','sections','items','charges');
+    $m=$pdo->prepare('SELECT * FROM quotation_payment_milestones WHERE quotation_id=? ORDER BY sort_order,id');$m->execute([$quotationId]);$milestones=$m->fetchAll(PDO::FETCH_ASSOC);
+    return compact('quote','groups','sections','items','charges','milestones');
 }
 
 try{$data=revision_load($pdo,$id);}catch(Throwable $e){http_response_code(404);exit(h($e->getMessage()));}
@@ -79,6 +80,7 @@ if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='save_revisio
         $deleteSections=array_map('intval',array_keys((array)($_POST['delete_sections']??[])));
         $deleteGroups=array_map('intval',array_keys((array)($_POST['delete_groups']??[])));
         $deleteCharges=array_map('intval',array_keys((array)($_POST['delete_charges']??[])));
+        $deleteMilestones=array_map('intval',array_keys((array)($_POST['delete_milestones']??[])));
 
         $sectionsByGroup=[];foreach($data['sections'] as $row)$sectionsByGroup[(int)$row['group_id']][]=$row;
         $itemsBySection=[];foreach($data['items'] as $row)$itemsBySection[(int)$row['section_id']][]=$row;
@@ -201,6 +203,37 @@ if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='save_revisio
             $payloadCharges[]=['client_key'=>'new_charge','charge_name'=>trim((string)$newCharge['charge_name']),'charge_category'=>$newCharge['charge_category']??'other','calculation_type'=>'fixed','calculation_base'=>'manual','rate'=>max(0,quotation_num($newCharge['rate']??0)),'internal_only'=>$canViewCost&&!empty($newCharge['internal_only']),'taxable'=>!empty($newCharge['taxable']),'source_type'=>'manual'];
         }
 
+        $milestonePost=(array)($_POST['milestones']??[]);
+        $paymentInput=[];
+        foreach($data['milestones'] as $milestone){
+            $mid=(int)$milestone['id'];
+            if(in_array($mid,$deleteMilestones,true)) continue;
+            $mp=(array)($milestonePost[$mid]??[]);
+            $label=trim((string)($mp['label']??$milestone['label']));
+            if($label==='') continue;
+            $paymentInput[]=[
+                'label'=>$label,
+                'calculation_type'=>$mp['calculation_type']??$milestone['calculation_type'],
+                'value'=>quotation_num($mp['value']??$milestone['value']),
+                'due_trigger'=>$mp['due_trigger']??$milestone['due_trigger'],
+                'due_date'=>trim((string)($mp['due_date']??$milestone['due_date'])),
+                'customer_visible'=>!empty($mp['customer_visible']),
+                'notes'=>trim((string)($mp['notes']??$milestone['notes']))
+            ];
+        }
+        $newMilestone=(array)($_POST['new_milestone']??[]);
+        if(trim((string)($newMilestone['label']??''))!==''){
+            $paymentInput[]=[
+                'label'=>trim((string)$newMilestone['label']),
+                'calculation_type'=>$newMilestone['calculation_type']??'percentage',
+                'value'=>quotation_num($newMilestone['value']??0),
+                'due_trigger'=>$newMilestone['due_trigger']??'other',
+                'due_date'=>trim((string)($newMilestone['due_date']??'')),
+                'customer_visible'=>!empty($newMilestone['customer_visible']),
+                'notes'=>trim((string)($newMilestone['notes']??''))
+            ];
+        }
+
         $existingOverheadPct=(float)$q['direct_cost']>0?((float)$q['overhead_amount']/(float)$q['direct_cost']*100):0.0;
         $existingContingencyPct=(float)$q['direct_cost']>0?((float)$q['contingency_amount']/(float)$q['direct_cost']*100):0.0;
         $payload=[
@@ -221,6 +254,7 @@ if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='save_revisio
             // Sensitive values are forced above when the user lacks edit permission.
             'edit_margin'=>true
         ]);
+        $preparedMilestones=quotation_payment_prepare($paymentInput,(float)$pricing['final_total']);
 
         $pdo->beginTransaction();
         quotation_workflow_replace_master_pricing($pdo,$id,$pricing,(int)$staff['id'],[
@@ -230,6 +264,7 @@ if($_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='save_revisio
             'internal_notes'=>can('quotation.view_cost')?(trim((string)($_POST['internal_notes']??$q['internal_notes']))?:null):$q['internal_notes'],
             'terms_and_conditions'=>trim((string)($_POST['terms_and_conditions']??$q['terms_and_conditions']))?:null,
             'tax_name'=>trim((string)($_POST['tax_name']??$q['tax_name']))?:null,
+            'payment_milestones'=>$preparedMilestones,
         ]);
         quotation_workflow_event($pdo,$id,null,'comment',(int)$staff['id'],'draft','draft',trim((string)($_POST['revision_note']??''))?:'Working revision updated.');
         $pdo->commit();
@@ -299,6 +334,37 @@ require __DIR__.'/../../includes/staff/header.php';
 <section class="staff-panel"><p class="eyebrow">Add scope group</p><h2>New quotation group</h2><div class="form-grid"><label>Group code<input name="new_group[group_code]" placeholder="ADD"></label><label>Group name<input name="new_group[group_name]" placeholder="Leave blank to skip"></label><label>Group type<select name="new_group[group_type]"><option value="standard">Standard</option><option value="package">Package</option><option value="additional">Additional</option></select></label></div><div class="two"><label>First section code<input name="new_group[section_code]" placeholder="F"></label><label>First section name<input name="new_group[section_name]" placeholder="Additional Works"></label></div></section>
 
 <section class="staff-panel"><p class="eyebrow">Charges</p><h2>Additional & internal charges</h2><?php foreach($data['charges'] as $c): $cid=(int)$c['id']; if((int)$c['internal_only']===1 && !can('quotation.view_cost')) continue; ?><div class="revision-charge-row"><input name="charges[<?= $cid ?>][charge_name]" value="<?= h($c['charge_name']) ?>"><select name="charges[<?= $cid ?>][charge_category]"><?php foreach(['labour','installation','delivery','transport','measurement','design','subcontractor','waste','overhead','contingency','consumables','machine','disposal','parking_toll','surcharge','other'] as $v): ?><option value="<?= $v ?>" <?= $c['charge_category']===$v?'selected':'' ?>><?= h(str_replace('_',' ',$v)) ?></option><?php endforeach; ?></select><select name="charges[<?= $cid ?>][calculation_type]"><?php foreach(['fixed','percentage','per_unit','per_hour','per_day','per_trip'] as $v): ?><option value="<?= $v ?>" <?= $c['calculation_type']===$v?'selected':'' ?>><?= h(str_replace('_',' ',$v)) ?></option><?php endforeach; ?></select><select name="charges[<?= $cid ?>][calculation_base]"><?php foreach(['manual','direct_cost','internal_cost','selling_subtotal','group_subtotal','section_subtotal'] as $v): ?><option value="<?= $v ?>" <?= $c['calculation_base']===$v?'selected':'' ?>><?= h(str_replace('_',' ',$v)) ?></option><?php endforeach; ?></select><input type="number" step=".01" min="0" name="charges[<?= $cid ?>][rate]" value="<?= h($c['rate']) ?>"><input type="number" step=".01" min="0" name="charges[<?= $cid ?>][base_amount]" value="<?= h($c['base_amount']) ?>"><label class="check"><input type="checkbox" name="charges[<?= $cid ?>][internal_only]" value="1" <?= (int)$c['internal_only']?'checked':'' ?>> Internal</label><label class="check"><input type="checkbox" name="charges[<?= $cid ?>][taxable]" value="1" <?= (int)$c['taxable']?'checked':'' ?>> Taxable</label><label class="check revision-delete"><input type="checkbox" name="delete_charges[<?= $cid ?>]" value="1"> Remove</label></div><?php endforeach; ?><div class="revision-charge-row revision-new-charge"><input name="new_charge[charge_name]" placeholder="New fixed charge"><select name="new_charge[charge_category]"><option value="other">Other</option><option value="delivery">Delivery</option><option value="installation">Installation</option><option value="transport">Transport</option><option value="subcontractor">Subcontractor</option><option value="waste">Waste</option><option value="consumables">Consumables</option></select><input type="number" step=".01" min="0" name="new_charge[rate]" value="0"><?php if(can('quotation.view_cost')): ?><label class="check"><input type="checkbox" name="new_charge[internal_only]" value="1"> Internal</label><?php endif; ?><label class="check"><input type="checkbox" name="new_charge[taxable]" value="1" checked> Taxable</label></div></section>
+
+<section class="staff-panel quote-payment-panel">
+<div class="section-title"><div><p class="eyebrow">Stage 5 · Payment plan</p><h2>Customer payment schedule</h2><p class="muted">These milestones are recalculated against the revised grand total and frozen when the revision enters approval.</p></div></div>
+<div class="revision-payment-list">
+<?php foreach($data['milestones'] as $m): $mid=(int)$m['id']; ?>
+<div class="revision-payment-row">
+<input name="milestones[<?= $mid ?>][label]" value="<?= h($m['label']) ?>" placeholder="Milestone">
+<select name="milestones[<?= $mid ?>][calculation_type]"><option value="percentage" <?= $m['calculation_type']==='percentage'?'selected':'' ?>>Percentage</option><option value="fixed" <?= $m['calculation_type']==='fixed'?'selected':'' ?>>Fixed RM</option></select>
+<input type="number" min="0" step=".01" name="milestones[<?= $mid ?>][value]" value="<?= h($m['value']) ?>">
+<select name="milestones[<?= $mid ?>][due_trigger]"><?php foreach(['acceptance'=>'On acceptance','before_production'=>'Before production','before_delivery'=>'Before delivery','on_installation'=>'On installation','on_completion'=>'On completion','date'=>'Specific date','other'=>'Other'] as $k=>$label): ?><option value="<?= h($k) ?>" <?= $m['due_trigger']===$k?'selected':'' ?>><?= h($label) ?></option><?php endforeach; ?></select>
+<input type="date" name="milestones[<?= $mid ?>][due_date]" value="<?= h((string)$m['due_date']) ?>">
+<label class="check"><input type="checkbox" name="milestones[<?= $mid ?>][customer_visible]" value="1" <?= (int)$m['customer_visible']?'checked':'' ?>> Customer</label>
+<input name="milestones[<?= $mid ?>][notes]" value="<?= h((string)$m['notes']) ?>" placeholder="Optional note">
+<strong><?= money($m['amount']) ?></strong>
+<label class="check revision-delete"><input type="checkbox" name="delete_milestones[<?= $mid ?>]" value="1"> Remove</label>
+</div>
+<?php endforeach; ?>
+<?php if(!$data['milestones']): ?><div class="quote-payment-empty"><strong>No payment schedule yet</strong><span>Add one below if the customer quotation should define deposits or progress claims.</span></div><?php endif; ?>
+<div class="revision-payment-row revision-new-payment">
+<input name="new_milestone[label]" placeholder="New milestone (leave blank to skip)">
+<select name="new_milestone[calculation_type]"><option value="percentage">Percentage</option><option value="fixed">Fixed RM</option></select>
+<input type="number" min="0" step=".01" name="new_milestone[value]" value="0">
+<select name="new_milestone[due_trigger]"><option value="acceptance">On acceptance</option><option value="before_production">Before production</option><option value="before_delivery">Before delivery</option><option value="on_installation">On installation</option><option value="on_completion">On completion</option><option value="date">Specific date</option><option value="other" selected>Other</option></select>
+<input type="date" name="new_milestone[due_date]">
+<label class="check"><input type="checkbox" name="new_milestone[customer_visible]" value="1" checked> Customer</label>
+<input name="new_milestone[notes]" placeholder="Optional note">
+<span></span><span></span>
+</div>
+</div>
+<p class="muted tiny">If a schedule exists, its calculated amounts must equal the revised quotation total before the revision can be saved.</p>
+</section>
 
 <section class="staff-panel"><p class="eyebrow">Notes</p><h2>Revision notes & customer wording</h2><label>Revision work note<input name="revision_note" placeholder="What changed in this working revision?"></label><label>Customer notes<textarea name="customer_notes" rows="3"><?= h($q['customer_notes']) ?></textarea></label><?php if(can('quotation.view_cost')): ?><label>Internal notes<textarea name="internal_notes" rows="3"><?= h($q['internal_notes']) ?></textarea></label><?php endif; ?><label>Terms &amp; conditions<textarea name="terms_and_conditions" rows="5"><?= h($q['terms_and_conditions']) ?></textarea></label><div class="revision-save-bar"><div><strong>Current total <?= money($q['final_total']) ?></strong><small>Saving recalculates all totals using Stage 3 server pricing.</small></div><button class="btn primary" type="submit">Save revision changes</button></div></section>
 </form>

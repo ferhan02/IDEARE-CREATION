@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__.'/quotation-pricing.php';
+require_once __DIR__.'/quotation-payments.php';
 
 /**
  * IdeaRE Quotation Centre Stage 4 workflow helpers.
@@ -629,6 +630,10 @@ function quotation_workflow_replace_master_pricing(
         VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
     foreach($pricing['adjustments'] as $adjustment){
         $adjustmentStmt->execute([$quotationId,$adjustment['group_client_key']?($groupIds[$adjustment['group_client_key']]??null):null,$adjustment['section_client_key']?($sectionIds[$adjustment['section_client_key']]??null):null,$adjustment['quotation_item_client_key']?($itemIds[$adjustment['quotation_item_client_key']]??null):null,$adjustment['adjustment_type'],$adjustment['calculation_type'],$adjustment['direction'],$adjustment['value'],$adjustment['base_amount'],$adjustment['amount'],$adjustment['customer_visible'],$adjustment['requires_approval'],$adjustment['reason'],$staffId,$adjustment['sort_order']]);
+    }
+
+    if(array_key_exists('payment_milestones',$meta)){
+        quotation_payment_replace_master($pdo,$quotationId,(array)$meta['payment_milestones']);
     }
 
     $stmt=$pdo->prepare("UPDATE quotations SET

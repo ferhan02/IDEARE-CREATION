@@ -20,6 +20,7 @@ $quotationCreateAssets=$quotationCreateAssets??(
     str_ends_with($scriptPath,'/quotation-view.php') ||
     str_ends_with($scriptPath,'/quotation-revise.php') ||
     str_ends_with($scriptPath,'/quotation-version-view.php') ||
+    str_ends_with($scriptPath,'/quotation-handoff.php') ||
     str_ends_with($scriptPath,'/quotation-rate-book.php') ||
     str_ends_with($scriptPath,'/quotation-approval-rules.php') ||
     str_ends_with($scriptPath,'/quotation-settings.php')

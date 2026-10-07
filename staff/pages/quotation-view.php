@@ -111,6 +111,9 @@ $costStmt=$pdo->prepare('SELECT * FROM quotation_cost_components WHERE quotation
 $costStmt->execute([$id]);$costComponents=$costStmt->fetchAll(PDO::FETCH_ASSOC);
 $adjustStmt=$pdo->prepare('SELECT * FROM quotation_adjustments WHERE quotation_id=? ORDER BY sort_order,id');
 $adjustStmt->execute([$id]);$adjustments=$adjustStmt->fetchAll(PDO::FETCH_ASSOC);
+$milestoneStmt=$pdo->prepare('SELECT * FROM quotation_payment_milestones WHERE quotation_id=? ORDER BY sort_order,id');
+$milestoneStmt->execute([$id]);$paymentMilestones=$milestoneStmt->fetchAll(PDO::FETCH_ASSOC);
+$customerPaymentMilestones=array_values(array_filter($paymentMilestones,fn($m)=>(int)($m['customer_visible']??1)===1));
 $historyStmt=$pdo->prepare("SELECT h.*,CONCAT(s.first_name,' ',COALESCE(s.last_name,'')) changed_by_name FROM quotation_status_history h LEFT JOIN staff s ON s.id=h.changed_by WHERE h.quotation_id=? ORDER BY h.created_at DESC");
 $historyStmt->execute([$id]);$history=$historyStmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -156,7 +159,7 @@ require __DIR__.'/../../includes/staff/header.php';
 <main class="staff-content quotation-view-page quotation-view-stage4">
 <div class="page-head no-print">
     <div>
-        <p class="eyebrow">Quotation Centre · Stage 4</p>
+        <p class="eyebrow">Quotation Centre · Stage 5</p>
         <h1><?= h($q['quotation_code']) ?></h1>
         <p class="muted"><?= h($q['customer_name']) ?> · <?= h($q['project_name']?:$q['project_type']?:'Project') ?> · <?= h(trim($q['salesperson_name'])?:'Unassigned') ?></p>
     </div>
@@ -224,7 +227,10 @@ require __DIR__.'/../../includes/staff/header.php';
     <?php elseif($q['status']==='rejected'): ?>
         <div class="workflow-action-card workflow-danger-card"><div><strong>This revision was rejected</strong><span>The rejected snapshot remains in history. Start a new revision to continue negotiation.</span></div><?php if(can('quotation.revise')): ?><form method="post" class="workflow-inline-form"><?= csrf_field() ?><input type="hidden" name="action" value="start_revision"><input type="hidden" name="id" value="<?= $id ?>"><input name="revision_note" placeholder="What will change next?"><button class="btn primary">Start new revision</button></form><?php endif; ?></div>
     <?php elseif($q['status']==='accepted'): ?>
-        <div class="workflow-action-card workflow-success-card"><div><strong>Customer accepted revision v<?= $issuedVersion?(int)$issuedVersion['version_no']:'—' ?></strong><span>The accepted commercial snapshot is locked. Stage 5 will use this exact version for the final document and downstream hand-off.</span></div><?php if($issuedVersion): ?><a class="btn primary" href="<?= h(ideare_root_url('staff/pages/quotation-version-view.php?id='.(int)$issuedVersion['id'])) ?>">Open accepted version</a><?php endif; ?></div>
+        <div class="workflow-action-card workflow-success-card">
+            <div><strong>Customer accepted revision v<?= $issuedVersion?(int)$issuedVersion['version_no']:'—' ?></strong><span>The accepted commercial snapshot is locked. Use the Stage 5 hand-off to create the linked BOM, milestone invoices and move the accepted scope into operations without re-keying the quotation.</span></div>
+            <div class="actions"><?php if($issuedVersion): ?><a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-version-view.php?id='.(int)$issuedVersion['id'])) ?>">Customer PDF / accepted version</a><?php endif; ?><a class="btn primary" href="<?= h(ideare_root_url('staff/pages/quotation-handoff.php?id='.$id)) ?>">Open Stage 5 hand-off</a></div>
+        </div>
     <?php endif; ?>
 
     <?php if($pendingApprovals): ?>
@@ -261,7 +267,7 @@ require __DIR__.'/../../includes/staff/header.php';
                         <?php if($section['description']): ?><p class="quote-doc-section-desc"><?= nl2br(h($section['description'])) ?></p><?php endif; ?>
                         <table class="customer-quote-table stage3-quote-table"><thead><tr><th>Description</th><th>Qty</th><th>Unit</th><th>Unit Price</th><th>Amount</th></tr></thead><tbody>
                         <?php foreach($itemsBySection[(int)$section['id']]??[] as $item): if(!(int)$item['show_on_customer_quote']) continue; ?>
-                            <tr class="<?= (int)$item['is_foc']===1?'quote-foc-row':'' ?>"><td><b><?= h($item['description']) ?></b><?php if($item['measurement_text']): ?><small><?= h($item['measurement_text']) ?></small><?php endif; ?><?php if($item['notes']): ?><small><?= h($item['notes']) ?></small><?php endif; ?></td><td><?= h(rtrim(rtrim(number_format((float)$item['quantity'],3,'.',''),'0'),'.')) ?></td><td><?= h($item['unit']?:'—') ?></td><td><?= (int)$item['is_foc']===1?'<b class="quote-foc-label">FOC</b>':money($item['unit_price']) ?></td><td><?= (int)$item['is_foc']===1?'<b class="quote-foc-label">FOC</b>':money($item['amount']) ?></td></tr>
+                            <tr class="<?= (int)$item['is_foc']===1?'quote-foc-row':'' ?>"><td><b><?= h($item['description']) ?></b><?php if($item['measurement_text']): ?><small><?= h($item['measurement_text']) ?></small><?php endif; ?></td><td><?= h(rtrim(rtrim(number_format((float)$item['quantity'],3,'.',''),'0'),'.')) ?></td><td><?= h($item['unit']?:'—') ?></td><td><?= (int)$item['is_foc']===1?'<b class="quote-foc-label">FOC</b>':money($item['unit_price']) ?></td><td><?= (int)$item['is_foc']===1?'<b class="quote-foc-label">FOC</b>':money($item['amount']) ?></td></tr>
                         <?php endforeach; ?>
                         </tbody></table>
                     </div>
@@ -282,6 +288,15 @@ require __DIR__.'/../../includes/staff/header.php';
         <?php if((float)$q['tax_amount']>0): ?><div><span><?= h($q['tax_name']?:'Tax') ?> (<?= h($q['tax_percent']) ?>%)</span><strong><?= money($q['tax_amount']) ?></strong></div><?php endif; ?>
         <div class="final"><span>Total</span><strong><?= money($q['final_total']) ?></strong></div>
     </div>
+
+    <?php if($customerPaymentMilestones): ?>
+    <div class="quote-payment-document">
+        <div class="quote-payment-document-head"><div><small>Payment terms</small><strong>Payment schedule</strong></div><span><?= count($customerPaymentMilestones) ?> milestone<?= count($customerPaymentMilestones)===1?'':'s' ?></span></div>
+        <table class="quote-payment-document-table"><thead><tr><th>Stage</th><th>Due</th><th>Basis</th><th>Amount</th></tr></thead><tbody>
+        <?php foreach($customerPaymentMilestones as $m): ?><tr><td><b><?= h($m['label']) ?></b><?php if($m['notes']): ?><small><?= h($m['notes']) ?></small><?php endif; ?></td><td><?= h(quotation_payment_trigger_label($m['due_trigger'])) ?><?= $m['due_date']?' · '.h(date('j M Y',strtotime($m['due_date']))):'' ?></td><td><?= $m['calculation_type']==='percentage'?h(rtrim(rtrim(number_format((float)$m['value'],2,'.',''),'0'),'.')).'%':'Fixed' ?></td><td><strong><?= money($m['amount']) ?></strong></td></tr><?php endforeach; ?>
+        </tbody></table>
+    </div>
+    <?php endif; ?>
 
     <?php if($q['customer_notes']): ?><div class="quote-note-block"><b>Notes</b><p><?= nl2br(h($q['customer_notes'])) ?></p></div><?php endif; ?>
     <?php if($q['terms_and_conditions']): ?><div class="quote-note-block terms"><b>Terms &amp; conditions</b><p><?= nl2br(h($q['terms_and_conditions'])) ?></p></div><?php endif; ?>

@@ -475,6 +475,7 @@ require __DIR__.'/../../includes/staff/header.php';
                             </td>
 
                             <td class="quotation-row-actions">
+                                <?php if($q['status']==='accepted' && !empty($q['accepted_version_id'])): ?><a class="btn primary" href="<?= h(ideare_root_url('staff/pages/quotation-handoff.php?id='.(int)$q['id'])) ?>">Hand-off</a><?php endif; ?>
                                 <a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-view.php?id='.(int)$q['id'])) ?>">Open</a>
                             </td>
                         </tr>
@@ -546,11 +547,11 @@ require __DIR__.'/../../includes/staff/header.php';
             </section>
 
             <section class="staff-panel quotation-stage-card">
-                <p class="eyebrow">Stage 4</p>
-                <h2>Revision workflow is live</h2>
+                <p class="eyebrow">Stage 5 complete</p>
+                <h2>Quotation lifecycle is connected</h2>
                 <p class="muted">
-                    Drafts can now be frozen into immutable revisions, routed through commercial approvals, issued as an exact version
-                    and accepted or rejected by the customer without overwriting quotation history.
+                    Accepted revisions now become the operational baseline: the frozen customer document keeps its payment schedule,
+                    and the Stage 5 hand-off can create linked milestone invoices and a BOM without re-keying the accepted quotation.
                 </p>
             </section>
         </aside>
