@@ -13,7 +13,7 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
         $keys=[
             'quotation_default_markup_percent','quotation_default_overhead_percent','quotation_default_contingency_percent',
             'quotation_default_tax_percent','quotation_valid_days','quotation_prefix','quotation_default_currency',
-            'quotation_require_price_override_reason','quotation_foc_requires_reason','quotation_package_adjustment_requires_approval'
+            'quotation_require_price_override_reason','quotation_foc_requires_reason','quotation_package_adjustment_requires_approval','quotation_require_approval_for_non_approvers'
         ];
         foreach($keys as $key){
             if(!array_key_exists($key,$_POST)) continue;
@@ -45,14 +45,15 @@ $settings=[];
 foreach($pdo->query("SELECT setting_key,setting_value FROM system_settings WHERE setting_key LIKE 'quotation_%'") as $r){$settings[$r['setting_key']]=$r['setting_value'];}
 $presets=$pdo->query('SELECT * FROM quotation_charge_presets ORDER BY sort_order,charge_name')->fetchAll();
 $rateCount=(int)$pdo->query('SELECT COUNT(*) FROM quotation_rate_items WHERE is_active=1')->fetchColumn();
+$ruleCount=(int)$pdo->query('SELECT COUNT(*) FROM quotation_approval_rules WHERE is_active=1')->fetchColumn();
 
 $pageTitle='Quotation Settings';
 require __DIR__.'/../../includes/staff/header.php';
 ?>
 <main class="staff-content">
 <div class="page-head">
-    <div><p class="eyebrow">Quotation Centre · Stage 3</p><h1>Quotation settings</h1><p class="muted">Global commercial defaults, charge presets and access to the central Rate Book.</p></div>
-    <div class="actions"><a class="btn primary" href="<?= h(ideare_root_url('staff/admin/quotation-rate-book.php')) ?>">Open Rate Book · <?= $rateCount ?> active</a><a class="btn" href="<?= h(ideare_root_url('staff/pages/quotation-centre.php')) ?>">Quotation Centre</a></div>
+    <div><p class="eyebrow">Quotation Centre · Stage 4</p><h1>Quotation settings</h1><p class="muted">Commercial defaults, workflow policy, charge presets and controlled approval rules.</p></div>
+    <div class="actions"><a class="btn" href="<?= h(ideare_root_url('staff/admin/quotation-rate-book.php')) ?>">Rate Book · <?= $rateCount ?> active</a><a class="btn" href="<?= h(ideare_root_url('staff/admin/quotation-approval-rules.php')) ?>">Approval rules · <?= $ruleCount ?> active</a><a class="btn" href="<?= h(ideare_root_url('staff/admin/approvals.php')) ?>">Approval queue</a><a class="btn primary" href="<?= h(ideare_root_url('staff/pages/quotation-centre.php')) ?>">Quotation Centre</a></div>
 </div>
 
 <div class="split-grid">
@@ -65,7 +66,12 @@ require __DIR__.'/../../includes/staff/header.php';
         <div class="form-grid"><label>Default validity (days)<input name="quotation_valid_days" type="number" min="1" value="<?= h($settings['quotation_valid_days']??'30') ?>"></label><label>Quotation prefix<input name="quotation_prefix" value="<?= h($settings['quotation_prefix']??'QT') ?>"></label><label>Currency<input name="quotation_default_currency" maxlength="3" value="<?= h($settings['quotation_default_currency']??'MYR') ?>"></label></div>
         <input type="hidden" name="quotation_require_price_override_reason" value="0"><label class="check"><input type="checkbox" name="quotation_require_price_override_reason" value="1" <?= ($settings['quotation_require_price_override_reason']??'1')==='1'?'checked':'' ?>> Require a reason when staff override a Rate Book selling price</label>
         <input type="hidden" name="quotation_foc_requires_reason" value="0"><label class="check"><input type="checkbox" name="quotation_foc_requires_reason" value="1" <?= ($settings['quotation_foc_requires_reason']??'1')==='1'?'checked':'' ?>> Require a reason for every FOC quotation line</label>
-        <input type="hidden" name="quotation_package_adjustment_requires_approval" value="0"><label class="check"><input type="checkbox" name="quotation_package_adjustment_requires_approval" value="1" <?= ($settings['quotation_package_adjustment_requires_approval']??'1')==='1'?'checked':'' ?>> Route package/commercial adjustments through approval rules in Stage 4</label>
+        <div class="quote-workflow-settings">
+            <p class="eyebrow">Stage 4 workflow policy</p>
+            <input type="hidden" name="quotation_require_approval_for_non_approvers" value="0"><label class="check"><input type="checkbox" name="quotation_require_approval_for_non_approvers" value="1" <?= ($settings['quotation_require_approval_for_non_approvers']??'1')==='1'?'checked':'' ?>> Staff without quotation approval permission must obtain management approval before issue</label>
+            <input type="hidden" name="quotation_package_adjustment_requires_approval" value="0"><label class="check"><input type="checkbox" name="quotation_package_adjustment_requires_approval" value="1" <?= ($settings['quotation_package_adjustment_requires_approval']??'1')==='1'?'checked':'' ?>> Require approval whenever package/commercial pricing changes the itemized selling value</label>
+            <p class="muted tiny">Approved revisions are always immutable, and customer decisions are always tied to the exact issued revision. Discount, low-margin, package, FOC, price-override and high-value thresholds are managed in Approval Rules.</p>
+        </div>
         <button class="btn primary">Save settings</button>
     </form>
 </section>

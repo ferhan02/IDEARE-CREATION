@@ -7,9 +7,9 @@ $staff=current_staff();
 $pageTitle='Quotation Centre';
 
 /*
- * Quotation Centre dashboard/register. Stage 3 adds section-based scope, the
- * Rate Book, package/FOC pricing and server-verified internal costing while
- * revisions and approval automation remain for Stage 4.
+ * Quotation Centre dashboard/register. Stage 4 adds immutable quotation
+ * revisions, controlled approval routing, exact-version issue and customer
+ * acceptance while retaining the Stage 3 server-authoritative pricing model.
  */
 $requiredV2Tables=[
     'quotation_groups',
@@ -17,6 +17,7 @@ $requiredV2Tables=[
     'quotation_rate_items',
     'quotation_adjustments',
     'quotation_cost_components',
+    'quotation_version_events',
 ];
 
 foreach($requiredV2Tables as $requiredTable){
@@ -28,7 +29,7 @@ foreach($requiredV2Tables as $requiredTable){
                 <p class="eyebrow">Database update required</p>
                 <h1>Quotation Centre V2 is not ready yet</h1>
                 <p class="muted">
-                    Apply the Quotation Centre V2 SQL migration to <code>ideare_db</code>, then reload this page.
+                    Apply the Quotation Centre V2 migration and the Stage 4 workflow SQL to <code>ideare_db</code>, then reload this page.
                     Existing quotation data will remain intact.
                 </p>
             </section>
@@ -400,7 +401,7 @@ require __DIR__.'/../../includes/staff/header.php';
                         $projectName=$q['project_name']?:($q['linked_project_name']??'');
                         $customerCode=$q['customer_code_snapshot']?:($q['crm_customer_code']??'');
                         $versionNo=max(1,(int)$q['current_version_no']);
-                        $versionCount=max((int)$q['version_count'],$versionNo);
+                        $versionCount=(int)$q['version_count'];
                         ?>
                         <tr class="quotation-row <?= ($q['pending_approval_count']??0)>0?'has-pending-approval':'' ?>">
                             <td>
@@ -433,8 +434,8 @@ require __DIR__.'/../../includes/staff/header.php';
                             </td>
 
                             <td>
-                                <b>v<?= $versionNo ?></b>
-                                <small><?= $versionCount ?> saved snapshot<?= $versionCount===1?'':'s' ?></small>
+                                <b>v<?= $versionNo ?> <?= $q['status']==='draft'?'working':'' ?></b>
+                                <small><?= $versionCount ?> frozen snapshot<?= $versionCount===1?'':'s' ?></small>
                                 <small><?= (int)$q['section_count'] ?> section<?= (int)$q['section_count']===1?'':'s' ?></small>
                             </td>
 
@@ -545,11 +546,11 @@ require __DIR__.'/../../includes/staff/header.php';
             </section>
 
             <section class="staff-panel quotation-stage-card">
-                <p class="eyebrow">Stage 3</p>
-                <h2>Scope &amp; pricing is live</h2>
+                <p class="eyebrow">Stage 4</p>
+                <h2>Revision workflow is live</h2>
                 <p class="muted">
-                    New quotations now support customer-facing sections, Rate Book pricing, multiple measurement methods,
-                    FOC lines, package totals and detailed internal cost tracking. Revisions and approval automation come next.
+                    Drafts can now be frozen into immutable revisions, routed through commercial approvals, issued as an exact version
+                    and accepted or rejected by the customer without overwriting quotation history.
                 </p>
             </section>
         </aside>

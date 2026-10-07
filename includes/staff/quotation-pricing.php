@@ -102,6 +102,26 @@ function quotation_cost_category_for_item(string $itemType): string
     };
 }
 
+function quotation_cost_category_for_charge(string $chargeCategory): string
+{
+    return match($chargeCategory){
+        'labour'=>'labour',
+        'installation'=>'installation',
+        'delivery'=>'delivery',
+        'transport'=>'transport',
+        'subcontractor'=>'subcontractor',
+        'waste'=>'waste',
+        'consumables'=>'consumables',
+        'overhead'=>'overhead',
+        'contingency'=>'contingency',
+        'machine'=>'machine',
+        'disposal'=>'disposal',
+        'parking_toll'=>'parking_toll',
+        'measurement','design'=>'site_cost',
+        default=>'other',
+    };
+}
+
 function quotation_rate_items_by_id(PDO $pdo,array $ids): array
 {
     $ids=array_values(array_unique(array_filter(array_map('intval',$ids),fn($id)=>$id>0)));
