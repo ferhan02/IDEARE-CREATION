@@ -52,6 +52,7 @@ $quotationCreateAssets=$quotationCreateAssets??(
 <?php endif; ?>
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/theme-icons.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/global-ui.css')) ?>">
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/logo-theme.css')) ?>">
 </head>
 <body>
 <div class="app-shell">

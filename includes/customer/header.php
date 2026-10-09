@@ -18,6 +18,7 @@ $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/ui-polish.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/theme-icons.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/global-ui.css">
+<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/logo-theme.css">
 </head>
 <body>
 <header class="site-header">

@@ -1,0 +1,66 @@
+/* IDEARE logo sizing + theme compatibility
+   Keeps the customer navbar at its intended compact height.
+*/
+
+.brand-logo-image {
+    display: block;
+    object-fit: contain;
+    background: transparent !important;
+    filter: invert(1);
+    transition: filter .18s ease, opacity .18s ease;
+}
+
+/* Customer navbar: the logo fits the navbar instead of sizing the navbar. */
+.site-header .nav-wrap {
+    height: 70px;
+    min-height: 70px;
+}
+
+.site-header .logo-link {
+    height: 70px;
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.site-header .site-brand-logo {
+    width: auto !important;
+    height: 34px !important;
+    max-width: 158px !important;
+    max-height: 34px !important;
+}
+
+/* The staff aside is always dark, so keep the supplied light mark there. */
+.sidebar .brand-logo-image {
+    filter: none;
+}
+
+/* Dark mode uses the original light/white logo everywhere. */
+html[data-theme="dark"] .brand-logo-image {
+    filter: none;
+}
+
+@media (max-width: 900px) {
+    .site-header .nav-wrap,
+    .site-header .logo-link {
+        height: 64px;
+        min-height: 64px;
+    }
+
+    .site-header .site-brand-logo {
+        height: 30px !important;
+        max-height: 30px !important;
+        max-width: 142px !important;
+    }
+
+    .site-nav {
+        top: 64px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .brand-logo-image {
+        transition: none;
+    }
+}
