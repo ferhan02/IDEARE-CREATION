@@ -15,23 +15,34 @@ function nav_active(string $needle):string
         <span>Staff Portal</span>
     </div>
 
-    <div class="sidebar-nav-search" role="search">
+    <form
+        class="sidebar-nav-search sidebar-global-search"
+        role="search"
+        action="<?=h(ideare_root_url('staff/pages/search.php'))?>"
+        method="get"
+    >
         <div class="sidebar-nav-search-box">
             <svg class="sidebar-nav-search-icon" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
             <input
-                id="sidebarNavSearch"
+                id="sidebarGlobalSearch"
+                name="q"
                 type="search"
-                placeholder="Find a page..."
-                aria-label="Filter staff navigation"
+                value="<?=h(trim((string)($_GET['q']??'')))?>"
+                placeholder="Search everything..."
+                aria-label="Search customers, projects, catalogue and other records"
                 autocomplete="off"
                 spellcheck="false"
             >
-            <button id="sidebarNavSearchClear" class="sidebar-nav-search-clear" type="button" aria-label="Clear navigation search" title="Clear search">×</button>
+            <button class="sidebar-nav-search-submit" type="submit" aria-label="Run global search" title="Search everything">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
         </div>
-        <div id="sidebarNavSearchHint" class="sidebar-nav-search-hint" aria-live="polite"></div>
-    </div>
+        <div class="sidebar-global-search-hint">Customers, projects, quotations, materials and more</div>
+    </form>
 
     <nav id="staffNavigation">
         <p class="nav-label">Overview</p>
@@ -83,11 +94,6 @@ function nav_active(string $needle):string
         <?php if(can('attendance.view_own')):?><a href="<?=h(ideare_root_url('staff/pages/attendance.php'))?>">Attendance</a><?php endif?>
         <?php if(can('leave.view_own')):?><a href="<?=h(ideare_root_url('staff/pages/leave.php'))?>">Leave</a><?php endif?>
         <a href="<?=h(ideare_root_url('staff/pages/profile.php'))?>">My Profile</a>
-
-        <div id="sidebarNavNoResults" class="sidebar-nav-no-results" hidden>
-            <strong>No page found</strong>
-            <span>Try another keyword.</span>
-        </div>
     </nav>
 
     <div class="sidebar-footer">
@@ -97,83 +103,8 @@ function nav_active(string $needle):string
 
 <script>
 (function () {
-    const input = document.getElementById('sidebarNavSearch');
-    const clearButton = document.getElementById('sidebarNavSearchClear');
-    const nav = document.getElementById('staffNavigation');
-    const emptyState = document.getElementById('sidebarNavNoResults');
-    const hint = document.getElementById('sidebarNavSearchHint');
-
-    if (!input || !nav) return;
-
-    const links = Array.from(nav.querySelectorAll(':scope > a'));
-    const labels = Array.from(nav.querySelectorAll(':scope > .nav-label'));
-
-    const normalise = value => String(value || '')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, ' ')
-        .trim();
-
-    function applyFilter() {
-        const query = normalise(input.value);
-        let visibleCount = 0;
-
-        links.forEach(link => {
-            const haystack = normalise(link.textContent + ' ' + (link.dataset.search || ''));
-            const matches = !query || haystack.includes(query);
-            link.hidden = !matches;
-            if (matches) visibleCount++;
-        });
-
-        labels.forEach(label => {
-            let sibling = label.nextElementSibling;
-            let hasVisibleLink = false;
-
-            while (sibling && !sibling.classList.contains('nav-label')) {
-                if (sibling.tagName === 'A' && !sibling.hidden) {
-                    hasVisibleLink = true;
-                    break;
-                }
-                sibling = sibling.nextElementSibling;
-            }
-
-            label.hidden = !hasVisibleLink;
-        });
-
-        if (emptyState) emptyState.hidden = !query || visibleCount > 0;
-        if (clearButton) clearButton.classList.toggle('visible', Boolean(query));
-
-        if (hint) {
-            hint.textContent = query
-                ? (visibleCount === 1 ? '1 page found' : visibleCount + ' pages found')
-                : '';
-        }
-    }
-
-    input.addEventListener('input', applyFilter);
-
-    if (clearButton) {
-        clearButton.addEventListener('click', function () {
-            input.value = '';
-            applyFilter();
-            input.focus();
-        });
-    }
-
-    input.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            input.value = '';
-            applyFilter();
-            input.blur();
-        }
-
-        if (event.key === 'Enter') {
-            const firstVisible = links.find(link => !link.hidden);
-            if (firstVisible && input.value.trim()) {
-                event.preventDefault();
-                firstVisible.click();
-            }
-        }
-    });
+    const input = document.getElementById('sidebarGlobalSearch');
+    if (!input) return;
 
     document.addEventListener('keydown', function (event) {
         const target = event.target;
@@ -182,6 +113,7 @@ function nav_active(string $needle):string
         if (!typing && event.key === '/') {
             event.preventDefault();
             input.focus();
+            input.select();
         }
     });
 })();

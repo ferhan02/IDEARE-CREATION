@@ -51,6 +51,7 @@ $quotationCreateAssets=$quotationCreateAssets??(
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/task-management.css')) ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/theme-icons.css')) ?>">
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/global-ui.css')) ?>">
 </head>
 <body>
 <div class="app-shell">
@@ -60,7 +61,7 @@ $quotationCreateAssets=$quotationCreateAssets??(
 <header class="topbar">
     <button id="menuBtn" class="menu-btn" aria-label="Toggle navigation">☰</button>
     <form action="<?= h(ideare_root_url('staff/pages/search.php')) ?>" method="get" class="top-search">
-        <input name="q" placeholder="Search customers, projects..." aria-label="Global search">
+        <input name="q" placeholder="Search customers, projects, catalogue..." aria-label="Global search">
     </form>
     <div class="topbar-spacer"></div>
     <a class="top-icon" href="<?= h(ideare_root_url('staff/pages/notifications.php')) ?>">Notifications</a>

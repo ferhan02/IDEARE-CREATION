@@ -14,6 +14,7 @@ $flash = pull_flash();
 <link rel="stylesheet" href="<?= h(base_url('assets/css/staff.css')) ?>">
 <link rel="stylesheet" href="<?= h(base_url('assets/css/ui-polish.css')) ?>">
 <link rel="stylesheet" href="<?= h(base_url('assets/css/theme-icons.css')) ?>">
+<link rel="stylesheet" href="<?= h(base_url('assets/css/global-ui.css')) ?>">
 </head>
 <body>
 <div class="app-shell">

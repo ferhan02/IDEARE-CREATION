@@ -19,6 +19,7 @@ $customerStaffSignedIn = !empty($_SESSION['staff_id']);
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/site.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/ui-polish.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/theme-icons.css">
+<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/global-ui.css">
 </head>
 <body>
 <header class="site-header">
