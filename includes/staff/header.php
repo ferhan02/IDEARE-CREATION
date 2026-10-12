@@ -4,6 +4,7 @@ $staff=current_staff();
 $pageTitle=$pageTitle??'IDEARE Staff Portal';
 $flash=pull_flash();
 $taskManagementAssets=$taskManagementAssets??false;
+$pageStyles=$pageStyles??[];
 
 $scriptPath=str_replace('\\','/',$_SERVER['PHP_SELF']??'');
 $costingQuotationAssets=$costingQuotationAssets??(
@@ -53,6 +54,9 @@ $quotationCreateAssets=$quotationCreateAssets??(
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/theme-icons.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/global-ui.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/logo-theme.css')) ?>">
+<?php foreach($pageStyles as $extraStyle): ?>
+<link rel="stylesheet" href="<?= h(ideare_root_url(ltrim($extraStyle,'/'))) ?>">
+<?php endforeach; ?>
 </head>
 <body>
 <div class="app-shell">
