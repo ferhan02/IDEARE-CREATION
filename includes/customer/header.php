@@ -5,23 +5,27 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 $pageTitle = $pageTitle ?? 'IDEARE';
 $pageStyles = $pageStyles ?? [];
-$customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/public/pages/') ? '../../' :
-                (str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/designer/') ? '../' : '');
+// Preserve an explicit relative prefix; pages/ is one level below the project root.
+$currentScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
+$customerRoot = $customerRoot ?? (
+    str_contains($currentScript, '/public/pages/') ? '../../' :
+    (str_contains($currentScript, '/designer/') || str_contains($currentScript, '/pages/') ? '../' : '')
+);
 ?>
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title><?= htmlspecialchars($pageTitle) ?></title>
+<title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
 <script>(function(){try{document.documentElement.dataset.theme=localStorage.getItem('ideare-theme')==='dark'?'dark':'light'}catch(e){document.documentElement.dataset.theme='light'}})();</script>
-<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/site.css">
-<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/ui-polish.css">
-<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/theme-icons.css">
-<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/global-ui.css">
-<link rel="stylesheet" href="<?= $customerRoot ?>assets/css/logo-theme.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/site.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/ui-polish.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/theme-icons.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/global-ui.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/logo-theme.css">
 <?php foreach ($pageStyles as $style): ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot . ltrim($style, '/')) ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot . ltrim($style, '/'), ENT_QUOTES, 'UTF-8') ?>">
 <?php endforeach; ?>
 </head>
 <body>
