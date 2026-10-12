@@ -15,30 +15,12 @@ function nav_active(string $needle):string
         <span>Staff Portal</span>
     </div>
 
-    <form
-        class="sidebar-nav-search sidebar-global-search"
-        role="search"
-        action="<?=h(ideare_root_url('staff/pages/search.php'))?>"
-        method="get"
-    >
+    <form class="sidebar-nav-search sidebar-global-search" role="search" action="<?=h(ideare_root_url('staff/pages/search.php'))?>" method="get">
         <div class="sidebar-nav-search-box">
-            <svg class="sidebar-nav-search-icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <input
-                id="sidebarGlobalSearch"
-                name="q"
-                type="search"
-                value="<?=h(trim((string)($_GET['q']??'')))?>"
-                placeholder="Search everything..."
-                aria-label="Search customers, projects, catalogue and other records"
-                autocomplete="off"
-                spellcheck="false"
-            >
+            <svg class="sidebar-nav-search-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.35-4.35m1.35-5.65a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input id="sidebarGlobalSearch" name="q" type="search" value="<?=h(trim((string)($_GET['q']??'')))?>" placeholder="Search everything..." aria-label="Search customers, projects, catalogue and other records" autocomplete="off" spellcheck="false">
             <button class="sidebar-nav-search-submit" type="submit" aria-label="Run global search" title="Search everything">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M5 12h14m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
         </div>
         <div class="sidebar-global-search-hint">Customers, projects, quotations, materials and more</div>
@@ -67,7 +49,8 @@ function nav_active(string $needle):string
 
         <p class="nav-label">Procurement &amp; Workshop</p>
         <a href="<?=h(ideare_root_url('staff/pages/materials.php'))?>">Material Catalogue</a>
-        <a href="<?=h(ideare_root_url('material-catalogue.php'))?>">HPL Finish Catalogue ↗</a>
+        <a href="<?=h(ideare_root_url('hpl-catalogue.php'))?>">HPL Catalogue ↗</a>
+        <a href="<?=h(ideare_root_url('stone-catalogue.php'))?>">Stone Catalogue ↗</a>
         <a href="<?=h(ideare_root_url('staff/pages/suppliers.php'))?>">Suppliers</a>
         <a href="<?=h(ideare_root_url('staff/pages/purchase-orders.php'))?>">Purchase Orders</a>
         <a href="<?=h(ideare_root_url('staff/pages/inventory.php'))?>">Inventory</a>
@@ -77,9 +60,7 @@ function nav_active(string $needle):string
 
         <p class="nav-label">Work</p>
         <a href="<?=h(ideare_root_url('staff/pages/tasks.php'))?>">My Tasks</a>
-        <?php if(can_manage_tasks()): ?>
-            <a href="<?=h(ideare_root_url('staff/admin/task-management.php'))?>">Task Management</a>
-        <?php endif; ?>
+        <?php if(can_manage_tasks()): ?><a href="<?=h(ideare_root_url('staff/admin/task-management.php'))?>">Task Management</a><?php endif; ?>
         <a href="<?=h(ideare_root_url('staff/pages/calendar.php'))?>">Staff Calendar</a>
         <a href="<?=h(ideare_root_url('staff/pages/warranty.php'))?>">Warranty / After-Sales</a>
 
@@ -96,20 +77,16 @@ function nav_active(string $needle):string
         <a href="<?=h(ideare_root_url('staff/pages/profile.php'))?>">My Profile</a>
     </nav>
 
-    <div class="sidebar-footer">
-        <a href="<?=h(ideare_root_url('auth/logout.php'))?>">Sign out</a>
-    </div>
+    <div class="sidebar-footer"><a href="<?=h(ideare_root_url('auth/logout.php'))?>">Sign out</a></div>
 </aside>
 
 <script>
 (function () {
     const input = document.getElementById('sidebarGlobalSearch');
     if (!input) return;
-
     document.addEventListener('keydown', function (event) {
         const target = event.target;
         const typing = target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable;
-
         if (!typing && event.key === '/') {
             event.preventDefault();
             input.focus();
