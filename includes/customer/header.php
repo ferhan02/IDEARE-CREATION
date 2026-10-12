@@ -4,6 +4,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 $pageTitle = $pageTitle ?? 'IDEARE';
+$pageStyles = $pageStyles ?? [];
 $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/public/pages/') ? '../../' :
                 (str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '/designer/') ? '../' : '');
 ?>
@@ -19,6 +20,9 @@ $customerRoot = str_contains(str_replace('\\','/',$_SERVER['PHP_SELF'] ?? ''), '
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/theme-icons.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/global-ui.css">
 <link rel="stylesheet" href="<?= $customerRoot ?>assets/css/logo-theme.css">
+<?php foreach ($pageStyles as $style): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot . ltrim($style, '/')) ?>">
+<?php endforeach; ?>
 </head>
 <body>
 <header class="site-header">
