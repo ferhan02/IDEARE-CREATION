@@ -24,6 +24,7 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/theme-icons.css">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/global-ui.css">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/logo-theme.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot) ?>assets/css/where-we-are.css">
 <?php foreach ($pageStyles as $style): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot . ltrim($style, '/'), ENT_QUOTES, 'UTF-8') ?>">
 <?php endforeach; ?>

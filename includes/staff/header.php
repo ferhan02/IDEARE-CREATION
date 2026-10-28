@@ -5,7 +5,6 @@ $pageTitle=$pageTitle??'IDEARE Staff Portal';
 $flash=pull_flash();
 $taskManagementAssets=$taskManagementAssets??false;
 $pageStyles=$pageStyles??[];
-
 $scriptPath=str_replace('\\','/',$_SERVER['PHP_SELF']??'');
 $costingQuotationAssets=$costingQuotationAssets??(
     str_contains($scriptPath,'/quotation-') ||
@@ -54,6 +53,10 @@ $quotationCreateAssets=$quotationCreateAssets??(
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/theme-icons.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/global-ui.css')) ?>">
 <link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/logo-theme.css')) ?>">
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/staff-dark-fixes.css')) ?>">
+<?php if(str_contains($scriptPath,'quotation-')): ?>
+<script defer src="<?= h(ideare_root_url('assets/js/quotation-no-approvals.js')) ?>"></script>
+<?php endif; ?>
 <?php foreach($pageStyles as $extraStyle): ?>
 <link rel="stylesheet" href="<?= h(ideare_root_url(ltrim($extraStyle,'/'))) ?>">
 <?php endforeach; ?>
@@ -65,9 +68,11 @@ $quotationCreateAssets=$quotationCreateAssets??(
 <?php if($staff): ?>
 <header class="topbar">
     <button id="menuBtn" class="menu-btn" aria-label="Toggle navigation">☰</button>
+    <?php if(can('search.use')): ?>
     <form action="<?= h(ideare_root_url('staff/pages/search.php')) ?>" method="get" class="top-search">
         <input name="q" placeholder="Search customers, projects, catalogue..." aria-label="Global search">
     </form>
+    <?php endif; ?>
     <div class="topbar-spacer"></div>
     <a class="top-icon" href="<?= h(ideare_root_url('staff/pages/notifications.php')) ?>">Notifications</a>
     <a class="top-icon" href="<?= h(ideare_root_url('index.php')) ?>">Customer Site</a>
