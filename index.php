@@ -80,6 +80,9 @@ require __DIR__.'/includes/customer/header.php';
                 <p>The same project can continue from design into quotation, material planning, production and installation without starting over.</p>
             </article>
         </div>
+        <div class="actions section-actions">
+            <a class="btn primary" href="public/pages/about.php" aria-label="See more about IDEARE">See More <span aria-hidden="true">→</span></a>
+        </div>
     </div>
 </section>
 
