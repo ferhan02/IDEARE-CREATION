@@ -40,7 +40,7 @@ $customerRoot = $customerRoot ?? (
 
     <nav class="site-nav" aria-label="Customer navigation">
       <a href="<?= $customerRoot ?>index.php">Home</a>
-      <a href="<?= $customerRoot ?>index.php#about">About</a>
+      <a href="<?= $customerRoot ?>public/pages/about.php">About</a>
       <a href="<?= $customerRoot ?>public/pages/services.php">Services</a>
       <a href="<?= $customerRoot ?>index.php#portfolio">Portfolio</a>
       <a href="<?= $customerRoot ?>material-catalogue.php">Materials</a>
