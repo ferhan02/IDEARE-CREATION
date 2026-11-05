@@ -1,0 +1,82 @@
+/* IDEARE TABLET 768–1199px: editorial two-column content and a touch-first nav.
+   One shared source image is cropped differently, never duplicated. */
+html[data-ideare-page] { --ideare-nav-height: 70px; }
+html[data-ideare-page] .site-wrap { width: min(calc(100% - 56px), 1080px); }
+html[data-ideare-page] .nav-wrap { min-height: var(--ideare-nav-height); }
+html[data-ideare-page] .nav-toggle {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  width: 46px; height: 44px; border-radius: 11px;
+  background: var(--paper); color: var(--ink); border: 1px solid var(--line);
+}
+html[data-ideare-page] .site-nav {
+  display: none !important; position: absolute; top: calc(100% + 1px);
+  left: 26px; right: 26px; z-index: 70; flex-direction: column;
+  align-items: stretch; gap: 0; padding: 13px 17px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 0 0 18px 18px;
+  box-shadow: 0 24px 44px rgba(0,0,0,.18);
+}
+html[data-ideare-page] .site-nav.open { display: flex !important; }
+html[data-ideare-page] .site-nav a { display: flex; align-items: center; min-height: 49px; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+html[data-ideare-page] .site-theme-toggle { margin: 10px 0 5px; }
+html[data-ideare-page="home"] .home-hero {
+  min-height: max(630px,calc(92svh - 70px));
+  background-position: center,center,61% center;
+}
+html[data-ideare-page="home"] .home-hero-inner { padding: 110px 0 140px; }
+html[data-ideare-page="home"] .home-hero h1 { font-size: clamp(62px,7.7vw,89px); }
+html[data-ideare-page="home"] .home-studio { min-height: 720px; padding-block: 135px 100px; }
+html[data-ideare-page="home"] .studio-content { grid-template-columns: minmax(0,1.2fr) minmax(225px,.7fr); gap: 28px; }
+html[data-ideare-page="home"] .studio-story h2 { font-size: clamp(51px,6.7vw,75px); }
+html[data-ideare-page="home"] .studio-established { max-width: 270px; padding: 23px; }
+html[data-ideare-page="home"] .studio-established strong { font-size: clamp(58px,7vw,83px); }
+html[data-ideare-page="home"] .service-story-opening-grid { grid-template-columns: minmax(0,1.2fr) minmax(230px,.8fr); gap: 28px; }
+html[data-ideare-page="home"] .service-story-opening h2 { font-size: clamp(53px,6vw,76px); }
+/* A shorter sticky journey than desktop. */
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-runway { height: 350svh; }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-sticky {
+  top: var(--ideare-nav-height); height: calc(100svh - var(--ideare-nav-height));
+}
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-stage-inner,
+html[data-ideare-page="home"] .service-story-stage-inner {
+  display: grid; grid-template-columns: minmax(0,.93fr) minmax(0,1.07fr);
+  gap: 22px; width: calc(100% - 68px); min-height: 0; height: 100%;
+  padding: 74px 0 93px;
+}
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-copy,
+html[data-ideare-page="home"] .service-story-copy { position: relative; inset: auto; z-index: 3; color: var(--ss-text); }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-photo,
+html[data-ideare-page="home"] .service-story-photo {
+  position: relative; inset: auto; width: 100%; height: 100%;
+  min-height: min(430px, 50svh); border: 1px solid var(--ss-line);
+}
+html[data-ideare-page="home"] .service-story-copy h3 { font-size: clamp(32px,3.9vw,51px); color: var(--ss-text); text-shadow: none; }
+html[data-ideare-page="home"] .service-story-copy h3 em { color: var(--ss-accent); }
+html[data-ideare-page="home"] .service-story-description,
+html[data-ideare-page="home"] .service-story-keywords { color: var(--ss-soft); text-shadow: none; }
+html[data-ideare-page="home"] .service-story-index { font-size: clamp(66px,7vw,94px); color: color-mix(in srgb,var(--ss-text) 13%,transparent); }
+html[data-ideare-page="home"] .service-story-category { color: var(--ss-accent); }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-topline { color: var(--ss-soft); text-shadow: none; }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-nav { left: 34px; right: 34px; gap: 10px; }
+html[data-ideare-page="home"] .service-story-nav-item { color: var(--ss-soft) !important; }
+html[data-ideare-page="home"] .service-story-nav-item[aria-current="step"] { color: var(--ss-text) !important; }
+html[data-ideare-page="home"] .service-story-nav-name { display: none; }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-scroll-note { display: none; }
+html[data-ideare-page="home"] .home-designer-grid { grid-template-columns: minmax(0,1fr) minmax(270px,.9fr); gap: 25px; }
+html[data-ideare-page="home"] .home-designer-copy h2 { font-size: clamp(43px,5vw,60px); }
+html[data-ideare-page="home"] .card-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+html[data-ideare-page="home"] .contact-grid { grid-template-columns: 1fr; }
+html[data-ideare-page="about"] .ia-hero-layout { grid-template-columns: minmax(0,1.1fr) minmax(230px,.75fr); gap: 30px; }
+html[data-ideare-page="about"] .ia-hero h1 { font-size: clamp(52px,6vw,77px); }
+html[data-ideare-page="about"] .ia-capability-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+html[data-ideare-page="services"] .services-hero-grid { grid-template-columns: 1fr 1fr; gap: 30px; }
+html[data-ideare-page="services"] .services-phase-nav { overflow-x: auto; scroll-snap-type: x proximity; }
+html[data-ideare-page="services"] .services-phase-nav a { scroll-snap-align: start; }
+html[data-ideare-page="designer"] .id3-room-layout,
+html[data-ideare-page="designer"] .id3-design-grid { display: grid; grid-template-columns: minmax(0,1fr); }
+html[data-ideare-page="designer"] .id3-inspector { position: static; max-height: none; overflow: visible; }
+html[data-ideare-page="designer"] .id3-canvas-wrap { height: min(60svh,570px); }
+@media (max-height: 720px) {
+  html[data-ideare-page="home"] .service-story.is-enhanced .service-story-index { font-size: 55px; margin-bottom: 9px; }
+  html[data-ideare-page="home"] .service-story-copy h3 { font-size: 34px; margin-bottom: 9px; }
+  html[data-ideare-page="home"] .service-story-keywords { display: none; }
+}

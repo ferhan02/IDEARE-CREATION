@@ -13,9 +13,11 @@ $pageScripts = $pageScripts ?? [];
     <span class="location-footer-copy">Architecture &amp; Interior Design</span>
   </div>
 </footer>
-<script src="<?= $customerRoot ?>assets/js/theme-icons.js"></script>
-<script src="<?= $customerRoot ?>assets/js/site.js"></script>
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/theme-icons.js"></script>
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/site.js"></script>
 <?php foreach ($pageScripts as $script): ?>
-<script src="<?= htmlspecialchars($customerRoot . ltrim($script, '/')) ?>"></script>
+<script src="<?= htmlspecialchars($customerRoot . ltrim($script, '/'), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endforeach; ?>
+<!-- This loader uses matchMedia, not user-agent strings or a paid detection API. -->
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/responsive/shared.js"></script>
 </body></html>

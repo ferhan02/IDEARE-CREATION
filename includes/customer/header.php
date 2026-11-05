@@ -5,6 +5,22 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 $pageTitle = $pageTitle ?? 'IDEARE';
 $pageStyles = $pageStyles ?? [];
+// Approach A: one PHP document and one set of image assets, with tailored layouts.
+// Classify the customer route only; staff pages do not include this header.
+$currentRoute = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
+$idearePage = match (true) {
+    str_contains($currentRoute, '/designer/') => 'designer',
+    str_contains($currentRoute, '/public/pages/about.php') => 'about',
+    str_contains($currentRoute, '/public/pages/services.php') => 'services',
+    str_contains($currentRoute, '/pages/book-appointment.php') => 'booking',
+    str_contains($currentRoute, '/pages/where-we-are.php') => 'location',
+    str_ends_with($currentRoute, '/material-catalogue.php'),
+    str_ends_with($currentRoute, '/hpl-catalogue.php'),
+    str_ends_with($currentRoute, '/stone-catalogue.php') => 'materials',
+    str_ends_with($currentRoute, '/index.php') => 'home',
+    default => 'general',
+};
+
 // Preserve an explicit relative prefix; pages/ is one level below the project root.
 $currentScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
 $customerRoot = $customerRoot ?? (
@@ -13,7 +29,7 @@ $customerRoot = $customerRoot ?? (
 );
 ?>
 <!doctype html>
-<html lang="en">
+<html lang="en" data-ideare-page="<?= htmlspecialchars($idearePage, ENT_QUOTES, 'UTF-8') ?>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -28,6 +44,11 @@ $customerRoot = $customerRoot ?? (
 <?php foreach ($pageStyles as $style): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot . ltrim($style, '/'), ENT_QUOTES, 'UTF-8') ?>">
 <?php endforeach; ?>
+<!-- Approach A: shared foundations, then ONLY the relevant layout stylesheet. -->
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/base.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/desktop.css" media="(min-width: 1200px)">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/tablet.css" media="(min-width: 768px) and (max-width: 1199px)">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/phone.css" media="(max-width: 767px)">
 </head>
 <body>
 <header class="site-header">
@@ -36,9 +57,9 @@ $customerRoot = $customerRoot ?? (
       <img class="brand-logo-image site-brand-logo" src="<?= $customerRoot ?>assets/images/ideare-logo.png" alt="IDEARE">
     </a>
 
-    <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+    <button class="nav-toggle" type="button" aria-label="Toggle navigation" aria-controls="customer-site-navigation" aria-expanded="false">☰</button>
 
-    <nav class="site-nav" aria-label="Customer navigation">
+    <nav class="site-nav" id="customer-site-navigation" aria-label="Customer navigation">
       <a href="<?= $customerRoot ?>index.php">Home</a>
       <a href="<?= $customerRoot ?>public/pages/about.php">About</a>
       <a href="<?= $customerRoot ?>public/pages/services.php">Services</a>

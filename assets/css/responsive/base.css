@@ -1,0 +1,20 @@
+/* APPROACH A — shared content + images across devices.
+   These are safe structural/interaction foundations; each actual layout lives
+   in desktop.css, tablet.css or phone.css (media-selected by customer/header). */
+:root { --ideare-nav-height: 70px; }
+html { scroll-padding-top: calc(var(--ideare-nav-height) + 12px); }
+html[data-ideare-page] body { min-width: 320px; }
+html[data-ideare-page] img, html[data-ideare-page] svg { max-width: 100%; }
+html[data-ideare-page] .site-wrap { min-width: 0; }
+html[data-ideare-page] main { min-width: 0; }
+html[data-ideare-page] .site-nav a:focus-visible,
+html[data-ideare-page] .nav-toggle:focus-visible,
+html[data-ideare-page] .service-story-nav-item:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 4px;
+}
+html[data-ideare-page] .service-story-stage { scroll-margin-top: var(--ideare-nav-height); }
+/* Stay on natural browser scrolling; no scroll lock/UA sniffing. */
+@media (prefers-reduced-motion: reduce) {
+  html[data-ideare-page] { scroll-behavior: auto; }
+  html[data-ideare-page] .service-story-stage img { transition: none !important; }
+}

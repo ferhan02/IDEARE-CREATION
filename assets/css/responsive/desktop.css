@@ -1,0 +1,27 @@
+/* IDEARE PC >= 1200px: spacious editorial grids, cinematic scroll scenes. */
+html[data-ideare-page] { --ideare-nav-height: 70px; }
+html[data-ideare-page] .site-nav { display: flex; flex-direction: row; }
+html[data-ideare-page] .nav-toggle { display: none; }
+html[data-ideare-page="home"] .home-hero { min-height: max(720px, calc(100svh - 70px)); }
+html[data-ideare-page="home"] .home-hero-inner { padding-block: clamp(132px, 15vh, 200px) clamp(150px, 17vh, 225px); }
+html[data-ideare-page="home"] .home-studio { min-height: 820px; }
+html[data-ideare-page="home"] .studio-content { grid-template-columns: minmax(0,1.5fr) minmax(250px,.6fr); }
+html[data-ideare-page="home"] .home-designer-grid { grid-template-columns: minmax(0,1.2fr) minmax(310px,.8fr); }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-runway { height: 520svh; }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-stage-inner {
+  grid-template-columns: minmax(0,.93fr) minmax(0,1.07fr);
+  width: min(1420px, calc(100% - 13vw)); gap: clamp(46px,5vw,86px);
+}
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-photo {
+  border-radius: 2px;
+  box-shadow: 0 35px 85px rgba(0,0,0,.19);
+}
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-copy h3 { font-size: clamp(42px,4.15vw,72px); }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-nav-name { display: inline; }
+html[data-ideare-page="home"] .service-story.is-enhanced .service-story-nav { gap: clamp(17px,2.8vw,58px); }
+html[data-ideare-page="home"] .card-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
+html[data-ideare-page="about"] .ia-hero-layout { grid-template-columns: minmax(0,1.5fr) minmax(280px,.65fr); }
+html[data-ideare-page="about"] .ia-capability-grid { grid-template-columns: repeat(4,minmax(0,1fr)); }
+html[data-ideare-page="services"] .services-hero-grid { grid-template-columns: minmax(0,1.2fr) minmax(340px,.8fr); }
+html[data-ideare-page="designer"] .id3-design-grid { grid-template-columns: minmax(0,1fr) 360px; }
+html[data-ideare-page="designer"] .id3-room-layout { grid-template-columns: minmax(280px,350px) minmax(0,1fr); }
