@@ -1,7 +1,7 @@
 <?php
 $pageTitle = 'IDEARE | Architecture, Interior Design & Build';
-$pageStyles = ['assets/css/homepage.css'];
-$pageScripts = ['assets/js/homepage.js'];
+$pageStyles = ['assets/css/homepage.css', 'assets/css/home-services-story.css'];
+$pageScripts = ['assets/js/homepage.js', 'assets/js/home-services-story.js'];
 require_once __DIR__ . '/includes/staff/feature-tools.php';
 $pdo = staff_db();
 $featuredProjects = [];
@@ -75,21 +75,134 @@ require __DIR__ . '/includes/customer/header.php';
         </div>
     </section>
 
-    <section class="section home-section home-services" id="services-overview">
-        <div class="site-wrap">
-            <div class="home-reveal home-section-heading compact-heading">
-                <div>
-                    <p class="eyebrow">What we do</p>
-                    <h2>From first idea to built space.</h2>
+    <!-- SERVICES: A five-chapter architectural story driven by vertical scroll. -->
+    <section class="service-story home-section" id="services-overview" aria-labelledby="service-story-heading">
+        <div class="service-story-opening">
+            <div class="site-wrap service-story-opening-grid">
+                <div class="home-reveal">
+                    <p class="service-story-overline">What we do <span aria-hidden="true">/</span> The IDEARE approach</p>
+                    <h2 id="service-story-heading">One vision.<br><span>Five disciplines.</span></h2>
+                </div>
+                <div class="service-story-opening-side home-reveal">
+                    <span class="service-story-opening-line" aria-hidden="true"></span>
+                    <p>From the first conversation to the finishing touches, discover how our services come together to create a space that's uniquely yours.</p>
+                    <span class="service-story-opening-hint">Scroll to explore our expertise <span aria-hidden="true">↓</span></span>
                 </div>
             </div>
-            <div class="card-grid">
-                <article class="card"><h2>Cabinet Design</h2><p>Build a first draft before speaking with the IdeaRE team.</p></article>
-                <article class="card"><h2>Custom Interiors</h2><p>Explore layout, finishing, colours and storage possibilities.</p></article>
-                <article class="card"><h2>Consultation Workflow</h2><p>Saved designs can be continued by authorized staff inside the same project.</p></article>
+        </div>
+
+        <div class="service-story-runway" data-service-runway>
+            <div class="service-story-sticky" data-service-sticky>
+                <div class="service-story-backdrop" aria-hidden="true"></div>
+                <div class="service-story-topline" aria-hidden="true">
+                    <span>IDEARE <b>/</b> SERVICES</span>
+                    <span>DESIGN <b>·</b> BUILD <b>·</b> CREATE</span>
+                </div>
+
+                <div class="service-story-stages" data-service-stages>
+                    <article class="service-story-stage" data-service-stage="0" aria-labelledby="service-title-01">
+                        <div class="service-story-stage-inner">
+                            <div class="service-story-copy">
+                                <span class="service-story-index">01 <small>/ 05</small></span>
+                                <p class="service-story-category"><span class="service-story-category-line"></span> Consultation</p>
+                                <h3 id="service-title-01">Every great space<br>begins with <em>a conversation.</em></h3>
+                                <p class="service-story-description">We listen before we design. Our consultation brings together your needs, priorities, budget and vision, so every decision has a clear purpose from day one.</p>
+                                <p class="service-story-keywords">Project briefing <span>·</span> Site understanding <span>·</span> Practical advice</p>
+                            </div>
+                            <figure class="service-story-photo">
+                                <img src="assets/images/home-services/consultation.webp" alt="IDEARE design consultation with clients reviewing kitchen plans and material samples" width="1254" height="1254" loading="eager" decoding="async">
+                                <figcaption><span>01 / DISCOVER</span><span>UNDERSTAND THE VISION</span></figcaption>
+                            </figure>
+                        </div>
+                    </article>
+
+                    <article class="service-story-stage" data-service-stage="1" aria-labelledby="service-title-02">
+                        <div class="service-story-stage-inner">
+                            <div class="service-story-copy">
+                                <span class="service-story-index">02 <small>/ 05</small></span>
+                                <p class="service-story-category"><span class="service-story-category-line"></span> 3D Design &amp; Visualisation</p>
+                                <h3 id="service-title-02">See your ideas<br><em>come to life.</em></h3>
+                                <p class="service-story-description">Our 3D design process helps you experience the layout, proportions, finishes and atmosphere before work begins. Refine the details with confidence, not guesswork.</p>
+                                <p class="service-story-keywords">3D visualisation <span>·</span> Layout exploration <span>·</span> Material selection</p>
+                            </div>
+                            <figure class="service-story-photo">
+                                <img src="assets/images/home-services/3d-design.webp" alt="IDEARE designer creating a detailed three-dimensional kitchen design on a computer" width="1254" height="1254" loading="eager" decoding="async">
+                                <figcaption><span>02 / VISUALISE</span><span>DESIGN BEFORE YOU BUILD</span></figcaption>
+                            </figure>
+                        </div>
+                    </article>
+
+                    <article class="service-story-stage" data-service-stage="2" aria-labelledby="service-title-03">
+                        <div class="service-story-stage-inner">
+                            <div class="service-story-copy">
+                                <span class="service-story-index">03 <small>/ 05</small></span>
+                                <p class="service-story-category"><span class="service-story-category-line"></span> Construction</p>
+                                <h3 id="service-title-03">From foundation<br>to <em>finishing.</em></h3>
+                                <p class="service-story-description">More than beautiful concepts, we deliver building work. From site preparation and structural works to coordinated installation and finishing, we manage the details that make a project real.</p>
+                                <p class="service-story-keywords">Building works <span>·</span> Project coordination <span>·</span> Quality workmanship</p>
+                            </div>
+                            <figure class="service-story-photo">
+                                <img src="assets/images/home-services/construction.webp" alt="IDEARE construction team working and reviewing drawings at an active building site" width="1254" height="1254" loading="eager" decoding="async">
+                                <figcaption><span>03 / BUILD</span><span>TURN IDEAS INTO REALITY</span></figcaption>
+                            </figure>
+                        </div>
+                    </article>
+
+                    <article class="service-story-stage" data-service-stage="3" aria-labelledby="service-title-04">
+                        <div class="service-story-stage-inner">
+                            <div class="service-story-copy">
+                                <span class="service-story-index">04 <small>/ 05</small></span>
+                                <p class="service-story-category"><span class="service-story-category-line"></span> Interior Design</p>
+                                <h3 id="service-title-04">Spaces that feel<br><em>like you.</em></h3>
+                                <p class="service-story-description">We bring form and function together through considered layouts, lighting, colours, textures and bespoke detailing. Every element has a place, and every space has a story.</p>
+                                <p class="service-story-keywords">Space planning <span>·</span> Interior finishes <span>·</span> Design detailing</p>
+                            </div>
+                            <figure class="service-story-photo">
+                                <img src="assets/images/home-services/interior-design.webp" alt="IDEARE interior design team reviewing a furnished residential space and architectural drawings" width="1254" height="1254" loading="eager" decoding="async">
+                                <figcaption><span>04 / REFINE</span><span>DESIGNED FOR LIVING</span></figcaption>
+                            </figure>
+                        </div>
+                    </article>
+
+                    <article class="service-story-stage" data-service-stage="4" aria-labelledby="service-title-05">
+                        <div class="service-story-stage-inner">
+                            <div class="service-story-copy">
+                                <span class="service-story-index">05 <small>/ 05</small></span>
+                                <p class="service-story-category"><span class="service-story-category-line"></span> Custom Cabinetry &amp; Furniture</p>
+                                <h3 id="service-title-05">Thoughtfully designed.<br><em>Made to fit.</em></h3>
+                                <p class="service-story-description">Our in-house manufacturing capabilities bring custom cabinetry and furniture into the same design-and-build journey. From made-to-measure storage to sofas, curtains and blinds, the final details are personal.</p>
+                                <p class="service-story-keywords">Custom cabinetry <span>·</span> Furniture <span>·</span> In-house production</p>
+                            </div>
+                            <figure class="service-story-photo">
+                                <img src="assets/images/home-services/custom-cabinetry.webp" alt="IDEARE cabinetry installers fitting custom kitchen cupboards at a residential project" width="1254" height="1254" loading="eager" decoding="async">
+                                <figcaption><span>05 / CRAFT</span><span>MADE FOR YOUR SPACE</span></figcaption>
+                            </figure>
+                        </div>
+                    </article>
+                </div>
+
+                <nav class="service-story-nav" aria-label="Jump to a service stage" data-service-nav>
+                    <span class="service-story-nav-track" aria-hidden="true"><span class="service-story-nav-fill"></span></span>
+                    <button class="service-story-nav-item" type="button" data-service-jump="0" aria-label="Go to Consultation" aria-current="step"><span>01</span><span class="service-story-nav-name">Consultation</span></button>
+                    <button class="service-story-nav-item" type="button" data-service-jump="1" aria-label="Go to 3D Design"><span>02</span><span class="service-story-nav-name">3D Design</span></button>
+                    <button class="service-story-nav-item" type="button" data-service-jump="2" aria-label="Go to Construction"><span>03</span><span class="service-story-nav-name">Construction</span></button>
+                    <button class="service-story-nav-item" type="button" data-service-jump="3" aria-label="Go to Interior Design"><span>04</span><span class="service-story-nav-name">Interior Design</span></button>
+                    <button class="service-story-nav-item" type="button" data-service-jump="4" aria-label="Go to Custom Cabinetry and Furniture"><span>05</span><span class="service-story-nav-name">Cabinetry</span></button>
+                </nav>
+                <div class="service-story-scroll-note" aria-hidden="true"><span></span> SCROLL TO CONTINUE</div>
             </div>
-            <div class="actions section-actions">
-                <a class="btn" href="public/pages/services.php">View services</a>
+        </div>
+
+        <div class="service-story-outro">
+            <div class="site-wrap service-story-outro-inner">
+                <div>
+                    <p class="service-story-outro-label">ONE TEAM, ONE JOURNEY</p>
+                    <h3>Ready to bring it all together?</h3>
+                </div>
+                <div class="service-story-outro-actions">
+                    <a class="btn primary" href="public/pages/services.php">Explore All Services <span aria-hidden="true">↗</span></a>
+                    <a class="btn" href="pages/book-appointment.php">Book a Consultation</a>
+                </div>
             </div>
         </div>
     </section>
