@@ -1,6 +1,7 @@
 <?php
 $pageTitle = 'IDEARE | Architecture, Interior Design & Build';
 $pageStyles = ['assets/css/homepage.css'];
+$pageScripts = ['assets/js/homepage.js'];
 require_once __DIR__ . '/includes/staff/feature-tools.php';
 $pdo = staff_db();
 $featuredProjects = [];
@@ -50,26 +51,13 @@ require __DIR__ . '/includes/customer/header.php';
         </div>
     </section>
 
-    <!-- ABOUT: Architectural studio scene is deliberately rendered with CSS, not an image/video. -->
+    <!-- ABOUT: Matched architectural photographs crossfade via the existing theme toggle. -->
     <section class="home-studio home-section" id="about" aria-labelledby="home-about-title">
-        <div class="studio-scene" aria-hidden="true">
-            <div class="studio-back-wall"></div>
-            <div class="studio-wall-left"></div>
-            <div class="studio-wall-right"></div>
-            <div class="studio-ceiling"></div>
-            <div class="studio-wall-base"></div>
-            <div class="studio-floor"></div>
-            <div class="studio-track studio-track-main"></div>
-            <div class="studio-spot studio-spot-left"><i></i></div>
-            <div class="studio-spot studio-spot-mid"><i></i></div>
-            <div class="studio-spot studio-spot-right"><i></i></div>
-            <div class="studio-beam studio-beam-left"></div>
-            <div class="studio-beam studio-beam-mid"></div>
-            <div class="studio-beam studio-beam-right"></div>
-            <div class="studio-wall-illumination"></div>
-        </div>
+        <div class="studio-photo studio-photo-light" aria-hidden="true"></div>
+        <div class="studio-photo studio-photo-dark" aria-hidden="true"></div>
+        <div class="studio-image-wash" aria-hidden="true"></div>
         <div class="site-wrap studio-content">
-            <div class="studio-story">
+            <div class="studio-story home-reveal">
                 <p class="studio-eyebrow">Our company <span aria-hidden="true">·</span> Since 2007</p>
                 <h2 id="home-about-title">Built on<br>experience.<br><span>Driven by ideas.</span></h2>
                 <p class="studio-description">IDEARE Creation Design and Build brings construction, interior design and in-house manufacturing together under one roof — from the first concept to the finished space.</p>
@@ -77,7 +65,7 @@ require __DIR__ . '/includes/customer/header.php';
                     <a class="btn primary" href="public/pages/about.php">See More <span aria-hidden="true">↗</span></a>
                 </div>
             </div>
-            <aside class="studio-established" aria-label="Established 27 September 2007">
+            <aside class="studio-established home-reveal" aria-label="Established 27 September 2007">
                 <span class="studio-established-label">Established</span>
                 <strong>2007<span>.</span></strong>
                 <p>27 September 2007</p>
@@ -85,12 +73,11 @@ require __DIR__ . '/includes/customer/header.php';
                 <span class="studio-established-detail">Construction <span aria-hidden="true">/</span> Interior Design <span aria-hidden="true">/</span> In-house Manufacturing</span>
             </aside>
         </div>
-        <div class="studio-floor-label" aria-hidden="true">THE IDEARE STUDIO <span>·</span> DESIGN &amp; BUILD</div>
     </section>
 
     <section class="section home-section home-services" id="services-overview">
         <div class="site-wrap">
-            <div class="home-section-heading compact-heading">
+            <div class="home-reveal home-section-heading compact-heading">
                 <div>
                     <p class="eyebrow">What we do</p>
                     <h2>From first idea to built space.</h2>
@@ -109,7 +96,7 @@ require __DIR__ . '/includes/customer/header.php';
 
     <section class="section home-section" id="portfolio">
         <div class="site-wrap">
-            <div class="home-section-heading">
+            <div class="home-reveal home-section-heading">
                 <div>
                     <p class="eyebrow">Portfolio</p>
                     <h2>Selected IdeaRE projects.</h2>
@@ -143,7 +130,7 @@ require __DIR__ . '/includes/customer/header.php';
     <?php if ($featuredIdeas): ?>
     <section class="section home-section" id="inspiration">
         <div class="site-wrap">
-            <div class="home-section-heading">
+            <div class="home-reveal home-section-heading">
                 <div>
                     <p class="eyebrow">Get inspired</p>
                     <h2>Cabinet Inspiration</h2>
@@ -168,7 +155,7 @@ require __DIR__ . '/includes/customer/header.php';
 
     <!-- The header lists Materials before Cabinet Designer; the homepage now follows that sequence. -->
     <section class="section home-section home-materials" id="materials-overview">
-        <div class="site-wrap home-materials-grid">
+        <div class="site-wrap home-materials-grid home-reveal">
             <div>
                 <p class="eyebrow">Materials &amp; finishes</p>
                 <h2>Every detail starts with the right material.</h2>
@@ -182,7 +169,7 @@ require __DIR__ . '/includes/customer/header.php';
 
     <!-- Former top hero content moved to the Cabinet Designer position. -->
     <section class="section home-section home-designer" id="cabinet-designer">
-        <div class="site-wrap home-designer-grid">
+        <div class="site-wrap home-designer-grid home-reveal">
             <div class="home-designer-copy">
                 <p class="eyebrow">Cabinet Designer</p>
                 <h2>Plan your space before the consultation.</h2>
