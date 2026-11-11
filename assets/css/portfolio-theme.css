@@ -1,0 +1,349 @@
+/*
+ * IDEARE portfolio theme adaptation
+ * Loaded after portfolio-showcase.css, responsive portfolio styles and overrides.
+ *
+ * Design:
+ *   Light — warm ivory, espresso, warm grey and muted bronze.
+ *   Dark  — the existing charcoal, ivory, beige and champagne palette.
+ *
+ * The photographs, image gradients, marquee/slider behavior, card hover pause,
+ * project modal and nested image viewer remain shared between both themes.
+ */
+
+/* Keep the existing dark palette explicit and stable. */
+html[data-theme="dark"] #portfolio.portfolio-showcase {
+    --portfolio-bg: #11110F;
+    --portfolio-panel: #1B1A18;
+    --portfolio-text: #F7F1E8;
+    --portfolio-muted: #C4B9AA;
+    --portfolio-gold: #C6A47D;
+    --portfolio-line: rgba(235, 220, 201, .17);
+    background: var(--portfolio-bg);
+    color: var(--portfolio-text);
+}
+
+html[data-theme="dark"] .portfolio-exhibition {
+    --pex-bg: #131311;
+    --pex-card: #22211F;
+    --pex-ivory: #F3EEE6;
+    --pex-muted: #AAA49B;
+    --pex-accent: #C5A77E;
+    --pex-line: rgba(238, 229, 216, .20);
+    background: var(--pex-bg);
+    color: var(--pex-ivory);
+}
+
+/* ───────────────────────── Light portfolio ───────────────────────── */
+html[data-theme="light"] #portfolio.portfolio-showcase {
+    --portfolio-bg: #F3F0E9;
+    --portfolio-panel: #E9E4DA;
+    --portfolio-text: #211D18;
+    --portfolio-muted: #71695E;
+    --portfolio-gold: #8A6A45;
+    --portfolio-line: rgba(33, 29, 24, .17);
+
+    background: var(--portfolio-bg);
+    color: var(--portfolio-text);
+    transition: background-color .48s ease, color .48s ease;
+}
+
+/* The scroll-exit fade follows the active theme instead of always fading black. */
+html[data-theme="light"] #portfolio.portfolio-showcase::after {
+    background: var(--portfolio-bg);
+}
+
+html[data-theme="light"] #portfolio .portfolio-intro-note {
+    color: #71695E;
+}
+
+/* Warm, restrained card framing; the actual project photographs are untouched. */
+html[data-theme="light"] #portfolio .portfolio-project {
+    background: #DED8CE;
+    border-color: rgba(33, 29, 24, .18);
+    box-shadow: 0 18px 45px rgba(52, 40, 28, .12);
+    transition:
+        transform .55s cubic-bezier(.2, .75, .25, 1),
+        border-color .35s ease,
+        box-shadow .35s ease,
+        background-color .45s ease;
+}
+
+html[data-theme="light"] #portfolio .portfolio-project:hover,
+html[data-theme="light"] #portfolio .portfolio-project:focus-visible {
+    border-color: rgba(138, 106, 69, .68);
+    box-shadow: 0 27px 58px rgba(52, 40, 28, .20);
+}
+
+/*
+ * Keep the black-to-transparent image gradient and white overlay labels in
+ * both themes. This preserves legibility over bright storefronts and exteriors.
+ */
+html[data-theme="light"] #portfolio .portfolio-project-shade {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(5, 5, 5, .015) 0%,
+            rgba(5, 5, 5, .015) 54%,
+            rgba(5, 5, 5, .24) 76%,
+            rgba(0, 0, 0, .66) 100%
+        ),
+        linear-gradient(90deg, rgba(0, 0, 0, .08), transparent 58%);
+}
+
+html[data-theme="light"] #portfolio .portfolio-project-meta {
+    color: rgba(255, 249, 240, .78);
+}
+
+html[data-theme="light"] #portfolio .portfolio-project-title {
+    color: rgba(255, 249, 240, .96);
+}
+
+html[data-theme="light"] #portfolio .portfolio-project-count {
+    color: rgba(255, 247, 235, .66);
+}
+
+html[data-theme="light"] #portfolio .portfolio-project-action {
+    color: rgba(255, 247, 235, .88);
+}
+
+html[data-theme="light"] #portfolio .portfolio-project:hover .portfolio-project-action {
+    color: #E8CBA9;
+}
+
+/* A warm architectural placeholder for projects whose cover is not uploaded yet. */
+html[data-theme="light"] #portfolio .portfolio-project-placeholder {
+    color: #211D18;
+    background:
+        radial-gradient(ellipse at 82% 18%, rgba(138, 106, 69, .15), transparent 43%),
+        repeating-linear-gradient(90deg, transparent 0 54px, rgba(83, 66, 47, .035) 55px, transparent 56px),
+        linear-gradient(135deg, #E9E3D8 0%, #DCD4C8 52%, #CEC4B6 100%);
+}
+
+html[data-theme="light"] #portfolio .portfolio-project-placeholder::before,
+html[data-theme="light"] #portfolio .portfolio-project-placeholder::after {
+    border-color: rgba(110, 83, 55, .18);
+}
+
+html[data-theme="light"] #portfolio .portfolio-placeholder-index {
+    color: #8A6A45;
+}
+
+html[data-theme="light"] #portfolio .portfolio-placeholder-title {
+    color: #211D18;
+}
+
+html[data-theme="light"] #portfolio .portfolio-placeholder-note {
+    color: #71695E;
+}
+
+/* Footer, gallery counter and the desktop edge fades. */
+html[data-theme="light"] #portfolio .portfolio-gallery-footer {
+    border-top-color: var(--portfolio-line);
+}
+
+html[data-theme="light"] #portfolio .portfolio-gallery-hint {
+    color: rgba(33, 29, 24, .58);
+}
+
+html[data-theme="light"] #portfolio .portfolio-gallery-counter {
+    color: #8A6A45;
+}
+
+html[data-theme="light"] #portfolio[data-portfolio-layout="desktop"] .portfolio-gallery::before {
+    background: linear-gradient(90deg, #F3F0E9, rgba(243, 240, 233, 0));
+}
+
+html[data-theme="light"] #portfolio[data-portfolio-layout="desktop"] .portfolio-gallery::after {
+    background: linear-gradient(270deg, #F3F0E9, rgba(243, 240, 233, 0));
+}
+
+/* ───────────────────────── Project popup ───────────────────────── */
+/* The page behind the modal remains dimmed and blurred in both themes. */
+html[data-theme="light"] .portfolio-modal-panel {
+    border-color: rgba(33, 29, 24, .18);
+    background: #F7F4EE;
+    color: #211D18;
+    box-shadow: 0 38px 110px rgba(45, 34, 23, .27);
+}
+
+html[data-theme="light"] .portfolio-modal-info {
+    background: linear-gradient(145deg, #FBF8F2 0%, #F0EBE2 100%);
+    border-bottom-color: rgba(33, 29, 24, .14);
+}
+
+html[data-theme="light"] .portfolio-modal-meta {
+    color: #8A6A45;
+}
+
+html[data-theme="light"] .portfolio-modal-title {
+    color: #211D18;
+}
+
+html[data-theme="light"] .portfolio-modal-description {
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-modal-close {
+    border-color: rgba(33, 29, 24, .22);
+    background: rgba(250, 248, 243, .96);
+    color: #211D18;
+    box-shadow: 0 5px 18px rgba(45, 34, 23, .10);
+}
+
+html[data-theme="light"] .portfolio-modal-close:hover {
+    border-color: #8A6A45;
+    background: #8A6A45;
+    color: #FFF9F0;
+}
+
+html[data-theme="light"] .portfolio-modal-gallery {
+    background: #E5DED2;
+}
+
+html[data-theme="light"] .portfolio-modal-photo {
+    border-color: rgba(33, 29, 24, .15);
+    background: #DAD2C6;
+}
+
+html[data-theme="light"] .portfolio-modal-photo-trigger,
+html[data-theme="light"] .portfolio-modal-photo-trigger:hover,
+html[data-theme="light"] .portfolio-modal-photo-trigger:focus-visible {
+    background: #DAD2C6 !important;
+}
+
+html[data-theme="light"] .portfolio-modal-photo-trigger img {
+    background: #DAD2C6;
+}
+
+html[data-theme="light"] .portfolio-modal-photo figcaption {
+    border-top-color: rgba(33, 29, 24, .10);
+    background: #EEE9E0;
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-modal-empty {
+    border-color: rgba(138, 106, 69, .30);
+    background:
+        radial-gradient(ellipse at 82% 15%, rgba(138, 106, 69, .12), transparent 44%),
+        #F0EBE2;
+}
+
+html[data-theme="light"] .portfolio-modal-empty .portfolio-empty-mark {
+    color: #8A6A45;
+}
+
+html[data-theme="light"] .portfolio-modal-empty strong {
+    color: #211D18;
+}
+
+html[data-theme="light"] .portfolio-modal-empty p {
+    color: #71695E;
+}
+
+/*
+ * The nested full-screen image viewer intentionally stays dark in light mode.
+ * Its black backdrop gives the selected photograph a neutral viewing surface.
+ */
+
+/* ───────────────────────── Static PHP fallback ───────────────────────── */
+/* If the portfolio feed is unavailable, index.php's original exhibition
+   remains theme-aware instead of reverting to a permanently dark section. */
+html[data-theme="light"] .portfolio-exhibition {
+    --pex-bg: #F3F0E9;
+    --pex-card: #E9E4DA;
+    --pex-ivory: #211D18;
+    --pex-muted: #71695E;
+    --pex-accent: #8A6A45;
+    --pex-line: rgba(33, 29, 24, .17);
+
+    background: var(--pex-bg);
+    color: var(--pex-ivory);
+    transition: background-color .48s ease, color .48s ease;
+}
+
+html[data-theme="light"] .portfolio-exhibition-grain {
+    background:
+        radial-gradient(ellipse at 88% 4%, rgba(138, 106, 69, .10), transparent 40%),
+        linear-gradient(transparent 42%, rgba(33, 29, 24, .025));
+}
+
+html[data-theme="light"] .portfolio-exhibition-intro-side > p {
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-exhibition-meta span {
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-exhibition-meta strong {
+    color: #8A6A45;
+}
+
+html[data-theme="light"] .portfolio-exhibit-media {
+    background: #DED8CE;
+    border-color: rgba(33, 29, 24, .16);
+}
+
+/* Preserve the dark image-bottom fade and white labels over photographs. */
+html[data-theme="light"] .portfolio-exhibit-media::after {
+    background: linear-gradient(
+        to bottom,
+        rgba(5, 5, 5, .13),
+        transparent 30%,
+        transparent 67%,
+        rgba(5, 5, 5, .68)
+    );
+}
+
+html[data-theme="light"] .portfolio-exhibit-caption h3 {
+    color: #211D18;
+}
+
+html[data-theme="light"] .portfolio-exhibit-caption-meta {
+    border-top-color: rgba(33, 29, 24, .17);
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-exhibition-status strong {
+    color: #211D18;
+}
+
+html[data-theme="light"] .portfolio-exhibition-status strong span {
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-current-title {
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-status-caption,
+html[data-theme="light"] .portfolio-exhibition-motion-label {
+    color: #71695E;
+}
+
+html[data-theme="light"] .portfolio-exhibition-btn {
+    border-color: rgba(33, 29, 24, .25) !important;
+    background: #EAE5DC;
+    color: #211D18;
+}
+
+html[data-theme="light"] .portfolio-exhibition-btn:hover {
+    border-color: #8A6A45 !important;
+    background: #8A6A45;
+    color: #FFF9F0;
+}
+
+html[data-theme="light"] .portfolio-exhibition-progress {
+    background: rgba(33, 29, 24, .15);
+}
+
+html[data-theme="light"] .portfolio-exhibition-progress span {
+    background: #8A6A45;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html[data-theme="light"] #portfolio.portfolio-showcase,
+    html[data-theme="light"] .portfolio-exhibition {
+        transition: none;
+    }
+}
