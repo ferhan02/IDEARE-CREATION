@@ -1,4 +1,7 @@
 /* Phone: vertical chapters, native scrolling, no pinned scene or scroll hijack. */
+import { mountPortfolioPhone } from './portfolio-phone.js';
+import { mountPortfolioWhenReady } from './portfolio-init.js';
+
 export function mount({ page, motion }) {
   const clean = [];
   const nav=document.querySelector('.site-nav'),toggle=document.querySelector('.nav-toggle');
@@ -8,6 +11,7 @@ export function mount({ page, motion }) {
     clean.push(()=>document.removeEventListener('pointerdown',close));
   }
   if(page==='home'){
+    clean.push(mountPortfolioWhenReady(() => mountPortfolioPhone({motion})));
     const story=document.querySelector('.service-story');
     const stages=[...document.querySelectorAll('.service-story-stage')];
     const links=[...document.querySelectorAll('[data-service-jump]')];

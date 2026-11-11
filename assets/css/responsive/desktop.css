@@ -25,3 +25,9 @@ html[data-ideare-page="about"] .ia-capability-grid { grid-template-columns: repe
 html[data-ideare-page="services"] .services-hero-grid { grid-template-columns: minmax(0,1.2fr) minmax(340px,.8fr); }
 html[data-ideare-page="designer"] .id3-design-grid { grid-template-columns: minmax(0,1fr) 360px; }
 html[data-ideare-page="designer"] .id3-room-layout { grid-template-columns: minmax(280px,350px) minmax(0,1fr); }
+
+/* Selected Works / desktop: continuously drifting gallery; visible cards side by side. */
+html[data-ideare-page="home"] .portfolio-exhibition { --pex-card-width: clamp(390px, 31vw, 520px); --pex-media-height: clamp(330px, 29vw, 460px); --pex-gap: 28px; }
+html[data-ideare-page="home"] .portfolio-exhibition-header { min-height: 290px; }
+html[data-ideare-page="home"] .portfolio-exhibition-viewport { padding-inline: max(24px, calc((100vw - 1160px)/2)); }
+html[data-ideare-page="home"] .portfolio-exhibit-caption h3 { font-size: clamp(24px,2.25vw,32px); }

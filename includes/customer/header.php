@@ -49,6 +49,12 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/desktop.css" media="(min-width: 1200px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/tablet.css" media="(min-width: 768px) and (max-width: 1199px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/phone.css" media="(max-width: 767px)">
+<?php if ($idearePage === 'home'): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-showcase.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-desktop.css" media="(min-width: 1200px)">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-tablet.css" media="(min-width: 768px) and (max-width: 1199px)">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-phone.css" media="(max-width: 767px)">
+<?php endif; ?>
 </head>
 <body>
 <header class="site-header">

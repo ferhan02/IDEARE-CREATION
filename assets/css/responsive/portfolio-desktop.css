@@ -1,0 +1,39 @@
+/* IDEARE portfolio — PC composition (>=1200px). */
+#portfolio[data-portfolio-layout="desktop"] .portfolio-viewport {
+    overflow: hidden;
+    padding-inline: 1px;
+}
+#portfolio[data-portfolio-layout="desktop"] .portfolio-track {
+    animation: ideare-portfolio-marquee var(--portfolio-marquee-duration, 70s) linear infinite;
+}
+#portfolio[data-portfolio-layout="desktop"]:hover .portfolio-track,
+#portfolio[data-portfolio-layout="desktop"]:focus-within .portfolio-track,
+#portfolio[data-portfolio-layout="desktop"].is-modal-open .portfolio-track,
+#portfolio[data-portfolio-layout="desktop"].is-page-hidden .portfolio-track,
+#portfolio[data-portfolio-layout="desktop"].is-static-motion .portfolio-track {
+    animation-play-state: paused;
+}
+@keyframes ideare-portfolio-marquee {
+    from { transform: translate3d(0,0,0); }
+    to { transform: translate3d(-50%,0,0); }
+}
+#portfolio[data-portfolio-layout="desktop"] .portfolio-gallery::before,
+#portfolio[data-portfolio-layout="desktop"] .portfolio-gallery::after {
+    content: '';
+    position: absolute;
+    z-index: 4;
+    top: 0;
+    bottom: 30px;
+    width: clamp(20px, 4vw, 65px);
+    pointer-events: none;
+}
+#portfolio[data-portfolio-layout="desktop"] .portfolio-gallery::before {
+    left: 0;
+    background: linear-gradient(90deg, #11110f, transparent);
+}
+#portfolio[data-portfolio-layout="desktop"] .portfolio-gallery::after {
+    right: 0;
+    background: linear-gradient(270deg, #11110f, transparent);
+}
+#portfolio[data-portfolio-layout="desktop"] .portfolio-project { width: clamp(470px, 38vw, 620px); }
+.portfolio-modal-panel { grid-template-columns: minmax(300px, .64fr) minmax(0, 1.36fr); }

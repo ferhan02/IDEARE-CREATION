@@ -1,8 +1,12 @@
 import { mountPinnedServiceStory } from './story.js';
+import { mountPortfolioTablet } from './portfolio-tablet.js';
+import { mountPortfolioWhenReady } from './portfolio-init.js';
+
 export function mount({ page, motion }) {
   const clean = [];
   if (page === 'home') {
     clean.push(mountPinnedServiceStory({gentle:true,motion}));
+    clean.push(mountPortfolioWhenReady(() => mountPortfolioTablet({motion})));
     const sticky = document.querySelector('[data-service-sticky]');
     const links = [...document.querySelectorAll('[data-service-jump]')];
     if (sticky && links.length) {

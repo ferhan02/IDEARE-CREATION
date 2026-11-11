@@ -1,8 +1,12 @@
 import { mountPinnedServiceStory } from './story.js';
+import { mountPortfolioDesktop } from './portfolio-desktop.js';
+import { mountPortfolioWhenReady } from './portfolio-init.js';
+
 export function mount({ page, motion }) {
   const clean = [];
   if (page === 'home') {
     clean.push(mountPinnedServiceStory({motion}));
+    clean.push(mountPortfolioWhenReady(() => mountPortfolioDesktop({motion})));
     // Gentle magnetic movement on the actual CTA, never on links/nav everywhere.
     if (!motion.matches && window.matchMedia('(hover:hover) and (pointer:fine)').matches) {
       document.querySelectorAll('.home-hero-actions .btn, .studio-actions .btn').forEach(button => {

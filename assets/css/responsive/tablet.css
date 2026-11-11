@@ -80,3 +80,11 @@ html[data-ideare-page="designer"] .id3-canvas-wrap { height: min(60svh,570px); }
   html[data-ideare-page="home"] .service-story-copy h3 { font-size: 34px; margin-bottom: 9px; }
   html[data-ideare-page="home"] .service-story-keywords { display: none; }
 }
+
+/* Selected Works / tablet: exactly one project at a time, 6.5s autoplay. */
+html[data-ideare-page="home"] .portfolio-exhibition { --pex-card-width: min(840px, calc(100vw - 56px)); --pex-media-height: clamp(350px,53vw,520px); --pex-gap: 18px; padding: 95px 0 118px; }
+html[data-ideare-page="home"] .portfolio-exhibition-header { flex-direction: column; align-items: flex-start; gap: 26px; }
+html[data-ideare-page="home"] .portfolio-exhibition-intro h2 { font-size: clamp(54px,7.7vw,82px); }
+html[data-ideare-page="home"] .portfolio-exhibition-intro-side { max-width: 650px; }
+html[data-ideare-page="home"] .portfolio-exhibition-viewport { width: var(--pex-card-width); margin-inline: auto; }
+html[data-ideare-page="home"] .portfolio-exhibition-motion-label { font-size: 9px; }

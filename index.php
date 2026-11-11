@@ -1,22 +1,12 @@
 <?php
 $pageTitle = 'IDEARE | Architecture, Interior Design & Build';
-$pageStyles = ['assets/css/homepage.css', 'assets/css/home-services-story.css'];
+$pageStyles = ['assets/css/homepage.css', 'assets/css/home-services-story.css', 'assets/css/home-portfolio.css'];
 $pageScripts = ['assets/js/homepage.js']; // The responsive device controllers manage the five-stage story.
 require_once __DIR__ . '/includes/staff/feature-tools.php';
 $pdo = staff_db();
-$featuredProjects = [];
 $featuredIdeas = [];
-
-try {
-    $featuredProjects = db_rows(
-        $pdo,
-        'SELECT title,category,short_description,cover_image,location_label
-         FROM project_gallery_entries
-         WHERE is_published=1
-         ORDER BY is_featured DESC,sort_order,completion_date DESC
-         LIMIT 3'
-    );
-} catch (Throwable $e) {}
+// Project exhibition artwork is read from the named image folders below.
+// Staff demo gallery entries are intentionally not presented as client projects.
 
 try {
     $featuredIdeas = db_rows(
@@ -28,6 +18,48 @@ try {
          LIMIT 3'
     );
 } catch (Throwable $e) {}
+
+// The public exhibition is curated independently of staff demo entries.
+// Add images to the named folders; the gallery automatically discovers them.
+$portfolioProjects = [
+    ['folder' => 'Cafe Shop at Hartamas', 'title' => 'Café Shop at Hartamas', 'category' => 'Food & Beverage', 'place' => 'Hartamas'],
+    ['folder' => 'Concorde, Shah Alam', 'title' => 'Concorde Hotel', 'category' => 'Hospitality', 'place' => 'Shah Alam'],
+    ['folder' => 'Free Duty Shop at KLIA 2', 'title' => 'Free Duty Shop at KLIA 2', 'category' => 'Retail', 'place' => 'KLIA 2'],
+    ['folder' => 'Getthis Cyberjaya', 'title' => 'Getthis Cyberjaya', 'category' => 'Retail & Commercial', 'place' => 'Cyberjaya'],
+    ['folder' => 'Kilang Yakult', 'title' => 'Kilang Yakult', 'category' => 'Commercial', 'place' => 'Malaysia'],
+    ['folder' => 'Klana Resort, Seremban', 'title' => 'Klana Resort', 'category' => 'Hospitality', 'place' => 'Seremban'],
+    ['folder' => 'Kooceng Cat Hotel & Spa', 'title' => 'Kooceng Cat Hotel & Spa', 'category' => 'Hospitality', 'place' => 'Malaysia'],
+    ['folder' => "Masjid Dato' Klana Petra Undang Luak Sungai Ujong", 'title' => "Masjid Dato' Klana Petra", 'category' => 'Cultural & Community', 'place' => 'Negeri Sembilan'],
+    ['folder' => 'Naelofar Hijab', 'title' => 'Naelofar Hijab', 'category' => 'Retail', 'place' => 'Malaysia'],
+    ['folder' => 'Panggung Bangsawan Melaka', 'title' => 'Panggung Bangsawan', 'category' => 'Cultural & Community', 'place' => 'Melaka'],
+    ['folder' => 'Subang Jaya Medical Centre', 'title' => 'Subang Jaya Medical Centre', 'category' => 'Healthcare', 'place' => 'Subang Jaya'],
+];
+foreach ($portfolioProjects as &$portfolioProject) {
+    $portfolioProject['photos'] = [];
+    $folder = $portfolioProject['folder'];
+    $absoluteFolder = __DIR__ . '/assets/images/portfolio/' . $folder;
+    if (!is_dir($absoluteFolder)) {
+        continue;
+    }
+    $names = scandir($absoluteFolder);
+    if (!is_array($names)) {
+        continue;
+    }
+    natcasesort($names);
+    foreach ($names as $file) {
+        if ($file === '.' || $file === '..' || !is_file($absoluteFolder . '/' . $file)) {
+            continue;
+        }
+        if (!in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg','jpeg','png','webp','avif'], true)) {
+            continue;
+        }
+        $portfolioProject['photos'][] = [
+            'src' => 'assets/images/portfolio/' . rawurlencode($folder) . '/' . rawurlencode($file),
+            'label' => trim(str_replace(['_', '-'], ' ', pathinfo($file, PATHINFO_FILENAME))),
+        ];
+    }
+}
+unset($portfolioProject);
 
 require __DIR__ . '/includes/customer/header.php';
 ?>
@@ -207,37 +239,86 @@ require __DIR__ . '/includes/customer/header.php';
         </div>
     </section>
 
-    <section class="section home-section" id="portfolio">
-        <div class="site-wrap">
-            <div class="home-reveal home-section-heading">
-                <div>
-                    <p class="eyebrow">Portfolio</p>
-                    <h2>Selected IdeaRE projects.</h2>
-                </div>
-                <p>A look at completed work, design directions and spaces developed by IdeaRE.</p>
+    <!-- PORTFOLIO: Unpinned horizontal exhibition; photos are discovered from project folders. -->
+    <section class="portfolio-exhibition home-section" id="portfolio" aria-labelledby="portfolio-heading" data-portfolio-gallery>
+        <div class="portfolio-exhibition-grain" aria-hidden="true"></div>
+        <div class="site-wrap portfolio-exhibition-header">
+            <div class="portfolio-exhibition-intro home-reveal">
+                <p class="portfolio-exhibition-kicker">IDEARE <span aria-hidden="true">/</span> Selected works</p>
+                <h2 id="portfolio-heading">Spaces with<br><em>a story to tell.</em></h2>
             </div>
-            <div class="card-grid">
-                <?php if ($featuredProjects): ?>
-                    <?php foreach ($featuredProjects as $p): ?>
-                        <article class="card portfolio-card">
-                            <?php if ($p['cover_image']): ?>
-                                <img class="portfolio-image" src="<?= h(ideare_root_url($p['cover_image'])) ?>" alt="">
-                            <?php else: ?>
-                                <div class="project-ph"><?= h($p['category'] ?: 'Project') ?></div>
-                            <?php endif; ?>
-                            <small><?= h($p['category'] ?: 'Project') ?></small>
-                            <h3><?= h($p['title']) ?></h3>
-                            <p><?= h($p['short_description'] ?: '') ?></p>
-                            <?php if ($p['location_label']): ?><small><?= h($p['location_label']) ?></small><?php endif; ?>
-                        </article>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <article class="card portfolio-card"><div class="project-ph">Kitchen</div><small>Kitchen</small><h3>Modern Kitchen</h3><p>Clean lines, practical storage and a layout built around daily use.</p></article>
-                    <article class="card portfolio-card"><div class="project-ph">Wardrobe</div><small>Wardrobe</small><h3>Built-in Wardrobe</h3><p>Tailored internal storage with a fitted, architectural finish.</p></article>
-                    <article class="card portfolio-card"><div class="project-ph">Living</div><small>Living</small><h3>Living Storage</h3><p>Integrated cabinetry designed to feel like part of the room.</p></article>
-                <?php endif; ?>
+            <div class="portfolio-exhibition-intro-side home-reveal">
+                <p>From distinctive destinations to thoughtfully crafted interiors. Explore a selection of spaces we've helped bring to life.</p>
+                <div class="portfolio-exhibition-meta"><span>THE PROJECT COLLECTION</span><strong><?= sprintf('%02d', count($portfolioProjects)) ?> PROJECTS</strong></div>
             </div>
         </div>
+
+        <div class="portfolio-exhibition-band" aria-label="Project highlights">
+            <div class="portfolio-exhibition-viewport" data-portfolio-viewport>
+                <div class="portfolio-exhibition-track" data-portfolio-track>
+                    <div class="portfolio-exhibition-group" data-portfolio-group>
+                        <?php foreach ($portfolioProjects as $portfolioIndex => $portfolioProject): ?>
+                        <?php
+                            $portfolioPhotos = $portfolioProject['photos'];
+                            $portfolioFirstPhoto = $portfolioPhotos[0] ?? null;
+                            $portfolioPhotoCount = count($portfolioPhotos);
+                            $portfolioJSON = htmlspecialchars(json_encode($portfolioPhotos, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_HEX_APOS), ENT_QUOTES, 'UTF-8');
+                            $portfolioTitle = htmlspecialchars($portfolioProject['title'], ENT_QUOTES, 'UTF-8');
+                        ?>
+                        <article class="portfolio-exhibit-card" data-portfolio-card data-project-index="<?= $portfolioIndex ?>" data-project-photos="<?= $portfolioJSON ?>">
+                            <div class="portfolio-exhibit-media" data-photo-stage>
+                                <?php if ($portfolioFirstPhoto): ?>
+                                    <img class="portfolio-exhibit-backdrop" src="<?= htmlspecialchars($portfolioFirstPhoto['src'], ENT_QUOTES, 'UTF-8') ?>" alt="" aria-hidden="true" loading="lazy" decoding="async">
+                                    <img class="portfolio-exhibit-image" src="<?= htmlspecialchars($portfolioFirstPhoto['src'], ENT_QUOTES, 'UTF-8') ?>" alt="<?= $portfolioTitle ?> — <?= htmlspecialchars($portfolioFirstPhoto['label'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy" decoding="async">
+                                <?php else: ?>
+                                    <div class="portfolio-exhibit-empty" aria-label="Project photographs coming soon">
+                                        <span class="portfolio-empty-mark" aria-hidden="true">I <b>D</b> E A R E</span>
+                                        <span class="portfolio-empty-line" aria-hidden="true"></span>
+                                        <span class="portfolio-empty-title">PHOTOGRAPHY<br>COMING SOON</span>
+                                    </div>
+                                <?php endif; ?>
+                                <span class="portfolio-exhibit-photo-name" data-photo-label><?= $portfolioFirstPhoto ? htmlspecialchars($portfolioFirstPhoto['label'], ENT_QUOTES, 'UTF-8') : 'Project highlight' ?></span>
+                                <span class="portfolio-exhibit-number" aria-hidden="true"><?= sprintf('%02d', $portfolioIndex + 1) ?></span>
+                                <?php if ($portfolioPhotoCount > 1): ?>
+                                <div class="portfolio-photo-navigation" aria-label="Photographs for <?= $portfolioTitle ?>">
+                                    <button class="portfolio-photo-arrow" type="button" data-photo-direction="-1" aria-label="Previous photo of <?= $portfolioTitle ?>" title="Previous project photo"><span aria-hidden="true">←</span></button>
+                                    <span class="portfolio-photo-counter" data-photo-counter aria-live="off">01 / <?= sprintf('%02d', $portfolioPhotoCount) ?></span>
+                                    <button class="portfolio-photo-arrow" type="button" data-photo-direction="1" aria-label="Next photo of <?= $portfolioTitle ?>" title="Next project photo"><span aria-hidden="true">→</span></button>
+                                </div>
+                                <?php else: ?>
+                                <span class="portfolio-photo-count-static"><?= $portfolioPhotoCount === 1 ? '01 / 01' : 'AWAITING IMAGES' ?></span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="portfolio-exhibit-caption">
+                                <div class="portfolio-exhibit-name-line">
+                                    <h3><?= $portfolioTitle ?></h3>
+                                    <span aria-hidden="true" class="portfolio-exhibit-decoration">↗</span>
+                                </div>
+                                <div class="portfolio-exhibit-caption-meta">
+                                    <span><?= htmlspecialchars($portfolioProject['category'], ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span><?= htmlspecialchars($portfolioProject['place'], ENT_QUOTES, 'UTF-8') ?></span>
+                                </div>
+                            </div>
+                        </article>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="site-wrap portfolio-exhibition-footer">
+            <div class="portfolio-exhibition-status" role="status" aria-live="polite">
+                <span class="portfolio-status-caption">CURRENT EXHIBIT</span>
+                <strong data-portfolio-active>01 <span>/ <?= sprintf('%02d', count($portfolioProjects)) ?></span></strong>
+                <span class="portfolio-current-title" data-portfolio-current-title><?= htmlspecialchars($portfolioProjects[0]['title'], ENT_QUOTES, 'UTF-8') ?></span>
+            </div>
+            <div class="portfolio-exhibition-controls">
+                <span class="portfolio-exhibition-motion-label" data-portfolio-motion-label>CONTINUOUS EXHIBITION</span>
+                <button class="portfolio-exhibition-btn" type="button" data-portfolio-prev aria-label="Previous project"><span aria-hidden="true">←</span></button>
+                <button class="portfolio-exhibition-btn" type="button" data-portfolio-next aria-label="Next project"><span aria-hidden="true">→</span></button>
+            </div>
+        </div>
+        <div class="site-wrap portfolio-exhibition-progress" aria-hidden="true"><span data-portfolio-progress></span></div>
+        <div class="portfolio-exhibition-outro" aria-hidden="true"></div>
     </section>
 
     <?php if ($featuredIdeas): ?>

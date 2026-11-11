@@ -1,0 +1,39 @@
+/* IDEARE portfolio — tablet: one large project per slide, 6.5s autoplay. */
+#portfolio[data-portfolio-layout="tablet"] .portfolio-intro {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, .65fr);
+    gap: 30px;
+    margin-bottom: 34px;
+}
+#portfolio[data-portfolio-layout="tablet"] .portfolio-heading { font-size: clamp(42px, 6vw, 67px); }
+#portfolio[data-portfolio-layout="tablet"] .portfolio-shell { width: min(calc(100% - 54px), 1000px); }
+#portfolio[data-portfolio-layout="tablet"] .portfolio-viewport { width: 100%; padding: 8px 0 18px; }
+#portfolio[data-portfolio-layout="tablet"] .portfolio-track { display: block; width: 100%; animation: none !important; }
+#portfolio[data-portfolio-layout="tablet"] .portfolio-track-group {
+    display: flex;
+    width: 100%;
+    gap: 0;
+    padding: 0;
+    transition: transform .82s cubic-bezier(.22,.78,.22,1);
+    will-change: transform;
+}
+#portfolio[data-portfolio-layout="tablet"] .portfolio-project {
+    flex: 0 0 100%;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 13px;
+}
+#portfolio[data-portfolio-layout="tablet"] .portfolio-project-title { font-size: clamp(27px, 3.4vw, 40px); }
+#portfolio[data-portfolio-layout="tablet"] .portfolio-gallery::before,
+#portfolio[data-portfolio-layout="tablet"] .portfolio-gallery::after { display: none; }
+#portfolio[data-portfolio-layout="tablet"] .portfolio-gallery-footer { padding-top: 12px; }
+.portfolio-modal { padding: 20px; }
+.portfolio-modal-panel {
+    width: min(1160px, calc(100vw - 40px));
+    max-height: 94svh;
+    grid-template-columns: minmax(250px, .7fr) minmax(0, 1.3fr);
+}
+.portfolio-modal-info { padding: 35px 27px; }
+.portfolio-modal-gallery { gap: 9px; padding: 13px; }
+@media (prefers-reduced-motion: reduce) {
+    #portfolio[data-portfolio-layout="tablet"] .portfolio-track-group { transition: none !important; }
+}
