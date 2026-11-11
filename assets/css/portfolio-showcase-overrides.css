@@ -1,0 +1,446 @@
+/* IDEARE portfolio refinements.
+   Loaded after the shared and device-specific portfolio stylesheets so the
+   popup and card treatment remain consistent at every breakpoint/zoom level.
+*/
+
+/* Fluid exhibition geometry */
+#portfolio.portfolio-showcase {
+    overflow: hidden;
+}
+
+#portfolio .portfolio-shell {
+    width: min(1540px, calc(100% - clamp(32px, 5vw, 80px)));
+}
+
+#portfolio .portfolio-intro {
+    grid-template-columns: minmax(0, 1.15fr) minmax(220px, .65fr);
+    gap: clamp(24px, 5vw, 80px);
+}
+
+#portfolio .portfolio-project-shade {
+    background:
+        linear-gradient(
+            180deg,
+            rgba(5, 5, 5, .015) 0%,
+            rgba(5, 5, 5, .015) 54%,
+            rgba(5, 5, 5, .24) 76%,
+            rgba(0, 0, 0, .66) 100%
+        );
+}
+
+#portfolio .portfolio-project-copy {
+    gap: 5px;
+    padding: clamp(14px, 2vw, 24px);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .32s ease, transform .38s cubic-bezier(.2, .75, .25, 1);
+}
+
+#portfolio .portfolio-project-meta {
+    color: rgba(245, 232, 215, .72);
+    font-size: 8px;
+    font-weight: 650;
+    letter-spacing: .13em;
+}
+
+#portfolio .portfolio-project-title {
+    max-width: 100%;
+    color: rgba(255, 249, 240, .91);
+    font-size: clamp(16px, 1.45vw, 22px);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: -.025em;
+}
+
+#portfolio .portfolio-project-bottom {
+    margin-top: 1px;
+}
+
+#portfolio .portfolio-project-count {
+    color: rgba(255, 247, 235, .52);
+    font-size: 8px;
+}
+
+#portfolio .portfolio-project-action {
+    color: rgba(255, 247, 235, .70);
+    font-size: 9px;
+    font-weight: 600;
+}
+
+#portfolio .portfolio-project:hover .portfolio-project-copy,
+#portfolio .portfolio-project:focus-visible .portfolio-project-copy {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#portfolio .portfolio-project:focus-visible {
+    outline: 2px solid var(--portfolio-gold);
+    outline-offset: 5px;
+}
+
+@media (hover: none), (pointer: coarse) {
+    #portfolio .portfolio-project-copy {
+        opacity: 1;
+        transform: none;
+    }
+
+    #portfolio .portfolio-project-title {
+        font-size: clamp(16px, 2.3vw, 22px);
+    }
+}
+
+#portfolio[data-portfolio-layout="tablet"] .portfolio-project-title,
+#portfolio[data-portfolio-layout="phone"] .portfolio-project-title {
+    font-size: clamp(15px, 2.2vw, 20px);
+    color: rgba(255, 249, 240, .91);
+    font-weight: 600;
+}
+
+@media (min-width: 1200px) {
+    #portfolio .portfolio-project {
+        width: clamp(360px, 37vw, 590px);
+    }
+}
+
+@media (max-width: 1199px) {
+    #portfolio .portfolio-shell {
+        width: min(calc(100% - 48px), 1000px);
+    }
+
+    #portfolio .portfolio-project {
+        width: 100%;
+    }
+
+    #portfolio .portfolio-project-title {
+        font-size: clamp(17px, 2.2vw, 23px);
+    }
+}
+
+@media (max-width: 767px) {
+    #portfolio.portfolio-showcase {
+        padding: 76px 0 84px;
+    }
+
+    #portfolio .portfolio-shell {
+        width: min(calc(100% - 34px), 620px);
+    }
+
+    #portfolio .portfolio-project-copy {
+        padding: 18px;
+    }
+
+    #portfolio .portfolio-project-title {
+        font-size: clamp(16px, 4.8vw, 21px);
+    }
+}
+
+/* Project popup: one scroll container for the complete description and gallery. */
+.portfolio-modal {
+    padding: clamp(8px, 2vw, 28px);
+    overflow: hidden;
+}
+
+.portfolio-modal-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(1240px, calc(100vw - clamp(20px, 5vw, 64px)));
+    max-height: min(92svh, 1000px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+.portfolio-modal-close {
+    position: sticky;
+    top: 12px;
+    align-self: flex-end;
+    flex: 0 0 42px;
+    margin: 12px 14px -54px auto;
+}
+
+.portfolio-modal-info {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: start;
+    gap: 12px clamp(20px, 4vw, 48px);
+    overflow: visible;
+    padding: clamp(54px, 5vw, 70px) clamp(24px, 4vw, 60px) clamp(26px, 3vw, 42px);
+    border-right: 0;
+    border-bottom: 1px solid rgba(235, 220, 201, .13);
+}
+
+.portfolio-modal-index {
+    display: none !important;
+}
+
+.portfolio-modal-meta {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding-right: 54px;
+    color: #cdb08d;
+    font-size: 9px;
+    letter-spacing: .14em;
+}
+
+.portfolio-modal-title {
+    grid-column: 1;
+    max-width: none;
+    margin: 0;
+    font-size: clamp(30px, 3.1vw, 48px);
+}
+
+.portfolio-modal-description {
+    grid-column: 2;
+    max-width: none;
+    margin: 0;
+    font-size: clamp(13px, 1.05vw, 15px);
+    line-height: 1.85;
+}
+
+.portfolio-modal-note {
+    display: none;
+}
+
+.portfolio-modal-gallery {
+    flex: 0 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: clamp(10px, 1.4vw, 18px);
+    min-width: 0;
+    overflow: visible;
+    padding: clamp(12px, 2vw, 24px);
+}
+
+.portfolio-modal-photo {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid rgba(239, 224, 206, .12);
+    border-radius: 9px;
+    background: #080808;
+}
+
+.portfolio-modal-photo.is-cover-photo {
+    grid-column: 1 / -1;
+}
+
+.portfolio-modal-photo-trigger {
+    appearance: none;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0 !important;
+    border-radius: 0;
+    background: #080808 !important;
+    box-shadow: none !important;
+    line-height: 0;
+    cursor: zoom-in;
+}
+
+.portfolio-modal-photo-trigger:hover,
+.portfolio-modal-photo-trigger:focus-visible {
+    background: #080808 !important;
+    box-shadow: none !important;
+}
+
+.portfolio-modal-photo-trigger:focus-visible {
+    outline: 2px solid #c6a47d;
+    outline-offset: -3px;
+}
+
+.portfolio-modal-photo-trigger img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none;
+    object-fit: contain;
+    background: #080808;
+}
+
+.portfolio-modal-photo figcaption {
+    padding: 9px 12px 10px;
+    border-top: 1px solid rgba(239, 224, 206, .09);
+    color: #c7b9a8;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .055em;
+}
+
+/* Nested photo viewer: clicking the backdrop returns to the project popup. */
+.portfolio-image-viewer {
+    position: fixed;
+    z-index: 10002;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background: rgba(5, 5, 5, .93);
+    backdrop-filter: blur(14px) grayscale(.9);
+    -webkit-backdrop-filter: blur(14px) grayscale(.9);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .25s ease, visibility .25s ease;
+}
+
+.portfolio-image-viewer.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.portfolio-image-viewer-image {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(94vw, 1700px);
+    max-height: 94svh;
+    object-fit: contain;
+    background: #080808;
+    box-shadow: 0 28px 100px rgba(0, 0, 0, .55);
+    cursor: default;
+    user-select: none;
+}
+
+.portfolio-image-viewer-caption {
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    margin: 0;
+    color: rgba(245, 235, 222, .68);
+    font-size: 9px;
+    font-weight: 650;
+    letter-spacing: .13em;
+    text-align: center;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+.portfolio-modal-empty {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 1199px) {
+    .portfolio-modal {
+        padding: 12px;
+    }
+
+    .portfolio-modal-panel {
+        width: calc(100vw - 24px);
+        max-height: 94svh;
+    }
+
+    .portfolio-modal-info {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 11px;
+        padding: 54px 28px 25px;
+    }
+
+    .portfolio-modal-meta,
+    .portfolio-modal-title,
+    .portfolio-modal-description {
+        grid-column: 1;
+    }
+
+    .portfolio-modal-title {
+        font-size: clamp(29px, 4vw, 43px);
+    }
+
+    .portfolio-modal-description {
+        font-size: 13px;
+        line-height: 1.75;
+    }
+
+    .portfolio-modal-gallery {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 11px;
+        padding: 13px;
+    }
+
+    .portfolio-modal-photo.is-cover-photo {
+        grid-column: auto;
+    }
+}
+
+@media (max-width: 767px) {
+    .portfolio-modal {
+        padding: 7px;
+    }
+
+    .portfolio-modal-panel {
+        width: calc(100vw - 14px);
+        max-height: 96svh;
+        border-radius: 13px;
+    }
+
+    .portfolio-modal-close {
+        width: 36px;
+        height: 36px;
+        flex-basis: 36px;
+        margin: 8px 9px -44px auto;
+        font-size: 24px;
+    }
+
+    .portfolio-modal-info {
+        padding: 49px 19px 21px;
+        gap: 9px;
+    }
+
+    .portfolio-modal-meta {
+        max-width: calc(100% - 36px);
+        font-size: 8px;
+    }
+
+    .portfolio-modal-title {
+        font-size: clamp(27px, 7.2vw, 37px);
+    }
+
+    .portfolio-modal-description {
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    .portfolio-modal-gallery {
+        gap: 9px;
+        padding: 10px;
+    }
+
+    .portfolio-modal-photo figcaption {
+        padding: 8px 10px;
+        font-size: 8px;
+    }
+
+    .portfolio-image-viewer {
+        padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right))
+            max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+    }
+
+    .portfolio-image-viewer-image {
+        max-width: 96vw;
+        max-height: 92svh;
+    }
+
+    .portfolio-image-viewer-caption {
+        left: 10px;
+        right: 10px;
+        bottom: max(8px, env(safe-area-inset-bottom));
+        font-size: 8px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #portfolio .portfolio-project-copy,
+    #portfolio .portfolio-project-image,
+    .portfolio-modal,
+    .portfolio-modal-panel,
+    .portfolio-modal-close,
+    .portfolio-image-viewer {
+        transition: none !important;
+    }
+}

@@ -54,6 +54,7 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-desktop.css" media="(min-width: 1200px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-tablet.css" media="(min-width: 768px) and (max-width: 1199px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-phone.css" media="(max-width: 767px)">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-showcase-overrides.css">
 <?php endif; ?>
 </head>
 <body>
