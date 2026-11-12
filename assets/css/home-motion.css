@@ -1,0 +1,272 @@
+/* IDEARE / Homepage motion direction
+   Architectural, restrained and image-led. Loaded by homepage.js on the
+   homepage only; the Cabinet Inspirations section and later sections are
+   intentionally outside this motion layer. */
+
+/* ───────────────────── 01 / Hero: editorial stagger + restrained parallax ───────────────────── */
+.home-hero {
+    background-position:
+        center,
+        center,
+        center calc(50% + var(--hero-image-shift, 0px));
+}
+
+.home-hero-kicker,
+.home-hero h1,
+.home-hero-lead,
+.home-hero-actions,
+.home-hero-scroll {
+    animation: ideare-hero-rise .82s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+.home-hero-kicker { animation-delay: .08s; }
+.home-hero h1 { animation-delay: .18s; }
+.home-hero-lead { animation-delay: .31s; }
+.home-hero-actions { animation-delay: .44s; }
+.home-hero-scroll { animation-delay: .68s; }
+
+.home-hero-copy::before {
+    content: '';
+    position: absolute;
+    left: -22px;
+    top: 3px;
+    width: 1px;
+    height: clamp(95px, 12vw, 165px);
+    background: linear-gradient(to bottom, rgba(224, 196, 160, .85), rgba(224, 196, 160, 0));
+    transform-origin: top;
+    animation: ideare-line-draw .9s cubic-bezier(.19, 1, .22, 1) .22s both;
+}
+
+/* ───────────────────── 02 / About: photographic mask + studio depth ───────────────────── */
+.home-studio .studio-photo {
+    transform: translate3d(0, var(--studio-parallax-y, 0px), 0) scale(1.035);
+    will-change: transform, clip-path;
+}
+
+.home-studio.is-motion-visible .studio-photo {
+    animation: ideare-studio-mask 1.25s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+.home-studio.is-motion-visible .studio-story h2 {
+    animation: ideare-title-mask .92s cubic-bezier(.19, 1, .22, 1) .12s both;
+}
+
+.home-studio.is-motion-visible .studio-established strong {
+    animation: ideare-number-reveal .9s cubic-bezier(.19, 1, .22, 1) .24s both;
+}
+
+.home-studio.is-motion-visible .studio-established-rule {
+    transform-origin: left;
+    animation: ideare-line-draw .85s cubic-bezier(.19, 1, .22, 1) .36s both;
+}
+
+/* ───────────────────── 03 / What We Do: kinetic chapter titles + image wipes ───────────────────── */
+.service-story-opening.is-motion-visible h2 {
+    animation: ideare-title-mask .92s cubic-bezier(.19, 1, .22, 1) .08s both;
+}
+
+.service-story-opening.is-motion-visible .service-story-opening-line {
+    transform-origin: left;
+    animation: ideare-line-draw .8s cubic-bezier(.19, 1, .22, 1) .18s both;
+}
+
+.service-story.is-enhanced .service-story-stage[aria-hidden="false"] .service-story-photo {
+    animation: ideare-stage-image-wipe .92s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+.service-story.is-enhanced .service-story-stage[aria-hidden="false"] .service-story-copy h3 {
+    animation: ideare-title-mask .76s cubic-bezier(.19, 1, .22, 1) .08s both;
+}
+
+/* Phone keeps its native vertical scroll and reveals each chapter as it enters view. */
+.service-story.is-phone-story .service-story-stage.is-in-view .service-story-photo {
+    animation: ideare-phone-image-wipe .88s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+.service-story.is-phone-story .service-story-stage.is-in-view .service-story-copy h3 {
+    animation: ideare-title-mask .72s cubic-bezier(.19, 1, .22, 1) .08s both;
+}
+
+.service-story-outro.is-motion-visible h3 {
+    animation: ideare-title-mask .88s cubic-bezier(.19, 1, .22, 1) .08s both;
+}
+
+/* ───────────────────── 04 / Portfolio: image-first reveal, existing gallery motion retained ───────────────────── */
+#portfolio.portfolio-motion-ready .portfolio-intro.is-motion-visible {
+    animation: ideare-portfolio-intro .9s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+#portfolio.portfolio-motion-ready .portfolio-intro-side.is-motion-visible {
+    animation: ideare-portfolio-intro .9s cubic-bezier(.19, 1, .22, 1) .13s both;
+}
+
+#portfolio.portfolio-motion-ready .portfolio-intro.is-motion-visible .portfolio-heading {
+    animation: ideare-title-mask .82s cubic-bezier(.19, 1, .22, 1) .12s both;
+}
+
+#portfolio.portfolio-motion-ready .portfolio-project.is-motion-visible {
+    animation: ideare-card-focus .82s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+#portfolio.portfolio-motion-ready .portfolio-project.is-motion-visible .portfolio-project-image {
+    animation: ideare-portfolio-image-wipe .95s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+#portfolio.portfolio-motion-ready [data-portfolio-card].is-motion-visible .portfolio-exhibit-media {
+    animation: ideare-card-focus .82s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+#portfolio.portfolio-motion-ready [data-portfolio-card].is-motion-visible .portfolio-exhibit-image {
+    animation: ideare-portfolio-image-wipe .95s cubic-bezier(.19, 1, .22, 1) both;
+}
+
+/* ───────────────────── Motion primitives ───────────────────── */
+@keyframes ideare-hero-rise {
+    from { opacity: 0; transform: translate3d(0, 23px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ideare-line-draw {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+
+@keyframes ideare-studio-mask {
+    from { clip-path: inset(0 11% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ideare-title-mask {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ideare-number-reveal {
+    from { clip-path: inset(0 0 100% 0); transform: translate3d(0, 12px, 0); }
+    to { clip-path: inset(0 0 0 0); transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ideare-stage-image-wipe {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ideare-phone-image-wipe {
+    from { clip-path: inset(0 0 100% 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes ideare-portfolio-intro {
+    from { opacity: .25; transform: translate3d(0, 23px, 0); }
+    to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+
+@keyframes ideare-card-focus {
+    from { opacity: .62; filter: blur(5px); }
+    to { opacity: 1; filter: blur(0); }
+}
+
+@keyframes ideare-portfolio-image-wipe {
+    from { clip-path: inset(0 0 0 100%); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+/* ───────────────────── Responsive motion tuning ───────────────────── */
+@media (min-width: 1200px) {
+    .home-hero-copy::before { left: -27px; }
+    .home-studio .studio-photo { transform: translate3d(0, var(--studio-parallax-y, 0px), 0) scale(1.045); }
+    .service-story.is-enhanced .service-story-stage[aria-hidden="false"] .service-story-photo {
+        animation-duration: 1.02s;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    .home-hero {
+        background-position:
+            center,
+            center,
+            65% calc(50% + var(--hero-image-shift, 0px));
+    }
+
+    .home-hero-copy::before { left: -16px; height: 125px; }
+    .home-studio .studio-photo { transform: translate3d(0, var(--studio-parallax-y, 0px), 0) scale(1.025); }
+    .service-story.is-enhanced .service-story-stage[aria-hidden="false"] .service-story-photo {
+        animation-duration: .82s;
+    }
+}
+
+@media (max-width: 767px) {
+    .home-hero {
+        background-position:
+            center,
+            center,
+            64% calc(50% + var(--hero-image-shift, 0px));
+    }
+
+    .home-hero-copy::before {
+        left: -11px;
+        height: 105px;
+        opacity: .72;
+    }
+
+    .home-hero-kicker,
+    .home-hero h1,
+    .home-hero-lead,
+    .home-hero-actions,
+    .home-hero-scroll {
+        animation-duration: .68s;
+    }
+
+    .home-studio .studio-photo {
+        transform: translate3d(0, var(--studio-parallax-y, 0px), 0) scale(1.015);
+    }
+
+    .home-studio.is-motion-visible .studio-photo {
+        animation-duration: .95s;
+    }
+
+    .service-story.is-phone-story .service-story-stage.is-in-view .service-story-photo {
+        animation-duration: .72s;
+    }
+
+    #portfolio.portfolio-motion-ready .portfolio-project.is-motion-visible .portfolio-project-image,
+    #portfolio.portfolio-motion-ready [data-portfolio-card].is-motion-visible .portfolio-exhibit-image {
+        animation-duration: .72s;
+    }
+}
+
+/* Reduced motion: retain the complete page and its existing static fallbacks. */
+@media (prefers-reduced-motion: reduce) {
+    .home-hero-kicker,
+    .home-hero h1,
+    .home-hero-lead,
+    .home-hero-actions,
+    .home-hero-scroll,
+    .home-hero-copy::before,
+    .home-studio.is-motion-visible .studio-photo,
+    .home-studio.is-motion-visible .studio-story h2,
+    .home-studio.is-motion-visible .studio-established strong,
+    .home-studio.is-motion-visible .studio-established-rule,
+    .service-story-opening.is-motion-visible h2,
+    .service-story-opening.is-motion-visible .service-story-opening-line,
+    .service-story.is-enhanced .service-story-stage[aria-hidden="false"] .service-story-photo,
+    .service-story.is-enhanced .service-story-stage[aria-hidden="false"] .service-story-copy h3,
+    .service-story.is-phone-story .service-story-stage.is-in-view .service-story-photo,
+    .service-story.is-phone-story .service-story-stage.is-in-view .service-story-copy h3,
+    .service-story-outro.is-motion-visible h3,
+    #portfolio.portfolio-motion-ready .portfolio-intro.is-motion-visible,
+    #portfolio.portfolio-motion-ready .portfolio-intro-side.is-motion-visible,
+    #portfolio.portfolio-motion-ready .portfolio-intro.is-motion-visible .portfolio-heading,
+    #portfolio.portfolio-motion-ready .portfolio-project.is-motion-visible,
+    #portfolio.portfolio-motion-ready .portfolio-project.is-motion-visible .portfolio-project-image,
+    #portfolio.portfolio-motion-ready [data-portfolio-card].is-motion-visible .portfolio-exhibit-media,
+    #portfolio.portfolio-motion-ready [data-portfolio-card].is-motion-visible .portfolio-exhibit-image {
+        animation: none !important;
+        clip-path: none !important;
+        filter: none !important;
+        transform: none !important;
+    }
+
+    .home-hero { --hero-image-shift: 0px !important; }
+    .home-studio .studio-photo { transform: none !important; }
+}
