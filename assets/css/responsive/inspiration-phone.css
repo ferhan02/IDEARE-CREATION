@@ -1,0 +1,68 @@
+/* IDEARE Cabinet Inspiration — phone below 768px. */
+@media (max-width:767px) {
+  .ic-showroom {padding:74px 0 76px;}
+  .ic-showroom .ic-shell.site-wrap {width:min(calc(100% - 32px),620px);}
+  .ic-intro {display:block;margin-bottom:24px;}
+  .ic-intro h2 {font-size:clamp(40px,10.3vw,62px);}
+  .ic-intro-desc {font-size:13px;line-height:1.7;margin-top:17px;}
+  .ic-browse-link {margin-top:21px;min-height:40px;font-size:11px;}
+  .ic-filter-bar {padding:12px 0;margin-bottom:16px;align-items:start;display:block;}
+  .ic-filters {display:flex;overflow-x:auto;flex-wrap:nowrap;gap:7px;scrollbar-width:none;padding:4px 0 8px;}
+  .ic-filters::-webkit-scrollbar {display:none;}
+  .ic-filter {flex:0 0 auto;font-size:10px;padding:10px 13px;}
+  .ic-results {display:block;text-align:right;font-size:9px;}
+  .ic-stage {display:block;}
+  .ic-hero-media {aspect-ratio:4/3;min-height:0;border-radius:8px;touch-action:pan-y;}
+  .ic-hero-corner {top:17px;left:16px;font-size:8px;}
+  .ic-image-view {left:17px;right:17px;bottom:19px;font-size:11px;}
+  .ic-hero-foot {font-size:8px;letter-spacing:.13em;padding:11px 1px 18px;}
+  .ic-feature {display:block;}
+  .ic-feature-main {padding:27px 22px 25px;}
+  .ic-feature-kicker {margin-bottom:22px;font-size:8px;}
+  .ic-feature-room {font-size:9px;}
+  .ic-feature-title {font-size:clamp(31px,8vw,44px);margin:11px 0 13px;}
+  .ic-feature-description {font-size:12px;line-height:1.7;-webkit-line-clamp:3;}
+  .ic-feature-tags {margin-top:16px;}
+  .ic-feature-actions {display:grid;grid-template-columns:1fr;gap:9px;margin-top:21px;}
+  .ic-showroom .ic-feature-actions .ic-button {min-height:48px;}
+  .ic-feature-bottom {padding:19px 18px 20px;}
+  .ic-preview {flex:0 0 clamp(118px,36vw,164px);}
+  .ic-preview-name {font-size:10px;}
+  .ic-feature-controls {font-size:8px;letter-spacing:.08em;}
+  .ic-nav {width:41px;height:41px;}
+  .ic-endline {font-size:8px;letter-spacing:.08em;}
+  .ic-empty {display:block;padding-top:14px;}
+  .ic-empty-art {min-height:260px;padding:36px;}
+  .ic-empty > div:last-child {padding-top:28px;}
+  .ic-empty h3 {font-size:34px;}
+  .ic-empty p:not(.ic-eyebrow) {font-size:13px;}
+  .ic-page {padding-top:40px;}
+  .ic-page .ic-breadcrumb {margin-bottom:30px;}
+  .ic-page .ic-page-context h1 {font-size:clamp(39px,10.2vw,59px);}
+  .ic-page .ic-page-context > p:last-child {font-size:13px;}
+  .ic-page .ic-showroom {padding-top:10px;}
+  .ic-collection {margin-top:50px;}
+  .ic-collection-head {display:block;}
+  .ic-collection-head h3 {font-size:30px;}
+  .ic-collection-head p {margin:9px 0 0;}
+  .ic-collection-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  .ic-tile-photo {aspect-ratio:3/4;}
+  .ic-tile-info {padding-top:11px;}
+  .ic-tile-info strong {font-size:16px;}
+  .ic-tile-info small {font-size:8px;letter-spacing:.04em;}
+  .ic-tile-overlay {min-height:53px;padding:12px;font-size:9px;}
+  .ic-dialog {padding:7px;}
+  .ic-dialog-panel {width:calc(100vw - 14px);max-height:96svh;border-radius:9px;}
+  .ic-dialog-close {width:38px;height:38px;margin:9px 10px -48px auto;}
+  .ic-dialog-header {display:block;padding:57px 19px 21px;}
+  .ic-detail-kicker {font-size:9px;margin-bottom:13px;}
+  .ic-dialog-header h2 {font-size:clamp(31px,8vw,43px);margin-bottom:14px;}
+  .ic-detail-description {font-size:12px;line-height:1.7;}
+  .ic-dialog-gallery {padding:10px;}
+  .ic-detail-thumb {flex-basis:97px;}
+  .ic-dialog-footer {display:block;padding:24px 19px 30px;}
+  .ic-dialog-cta {border-left:0;border-top:1px solid var(--ic-line);padding:21px 0 0;margin-top:23px;}
+  .ic-dialog-cta p {font-size:12px;}
+  .ic-lightbox {padding:10px;}
+  .ic-lightbox img {max-width:96vw;max-height:91svh;}
+}

@@ -1,0 +1,21 @@
+/* IDEARE Cabinet Inspiration — tablet 768–1199px. */
+@media (min-width:768px) and (max-width:1199px) {
+  .ic-showroom .ic-shell.site-wrap {width:min(100% - 54px,1000px);}
+  .ic-intro {align-items:start;gap:25px;}
+  .ic-intro h2 {font-size:clamp(46px,6.3vw,76px);}
+  .ic-browse-link {margin-top:20px;}
+  .ic-stage {grid-template-columns:minmax(0,1fr);gap:0;}
+  .ic-hero-media {min-height:0;aspect-ratio:16/10;border-radius:9px 9px 0 0;}
+  .ic-hero-foot {padding-bottom:17px;}
+  .ic-feature {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:0;}
+  .ic-feature-main {padding:27px 28px 31px;}
+  .ic-feature-kicker {margin-bottom:28px;}
+  .ic-feature-title {font-size:clamp(32px,4.1vw,43px);}
+  .ic-feature-bottom {border-top:0;border-left:1px solid var(--ic-line);padding:25px 24px;display:flex;flex-direction:column;justify-content:space-between;}
+  .ic-preview {flex-basis:clamp(118px,16vw,162px);}
+  .ic-feature-actions {gap:8px;}
+  .ic-collection-grid {grid-template-columns:repeat(2,minmax(0,1fr));}
+  .ic-dialog-header {grid-template-columns:1fr;gap:13px;}
+  .ic-dialog-header h2,.ic-detail-description {grid-column:1;}
+  .ic-dialog-footer {grid-template-columns:1fr 1fr;}
+}

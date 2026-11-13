@@ -1,0 +1,11 @@
+/* IDEARE Cabinet Inspiration — desktop > 1200px. */
+@media (min-width:1200px) {
+  .ic-showroom .ic-shell.site-wrap {width:min(1480px,calc(100% - 112px));}
+  .ic-stage {grid-template-columns:minmax(0,1.3fr) minmax(370px,.7fr);}
+  .ic-hero-media {min-height:620px;}
+  .ic-feature-main {padding-top:46px;}
+  .ic-preview {flex-basis:clamp(125px,10vw,175px);}
+  .ic-collection-grid {grid-template-columns:repeat(3,minmax(0,1fr));}
+  .ic-collection-grid .ic-tile:nth-child(5n + 1) {grid-column:span 2;}
+  .ic-collection-grid .ic-tile:nth-child(5n + 1) .ic-tile-photo {aspect-ratio:2.05;}
+}

@@ -20,6 +20,7 @@ $pageScripts = $pageScripts ?? [];
 <?php endforeach; ?>
 <?php if (($idearePage ?? '') === 'home'): ?>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-showcase.js"></script>
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/inspiration-showroom.js"></script>
 <?php endif; ?>
 <!-- This loader uses matchMedia, not user-agent strings or a paid detection API. -->
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/responsive/shared.js"></script>

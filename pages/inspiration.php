@@ -1,1 +1,19 @@
-<?php require_once __DIR__.'/../includes/staff/feature-tools.php';$pdo=staff_db();$rows=[];try{$rows=$pdo->query('SELECT * FROM inspiration_designs WHERE is_published=1 ORDER BY is_featured DESC,sort_order,created_at DESC')->fetchAll(PDO::FETCH_ASSOC);}catch(Throwable $e){}?><!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cabinet Inspiration · IdeaRE</title><link rel="stylesheet" href="<?=h(ideare_root_url('assets/css/staff.css'))?>"><link rel="stylesheet" href="<?=h(ideare_root_url('assets/css/crm-projects.css'))?>"></head><body><main class="public-shell"><a href="<?=h(ideare_root_url('index.php'))?>">← IdeaRE</a><h1>Cabinet Inspiration</h1><p>Browse styles, then open the configurator to make them your own.</p><div class="public-grid"><?php foreach($rows as $r):?><article class="public-card"><?php if($r['cover_image']):?><img src="<?=h(ideare_root_url($r['cover_image']))?>" alt=""><?php endif?><div class="body"><small><?=h($r['style_name']?:'IdeaRE design')?> · <?=h($r['room_type']?:'')?></small><h2><?=h($r['title'])?></h2><p><?=h($r['description']?:'')?></p><a class="btn primary" href="<?=h(ideare_root_url('designer/index.php'.($r['base_design_id']?'?design_id='.$r['base_design_id']:'')))?>">Customize this design</a></div></article><?php endforeach?></div></main></body></html>
+<?php
+/** Customer-facing full inspiration showroom; published records load from the public feed. */
+$pageTitle = 'Cabinet Inspiration | IDEARE Creation';
+$pageScripts = ['assets/js/inspiration-showroom.js'];
+require __DIR__ . '/../includes/customer/header.php';
+?>
+<main class="ic-page" id="main-content">
+  <div class="ic-page-context site-wrap">
+    <a class="ic-breadcrumb" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>index.php#inspiration">← Back to homepage</a>
+    <p class="ic-page-eyebrow">IDEARE / CABINET INSPIRATIONS</p>
+    <h1>Ideas worth making your own.</h1>
+    <p>Explore our cabinetry concepts by room. Every inspiration is a starting point — dimensions, finishes and storage arrangements can be tailored to your space.</p>
+  </div>
+  <div data-inspiration-page="all" class="ic-loading-wrap site-wrap" aria-live="polite">
+    <p class="ic-loading-message">Preparing the design gallery…</p>
+    <p><a href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>designer/index.php">Or start your own cabinet design</a></p>
+  </div>
+</main>
+<?php require __DIR__ . '/../includes/customer/footer.php'; ?>
