@@ -1,6 +1,6 @@
 <?php
 $pageTitle='IDEARE | 3D Space & Cabinet Designer';
-$pageStyles=['assets/css/designer-3d.css'];
+$pageStyles=['assets/css/designer-3d.css','assets/css/designer-3d-compact-theme.css'];
 require __DIR__.'/../includes/customer/header.php';
 ?>
 <main class="id3-app" id="id3-app">

@@ -1,0 +1,126 @@
+/* IDEARE designer-only refinement. Load AFTER designer-3d.css. */
+html[data-ideare-page="designer"] .id3-app {
+  --id3-line: #ded8ce;
+  --id3-surface: #fff;
+  --id3-soft: #f6f3ee;
+  --id3-muted: #716b62;
+  width: min(100%, 1740px);
+  max-width: none;
+  padding: clamp(12px,1.5vw,22px) clamp(14px,2.5vw,38px) 22px;
+}
+html[data-ideare-page="designer"] .id3-app .id3-section { min-height: 0; }
+html[data-ideare-page="designer"] .id3-app .id3-topline { padding-bottom: 12px; gap: 12px; }
+html[data-ideare-page="designer"] .id3-app h1 { font-size: clamp(27px,2.4vw,37px); margin: 3px 0 4px; }
+html[data-ideare-page="designer"] .id3-app h2 { font-size: clamp(20px,2vw,27px); margin-bottom: 2px; }
+html[data-ideare-page="designer"] .id3-app h3 { margin-bottom: 9px; }
+html[data-ideare-page="designer"] .id3-app .id3-steps { margin-bottom: 14px; padding: 4px; }
+html[data-ideare-page="designer"] .id3-app .id3-steps button { min-height: 37px; padding: 6px 9px; }
+html[data-ideare-page="designer"] .id3-app .id3-intro { margin-bottom: 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-intro p { font-size: 13px; }
+html[data-ideare-page="designer"] .id3-app .id3-btn { padding: 9px 13px; min-height: 38px; font-size: 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-step-footer { margin-top: 14px; padding-top: 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-card { padding: 15px; }
+html[data-ideare-page="designer"] .id3-app label { margin: 7px 0; gap: 4px; }
+html[data-ideare-page="designer"] .id3-app input:not([type="checkbox"]):not([type="range"]),
+html[data-ideare-page="designer"] .id3-app select { min-height: 36px; padding: 7px 10px; }
+html[data-ideare-page="designer"] .id3-app textarea { padding: 8px 10px; min-height: 68px; }
+html[data-ideare-page="designer"] .id3-app .id3-separator { margin: 12px 0; }
+html[data-ideare-page="designer"] .id3-app .id3-shapes { max-width: none; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+html[data-ideare-page="designer"] .id3-app .id3-shapes button { min-height: 135px; gap: 2px; padding: 8px 10px; border-radius: 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-shapes svg { width: 105px; height: 68px; }
+html[data-ideare-page="designer"] .id3-app .id3-shapes strong { font-size: 13px; }
+html[data-ideare-page="designer"] .id3-app .id3-shapes small { font-size: 11px; }
+html[data-ideare-page="designer"] .id3-app .id3-room-layout { grid-template-columns: minmax(260px,310px) minmax(0,1fr); gap: 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-plan-panel { min-height: 0; display: flex; flex-direction: column; }
+html[data-ideare-page="designer"] .id3-app .id3-floor-svg { height: clamp(290px,43vh,395px); min-height: 0; }
+html[data-ideare-page="designer"] .id3-app .id3-floor-svg svg { max-height: 100%; }
+html[data-ideare-page="designer"] .id3-app .id3-catalog { margin-bottom: 10px; padding: 4px; }
+html[data-ideare-page="designer"] .id3-app .id3-catalog>button { padding: 9px 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-design-grid { grid-template-columns: minmax(0,1fr) clamp(290px,24vw,355px); gap: 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-canvas-wrap { height: clamp(310px,47vh,510px); min-height: 0; }
+html[data-ideare-page="designer"] .id3-app .id3-viewport-toolbar,
+html[data-ideare-page="designer"] .id3-app .id3-canvas-footer,
+html[data-ideare-page="designer"] .id3-app .id3-list-header { padding: 9px 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-cabinet-list { padding: 4px 12px 10px; min-height: 48px; }
+html[data-ideare-page="designer"] .id3-app .id3-inspector { top: 82px; max-height: calc(100dvh - 95px); scrollbar-width: thin; }
+html[data-ideare-page="designer"] .id3-app .id3-inspector-empty { padding: 36px 16px; }
+html[data-ideare-page="designer"] .id3-app .id3-empty-icon { font-size: 45px; }
+html[data-ideare-page="designer"] .id3-app .id3-inspector-empty p { max-width: 34ch; margin-inline: auto; }
+html[data-ideare-page="designer"] .id3-app .id3-accordion summary { padding: 11px 13px; }
+html[data-ideare-page="designer"] .id3-app .id3-detail { padding: 0 13px 12px; }
+html[data-ideare-page="designer"] .id3-app .id3-final-grid { grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr); gap: 12px; align-items:start; }
+html[data-ideare-page="designer"] .id3-app .id3-summary-row { padding: 7px 0; }
+html[data-ideare-page="designer"] .id3-app .id3-final-buttons { margin-top: 11px; gap: 7px; }
+html[data-ideare-page="designer"] .id3-app .id3-note { margin: 7px 0; }
+
+/* Complete palette: avoids light controls and unreadable text in dark mode. */
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app {
+  --id3-ink: #eeeae5;
+  --id3-muted: #b8afa5;
+  --id3-line: #4d4843;
+  --id3-surface: #292827;
+  --id3-soft: #363330;
+  --id3-accent: #d6ae7f;
+  color-scheme: dark;
+}
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(.id3-card,.id3-viewport-col,.id3-inspector,.id3-catalog,.id3-megamenu,.id3-shapes button) { background: var(--id3-surface); color: var(--id3-ink); border-color: var(--id3-line); }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(input,select,textarea) { background: #222120; color: var(--id3-ink); border-color: #555049; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(input,textarea)::placeholder { color: #a9a097; opacity: 1; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(.id3-steps,.id3-cabinet-list button,.id3-secondary,.id3-tiny,.id3-button-grid button,.id3-viewport-modes button,.id3-collection-row button,.id3-edit-mode button,.id3-object-actions button) { background: #34312e; border-color: #58524b; color: #eeeae5; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-steps button { background: transparent; color: #bcb2a5; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-steps button.current { background:#65513e; color:#fff; border-color:#826a50; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-steps button.done { color:#d4b18a; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-shapes button.selected,
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-cabinet-list button.selected,
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-material-results button.selected { background:#493b2f; border-color:#ad8b65; color:#fff; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(.id3-catalog>button.active,.id3-catalog>button:hover,.id3-object-actions button:hover,.id3-megagrid button:hover) { background:#474039; color:#fff; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(.id3-primary,.id3-viewport-modes button.active,.id3-edit-mode button.active) { background:#806041; border-color:#a17d57; color:white; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app :is(.id3-secondary,.id3-tiny,.id3-button-grid button,.id3-viewport-modes button):hover { background:#4a4239; color:#fff; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-canvas-wrap { background:radial-gradient(ellipse at 50% 35%,#565149,#373531); }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-canvas-hint { background:rgba(34,32,30,.91); color:#f0e9df; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app #canvas-loader { background:#302d2a; color:#eeeae5; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-floor-svg svg { background:#38332e; border-radius:10px; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-floor-svg svg>rect:first-child { fill:#403a34; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-floor-svg svg>polygon:first-of-type { fill:#77634b; stroke:#b6a18a; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-floor-svg svg>polygon:nth-of-type(2) { stroke:#d2c3ad; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-floor-svg svg text { fill:#eee7dc; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-floor-svg svg path { stroke:#dccdb8; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-message { background:#493924; border-color:#a78352; color:#f4dfc3; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-warning { background:#473822; border-color:#a3814f; color:#f5d7a7; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-error { background:#492c2b; border-color:#a85e57; color:#f6cbc7; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-save-result a { color:#e5c29c; }
+html[data-theme="dark"][data-ideare-page="designer"] .id3-app .id3-feature-list>div { border-color:var(--id3-line); }
+
+@media (max-width: 1199px) {
+  html[data-ideare-page="designer"] .id3-app .id3-room-layout { grid-template-columns: minmax(240px,300px) minmax(0,1fr); }
+  html[data-ideare-page="designer"] .id3-app .id3-design-grid { grid-template-columns:minmax(0,1fr) 300px; }
+}
+@media (max-width: 950px) {
+  html[data-ideare-page="designer"] .id3-app .id3-room-layout,
+  html[data-ideare-page="designer"] .id3-app .id3-design-grid,
+  html[data-ideare-page="designer"] .id3-app .id3-final-grid { grid-template-columns:1fr; }
+  html[data-ideare-page="designer"] .id3-app .id3-inspector { position:static;max-height:none; }
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 12px; }
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings h3,
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings .id3-separator,
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings .id3-button-grid,
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings .id3-feature-list,
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings .id3-note { grid-column:1/-1; }
+}
+@media (max-width: 650px) {
+  html[data-ideare-page="designer"] .id3-app { padding:12px 12px 20px; }
+  html[data-ideare-page="designer"] .id3-app .id3-topline { flex-direction:column;align-items:flex-start; }
+  html[data-ideare-page="designer"] .id3-app .id3-top-actions { flex-wrap:wrap; }
+  html[data-ideare-page="designer"] .id3-app .id3-steps { overflow-x:auto; }
+  html[data-ideare-page="designer"] .id3-app .id3-steps button { min-width:110px; }
+  html[data-ideare-page="designer"] .id3-app .id3-shapes { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  html[data-ideare-page="designer"] .id3-app .id3-shapes button { min-height:125px; }
+  html[data-ideare-page="designer"] .id3-app .id3-room-settings { grid-template-columns:1fr; }
+  html[data-ideare-page="designer"] .id3-app .id3-floor-svg { height:300px; }
+  html[data-ideare-page="designer"] .id3-app .id3-canvas-wrap { height:42svh;min-height:280px; }
+  html[data-ideare-page="designer"] .id3-app .id3-step-footer { flex-direction:column;align-items:stretch; }
+  html[data-ideare-page="designer"] .id3-app .id3-step-footer .id3-btn { width:100%; }
+  html[data-ideare-page="designer"] .id3-app .id3-small-fields { grid-template-columns:1fr;gap:0; }
+  html[data-ideare-page="designer"] .id3-app .id3-viewport-toolbar { flex-wrap:wrap; }
+  html[data-ideare-page="designer"] .id3-app .id3-canvas-hint { max-width:calc(100% - 24px); }
+}
