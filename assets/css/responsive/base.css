@@ -18,3 +18,17 @@ html[data-ideare-page] .service-story-stage { scroll-margin-top: var(--ideare-na
   html[data-ideare-page] { scroll-behavior: auto; }
   html[data-ideare-page] .service-story-stage img { transition: none !important; }
 }
+
+/* Keep the main document's vertical scrollbar visible and usable.
+   Firefox supports scrollbar-width/scrollbar-color; scrollbar-gutter reserves
+   the edge even when a browser would otherwise show an overlay scrollbar.
+   Do not apply these rules to nested galleries or modal scroll containers. */
+html[data-ideare-page] {
+  overflow-y: auto;
+  scrollbar-width: auto;
+  scrollbar-color: #8c8983 #eceae6;
+  scrollbar-gutter: stable;
+}
+html[data-ideare-page][data-theme="dark"] {
+  scrollbar-color: #8d8982 #252525;
+}
