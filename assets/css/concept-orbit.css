@@ -223,3 +223,144 @@ html[data-theme="dark"] .ci-page {
   .ci-orbit-ring,.ci-orbit-card,.ci-orbit-face,.ci-orbit-image img,.ci-page .ci-concept-card,.ci-concept-photo img,.ci-concept-view {transition:none!important;animation:none!important;}
   .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {transform:scale(1.045);}
 }
+
+/* ===========================================
+   IDEARE 2026 / true continuous 3D orbit
+   One shared composition on homepage and showroom.
+   =========================================== */
+.ci-home-section {
+  --ci-bg:#171613;
+  --ci-ink:#f7eee2;
+  --ci-gold:#d2ab7d;
+  --ci-muted:#c4b4a1;
+  position:relative;
+  isolation:isolate;
+  width:100%;
+  color:#f7eee2;
+  background:#171613;
+  overflow:hidden;
+}
+.ci-home-section *, .ci-home-section *::before, .ci-home-section *::after {box-sizing:border-box;}
+.ci-home-section :is(h1,h2,h3,p) {margin:0;}
+.ci-home-section .ci-landing {min-height:0;padding:clamp(37px,4.3vw,70px) 0 clamp(30px,3.6vw,59px);}
+.ci-home-section .ci-landing .ci-shell {padding:0;}
+.ci-home-section .ci-masthead {font-size:10px;}
+.ci-heading :is(h1,h2) {font-size:clamp(39px,4.7vw,72px);line-height:1.04;letter-spacing:-.063em;color:#f9f3eb;font-weight:650;margin:0;}
+.ci-heading :is(h1,h2) em {font-style:normal;color:#d2ac7e;font-weight:500;}
+.ci-home-section .ci-heading {margin-top:clamp(21px,2.4vw,35px);}
+.ci-home-section .ci-heading :is(h1,h2) {font-size:clamp(38px,4.2vw,69px);}
+.ci-home-section .ci-heading > p {font-size:clamp(12px,1vw,15px);}
+.ci-home-section .ci-orbit-frame {height:clamp(320px,32vw,475px);}
+.ci-home-section .ci-orbit-area {margin-top:0;}
+.ci-home-section .ci-landing-bottom {margin-top:14px;}
+.ci-orbit-frame {overflow:visible;perspective:1600px;perspective-origin:50% 50%;touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+.ci-orbit-track {
+  position:absolute;
+  pointer-events:none;
+  z-index:0;
+  top:55%;left:50%;
+  width:min(90%,1160px);height:86%;
+  border:1px solid rgba(211,174,125,.18);
+  border-radius:50%;
+  transform:translate(-50%,-50%) rotateX(67deg);
+  background:radial-gradient(ellipse,rgba(210,171,116,.06),transparent 58%);
+  box-shadow:0 0 45px rgba(225,167,104,.035), inset 0 0 65px rgba(230,178,104,.07);
+}
+.ci-orbit-ring {position:absolute;inset:0;transform-style:preserve-3d;transform:none!important;}
+.ci-orbit-card {
+  position:absolute;
+  top:50%;left:50%;
+  width:clamp(214px,20.3vw,310px);
+  height:clamp(255px,28vw,350px);
+  transform-origin:center center;
+  backface-visibility:visible;
+  will-change:transform,opacity;
+  transition:none!important;
+  filter:drop-shadow(0 18px 25px rgba(0,0,0,.28));
+  outline-offset:5px;
+}
+.ci-orbit-face {
+  position:relative;
+  display:block;
+  width:100%;height:100%;
+  border-radius:18px;
+  border:1.5px solid rgba(242,226,205,.58);
+  box-shadow:0 21px 54px rgba(0,0,0,.42),0 0 0 1px rgba(0,0,0,.1);
+  background:#2f251e;
+  overflow:hidden;
+  transform:translate3d(0,0,0) rotateX(0deg) rotateY(0deg) scale(1);
+  transform-style:preserve-3d;
+  transition:transform .35s cubic-bezier(.16,1,.3,1),border-color .32s,box-shadow .4s;
+  isolation:isolate;
+}
+.ci-orbit-face::before {content:"";position:absolute;z-index:1;inset:0;pointer-events:none;background:#090807;opacity:var(--ci-depth-shade,.1);transition:opacity .3s;}
+.ci-orbit-image {position:absolute;inset:0;display:block;}
+.ci-orbit-image img {display:block;width:100%;height:100%;object-fit:cover;transform:scale(1.025);transition:transform .48s cubic-bezier(.2,.8,.2,1);}
+.ci-orbit-card-info {z-index:3;position:absolute;inset:auto 0 0;display:flex;flex-direction:column;gap:5px;padding:72px clamp(15px,1.5vw,22px) 20px;background:linear-gradient(180deg,transparent,rgba(7,6,5,.23) 20%,rgba(7,6,5,.92));}
+.ci-orbit-card-info strong {font-size:clamp(17px,1.45vw,23px);}
+.ci-orbit-shine {
+  position:absolute;z-index:2;inset:0;pointer-events:none;
+  background:radial-gradient(circle at var(--ci-light-x,50%) var(--ci-light-y,35%),rgba(255,242,209,.42),rgba(255,232,197,.08) 26%,transparent 50%);
+  opacity:0;
+  mix-blend-mode:screen;
+  transition:opacity .25s;
+}
+.ci-orbit-card:is(:hover,:focus-visible) {z-index:130!important;}
+.ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {
+  border-color:#f1d5ad;
+  transform:translate3d(0,-10px,36px) rotateX(var(--ci-pointer-rx,0deg)) rotateY(var(--ci-pointer-ry,0deg)) scale(1.095);
+  box-shadow:0 36px 85px rgba(0,0,0,.64),0 0 0 2px rgba(224,178,124,.58),0 0 35px rgba(232,185,123,.27);
+}
+.ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-shine {opacity:1;}
+.ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-image img {transform:scale(1.085);}
+.ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face::before {opacity:0;}
+.ci-orbit-controls {position:relative;z-index:5;}
+.ci-page .ci-orbit-track,.ci-home-section .ci-orbit-track {display:block;}
+.ci-page .ci-orbit-frame,.ci-home-section .ci-orbit-frame {cursor:grab;}
+.ci-page .ci-orbit-frame:active,.ci-home-section .ci-orbit-frame:active {cursor:grabbing;}
+.ci-home-section .ci-arrow {display:grid;place-items:center;width:38px;height:38px;border:1px solid rgba(238,216,185,.43)!important;border-radius:50%;background:rgba(255,255,255,.06);color:#f5ecde;cursor:pointer;font-size:19px;transition:background .2s,transform .2s!important;}
+.ci-home-section .ci-arrow:hover {transform:translateY(-2px);background:rgba(216,170,116,.25);}
+.ci-home-section a:focus-visible,.ci-home-section button:focus-visible,.ci-home-section .ci-orbit-frame:focus-visible {outline:2px solid #d3a77b;outline-offset:4px;}
+/* Keep the homepage section independent of global homepage padding & old rail styles. */
+.ci-home-section .ci-shell {width:min(1480px,calc(100% - clamp(32px,5vw,92px)));margin-inline:auto;}
+.ci-home-section .ci-orbit-controls,.ci-home-section .ci-landing-bottom {color:#f1e4d4;}
+.ci-home-section .ci-active-meta {min-width:0;}
+.ci-home-section .ci-active-title {color:#f7eee2;}
+.ci-page .ci-landing,.ci-home-section .ci-landing {overflow:hidden;}
+@media (min-width:1200px) {
+  .ci-home-section .ci-orbit-frame {height:clamp(320px,33vw,466px);}
+}
+@media (min-width:701px) and (max-width:1199px) {
+  .ci-orbit-card {width:clamp(200px,27vw,280px);height:clamp(260px,32vw,325px);}
+  .ci-home-section .ci-heading :is(h1,h2) {font-size:clamp(36px,4.8vw,60px);}
+  .ci-home-section .ci-orbit-frame {height:clamp(310px,43vw,430px);}
+}
+@media (max-width:700px) {
+  .ci-home-section .ci-landing {min-height:0;padding:32px 0 34px;}
+  .ci-home-section .ci-shell {width:calc(100% - 28px);}
+  .ci-home-section .ci-heading {margin-top:27px;}
+  .ci-heading :is(h1,h2),.ci-home-section .ci-heading :is(h1,h2) {font-size:clamp(34px,8vw,49px);line-height:1.07;}
+  .ci-orbit-card {width:min(66vw,240px);height:clamp(238px,69vw,320px);transition:none!important;}
+  .ci-orbit-ring {transform:none!important;}
+  .ci-orbit-card[data-ci-distance="2"] {opacity:inherit;pointer-events:auto;}
+  .ci-home-section .ci-orbit-frame,.ci-page .ci-orbit-frame {height:clamp(300px,88vw,390px);}
+  .ci-orbit-track {height:75%;width:112%;}
+  .ci-home-section .ci-masthead,.ci-masthead {font-size:8px;letter-spacing:.055em;}
+  .ci-home-section .ci-masthead .ci-back {font-size:9px;}
+  .ci-home-section .ci-heading > p {font-size:12px;}
+  .ci-home-section .ci-orbit-area {display:block;margin-top:10px;}
+  .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {transform:translate3d(0,-7px,20px) rotateX(var(--ci-pointer-rx,0deg)) rotateY(var(--ci-pointer-ry,0deg)) scale(1.045);}
+  .ci-home-section .ci-active-title {font-size:14px;max-width:140px;}
+  .ci-home-section .ci-active-subtitle,.ci-home-section .ci-wheel-hint {display:none;}
+  .ci-home-section .ci-arrow {width:36px;height:36px;}
+  .ci-home-section .ci-landing-bottom span:last-child {display:none;}
+}
+@media (max-height:750px) and (min-width:701px) {
+  .ci-home-section .ci-landing {padding-top:23px;padding-bottom:26px;}
+  .ci-home-section .ci-orbit-frame,.ci-page .ci-orbit-frame {height:clamp(275px,43svh,345px);}
+  .ci-orbit-card {height:clamp(220px,37svh,290px);}
+}
+@media (prefers-reduced-motion:reduce) {
+  .ci-orbit-card,.ci-orbit-face,.ci-orbit-image img,.ci-orbit-shine {transition:none!important;}
+  .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {transform:translateY(-4px) scale(1.035);}
+}

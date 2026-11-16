@@ -1,0 +1,264 @@
+/* IDEARE | Homepage viewport-aware editorial layout.
+   Loaded after existing homepage/responsive styles. Keeps the existing assets,
+   portfolio logic, service card expansion and theme palette intact.
+   This file deliberately does not touch the detail pages or staff area. */
+html[data-ideare-page="home"] {
+  --home-page-inset: clamp(18px, 4vw, 72px);
+  --home-compact-gap: clamp(14px, 2vw, 30px);
+}
+html[data-ideare-page="home"] main > .home-section {
+  scroll-margin-top: var(--ideare-nav-height, 70px);
+}
+html[data-ideare-page="home"] :is(.home-hero-copy, .studio-story, .home-designer-copy, .home-materials-grid, .contact-copy) {
+  min-width: 0;
+}
+
+/* 01 / Photo hero. Keep it immersive, not taller than the available viewport
+   unless a very short screen needs extra height for readable copy. */
+html[data-ideare-page="home"] .home-hero {
+  min-height: clamp(555px, calc(100svh - var(--ideare-nav-height, 70px)), 1020px);
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+html[data-ideare-page="home"] .home-hero-inner {
+  padding-block: clamp(56px, 7svh, 92px);
+}
+html[data-ideare-page="home"] .home-hero-kicker { margin-bottom: clamp(11px, 1.9svh, 19px); }
+html[data-ideare-page="home"] .home-hero h1 {
+  font-size: clamp(48px, 5.45vw, 91px);
+  line-height: 1.0;
+  margin-bottom: clamp(17px, 2.4svh, 26px);
+}
+html[data-ideare-page="home"] .home-hero-lead { max-width: 630px; line-height: 1.6; }
+html[data-ideare-page="home"] .home-hero-actions { margin-top: clamp(20px, 3svh, 30px); }
+html[data-ideare-page="home"] .home-hero-scroll { bottom: clamp(14px, 2.5svh, 26px); }
+html[data-ideare-page="home"] .home-hero-scroll-line { height: 31px; }
+
+/* 02 / About. The large photograph remains full bleed, but its background is
+   intentionally cropped to let the content sit in a balanced single scene. */
+html[data-ideare-page="home"] .home-studio {
+  display: flex;
+  align-items: center;
+  min-height: clamp(520px, 74svh, 770px);
+  padding: clamp(40px, 5.2svh, 68px) 0;
+}
+html[data-ideare-page="home"] .home-studio .studio-content { width: min(1390px, calc(100% - 2 * var(--home-page-inset))); }
+html[data-ideare-page="home"] .studio-content { gap: clamp(26px, 4vw, 66px); align-items: center; }
+html[data-ideare-page="home"] .studio-photo { background-size: cover; background-position: center 48%; }
+html[data-ideare-page="home"] .studio-eyebrow { margin-bottom: clamp(9px, 1.4svh, 16px); }
+html[data-ideare-page="home"] .studio-story h2 {
+  font-size: clamp(43px, 5.05vw, 77px);
+  line-height: 1.0;
+  margin-bottom: clamp(13px, 2svh, 22px);
+}
+html[data-ideare-page="home"] .studio-description { line-height: 1.57; max-width: 650px; }
+html[data-ideare-page="home"] .studio-actions { margin-top: clamp(14px, 2.6svh, 24px); }
+html[data-ideare-page="home"] .studio-established { padding: clamp(19px, 2.3vw, 29px); }
+html[data-ideare-page="home"] .studio-established strong { font-size: clamp(55px, 5vw, 83px); }
+html[data-ideare-page="home"] .studio-established-rule { margin: 15px 0 12px; }
+
+/* 03 / Eight services: make the four-by-two layout compact at 100% zoom.
+   Expanded cards may grow when requested; their text is never clipped. */
+html[data-ideare-page="home"] .service-story-header {
+  padding: clamp(22px, 3.5svh, 45px) 0 clamp(18px, 2.4svh, 26px);
+  gap: clamp(20px, 3vw, 50px);
+}
+html[data-ideare-page="home"] .service-story-eyebrow { margin-bottom: 9px !important; }
+html[data-ideare-page="home"] .service-story-header h2 {
+  font-size: clamp(38px, 3.8vw, 65px);
+  line-height: 1.02;
+}
+html[data-ideare-page="home"] .service-story-header-side::before { margin-bottom: 10px; }
+html[data-ideare-page="home"] .service-story-header-side p { line-height: 1.58; font-size: clamp(13px, .95vw, 15px); }
+html[data-ideare-page="home"] .service-story-meta { margin-top: 10px; }
+html[data-ideare-page="home"] .service-story-grid {
+  gap: clamp(9px, 1vw, 15px);
+  padding-bottom: clamp(18px, 2.5svh, 30px);
+}
+html[data-ideare-page="home"] .service-story-grid .service-card {
+  min-height: clamp(195px, 26svh, 295px);
+  padding: clamp(14px, 1.35vw, 23px);
+  border-radius: clamp(12px, 1.3vw, 18px);
+}
+html[data-ideare-page="home"] .service-story-grid .service-card.is-expanded {
+  min-height: clamp(245px, 32svh, 375px);
+}
+html[data-ideare-page="home"] .service-story-grid .service-card h3 { font-size: clamp(19px, 1.6vw, 27px); }
+html[data-ideare-page="home"] .service-story-grid .service-card p { line-height: 1.56; }
+html[data-ideare-page="home"] .service-story-grid .service-card-hint { margin-top: 9px; }
+html[data-ideare-page="home"] .service-story-footer { padding: clamp(18px, 2.5svh, 28px) 0; }
+html[data-ideare-page="home"] .service-story-footer-inner { gap: 17px; }
+html[data-ideare-page="home"] .service-story-footer-inner p { font-size: clamp(15px, 1.35vw, 19px); }
+
+/* 04 / Portfolio: retain the interaction and card ratio, but remove the
+   100px+ gaps before and after the moving gallery. */
+html[data-ideare-page="home"] #portfolio.portfolio-exhibition,
+html[data-ideare-page="home"] #portfolio.portfolio-showcase {
+  padding: clamp(28px, 4.2svh, 49px) 0 clamp(24px, 3.8svh, 46px);
+  --pex-card-width: clamp(310px, 28vw, 465px);
+  --pex-media-height: clamp(235px, 32svh, 355px);
+  --pex-gap: clamp(12px, 1.4vw, 22px);
+}
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-header {
+  min-height: 0;
+  padding-bottom: clamp(17px, 2.3svh, 27px);
+  gap: clamp(20px, 3vw, 46px);
+}
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-kicker { margin-bottom: 10px; }
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-intro h2 {
+  font-size: clamp(42px, 4.2vw, 70px);
+  line-height: 1.0;
+}
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-intro-side > p { margin-bottom: 11px; line-height: 1.55; }
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-meta { padding-top: 10px; }
+html[data-ideare-page="home"] #portfolio .portfolio-exhibit-caption { padding-top: 10px; }
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-footer {
+  padding-top: clamp(14px, 2svh, 25px);
+  gap: 12px;
+}
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-progress { margin-top: 12px; }
+html[data-ideare-page="home"] #portfolio .portfolio-exhibition-outro { min-height: 0; height: 0; }
+/* The portfolio JS's revised presentation also uses .portfolio-intro. */
+html[data-ideare-page="home"] #portfolio .portfolio-intro {
+  gap: clamp(20px, 3vw, 50px);
+  margin-bottom: clamp(14px, 2svh, 25px);
+}
+html[data-ideare-page="home"] #portfolio .portfolio-kicker { margin-bottom: 8px; }
+html[data-ideare-page="home"] #portfolio .portfolio-intro h2,
+html[data-ideare-page="home"] #portfolio .portfolio-heading { font-size: clamp(42px, 4.2vw, 69px); }
+html[data-ideare-page="home"] #portfolio .portfolio-description { margin-top: 10px; line-height: 1.53; }
+html[data-ideare-page="home"] #portfolio .portfolio-intro-note { line-height: 1.55; }
+html[data-ideare-page="home"] #portfolio .portfolio-viewport { padding: 5px 0 12px; }
+html[data-ideare-page="home"] #portfolio .portfolio-project { width: clamp(330px, 30vw, 510px); }
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="tablet"] .portfolio-project,
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="phone"] .portfolio-project { width: 100%; }
+html[data-ideare-page="home"] #portfolio .portfolio-gallery-footer { padding-top: 10px; }
+html[data-ideare-page="home"] #portfolio .portfolio-intro-copy > p { line-height: 1.55; }
+
+/* 05 / Circular Inspirations: standalone listing removed. The cards are the
+   navigation to the selected style's own detailed collection. */
+html[data-ideare-page="home"] #inspiration.ci-home-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-height: 0;
+}
+html[data-ideare-page="home"] #inspiration .ci-landing {
+  display: flex;
+  align-items: center;
+  min-height: clamp(560px, 80svh, 845px);
+  padding: clamp(22px, 3.2svh, 36px) 0;
+}
+html[data-ideare-page="home"] #inspiration .ci-heading { margin-top: clamp(12px, 2.4svh, 28px); gap: 20px; }
+html[data-ideare-page="home"] #inspiration .ci-heading :is(h1,h2) {
+  font-size: clamp(39px, 4.1vw, 67px);
+  line-height: 1.03;
+}
+html[data-ideare-page="home"] #inspiration .ci-heading > p { line-height: 1.48; }
+html[data-ideare-page="home"] #inspiration .ci-orbit-frame { height: clamp(300px, 41svh, 435px); }
+html[data-ideare-page="home"] #inspiration .ci-orbit-area { margin-top: 2px; }
+html[data-ideare-page="home"] #inspiration .ci-landing-bottom { margin-top: clamp(10px, 1.6svh, 17px); }
+
+/* 06–08 / Materials, Designer and Contact share a rhythm, rather than leaving
+   large blank panels between each statement and its useful action. */
+html[data-ideare-page="home"] .home-materials {
+  padding: clamp(28px, 4.4svh, 50px) 0;
+}
+html[data-ideare-page="home"] .home-materials-grid { gap: clamp(14px, 2.3vw, 35px); }
+html[data-ideare-page="home"] .home-materials h2 {
+  font-size: clamp(33px, 3.4vw, 57px);
+  margin: 7px 0 11px;
+}
+html[data-ideare-page="home"] .home-materials p:last-child { font-size: clamp(13px, 1vw, 15px); line-height: 1.56; }
+html[data-ideare-page="home"] .home-designer {
+  padding: clamp(42px, 6svh, 75px) 0;
+}
+html[data-ideare-page="home"] .home-designer-grid { gap: clamp(23px, 4vw, 60px); }
+html[data-ideare-page="home"] .home-designer-copy h2 {
+  font-size: clamp(38px, 4.15vw, 66px);
+  margin: 7px 0 14px;
+}
+html[data-ideare-page="home"] .home-designer-copy .lead { line-height: 1.56; }
+html[data-ideare-page="home"] .home-designer .home-designer-card { min-height: 275px; padding: 25px; }
+html[data-ideare-page="home"] .home-designer .actions { margin-top: 18px; }
+html[data-ideare-page="home"] .contact-section {
+  padding: clamp(36px, 5.4svh, 66px) 0;
+}
+html[data-ideare-page="home"] .contact-section h2 { line-height: 1.05; margin-block: 8px 13px; }
+html[data-ideare-page="home"] .contact-section .lead { line-height: 1.56; }
+html[data-ideare-page="home"] .contact-section .actions { margin-top: 17px; }
+html[data-ideare-page="home"] .contact-section .contact-points { gap: 12px; }
+html[data-ideare-page="home"] .contact-section .card { padding: clamp(17px, 2vw, 25px); }
+html[data-ideare-page="home"] .contact-section label { margin: 5px 0; }
+html[data-ideare-page="home"] .contact-section textarea { min-height: 70px; resize: vertical; }
+html[data-ideare-page="home"] .site-footer { margin-top: 0; }
+
+/* Tablet: two service columns need natural height; do not hide their copy. */
+@media (min-width: 768px) and (max-width: 1199px) {
+  html[data-ideare-page="home"] .home-studio { min-height: 0; padding: clamp(49px, 6svh, 75px) 0; }
+  html[data-ideare-page="home"] .home-studio .studio-content { width: min(930px, calc(100% - 52px)); }
+  html[data-ideare-page="home"] .studio-story h2 { font-size: clamp(45px, 6vw, 68px); }
+  html[data-ideare-page="home"] .service-story-header { padding-top: 36px; }
+  html[data-ideare-page="home"] .service-story-grid .service-card { min-height: clamp(235px, 28svh, 320px); }
+  html[data-ideare-page="home"] .service-story-grid .service-card.is-expanded { min-height: 335px; }
+  html[data-ideare-page="home"] #portfolio.portfolio-exhibition,
+  html[data-ideare-page="home"] #portfolio.portfolio-showcase { --pex-media-height: clamp(230px, 36svh, 340px); }
+  html[data-ideare-page="home"] #inspiration .ci-landing { min-height: 0; }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-frame { height: clamp(320px, 43svh, 420px); }
+  html[data-ideare-page="home"] .home-designer .home-designer-card { min-height: 250px; }
+}
+
+/* Phone: true single-column layouts must remain legible; no artificial fixed
+   height that would clip images, text, or expanded services on small screens. */
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] .home-hero { min-height: max(550px, calc(100svh - var(--ideare-nav-height, 66px))); }
+  html[data-ideare-page="home"] .home-hero-inner { padding: clamp(50px, 9svh, 78px) 0 clamp(55px, 9svh, 76px); }
+  html[data-ideare-page="home"] .home-hero h1 { font-size: clamp(41px, 10vw, 64px); margin-bottom: 15px; }
+  html[data-ideare-page="home"] .home-hero-lead { font-size: 14px; line-height: 1.6; }
+  html[data-ideare-page="home"] .home-studio { min-height: 0; padding: clamp(47px, 7svh, 70px) 0; }
+  html[data-ideare-page="home"] .home-studio .studio-content { width: calc(100% - 32px); }
+  html[data-ideare-page="home"] .studio-content { gap: 18px; }
+  html[data-ideare-page="home"] .studio-story h2 { font-size: clamp(41px, 10.7vw, 60px); }
+  html[data-ideare-page="home"] .studio-description { line-height: 1.62; }
+  html[data-ideare-page="home"] .studio-established { padding: 16px; max-width: 265px; }
+  html[data-ideare-page="home"] .studio-established strong { font-size: 54px; }
+  html[data-ideare-page="home"] .service-story-header { grid-template-columns: 1fr; padding: 35px 0 22px; gap: 14px; }
+  html[data-ideare-page="home"] .service-story-header h2 { font-size: clamp(38px, 10.5vw, 56px); }
+  html[data-ideare-page="home"] .service-story-header-side::before { margin-bottom: 9px; }
+  html[data-ideare-page="home"] .service-story-grid { grid-template-columns: 1fr; gap: 10px; padding-bottom: 25px; }
+  html[data-ideare-page="home"] .service-story-grid .service-card { min-height: clamp(208px, 46vw, 300px); padding: 19px; }
+  html[data-ideare-page="home"] .service-story-grid .service-card.is-expanded { min-height: 350px; }
+  html[data-ideare-page="home"] .service-story-grid .service-card h3 { font-size: 23px; }
+  html[data-ideare-page="home"] .service-story-footer { padding: 22px 0; }
+  html[data-ideare-page="home"] #portfolio.portfolio-exhibition,
+  html[data-ideare-page="home"] #portfolio.portfolio-showcase { padding: 42px 0 38px; --pex-card-width: calc(100vw - 32px); --pex-media-height: min(74vw, 380px); --pex-gap: 14px; }
+  html[data-ideare-page="home"] #portfolio .portfolio-exhibition-header { min-height: 0; padding-bottom: 18px; }
+  html[data-ideare-page="home"] #portfolio .portfolio-exhibition-intro h2 { font-size: clamp(39px, 10vw, 56px); }
+  html[data-ideare-page="home"] #portfolio .portfolio-exhibition-intro-side > p { margin-bottom: 9px; }
+  html[data-ideare-page="home"] #portfolio .portfolio-exhibition-footer { padding-top: 12px; }
+  html[data-ideare-page="home"] #portfolio .portfolio-exhibition-progress { margin-top: 9px; }
+  html[data-ideare-page="home"] #inspiration .ci-landing { min-height: 0; padding: 27px 0 29px; }
+  html[data-ideare-page="home"] #inspiration .ci-heading { margin-top: 17px; }
+  html[data-ideare-page="home"] #inspiration .ci-heading h2 { font-size: clamp(35px, 9vw, 49px); }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-frame { height: clamp(280px, 78vw, 385px); }
+  html[data-ideare-page="home"] .home-materials { padding: 37px 0; }
+  html[data-ideare-page="home"] .home-materials h2 { font-size: clamp(34px, 8vw, 49px); }
+  html[data-ideare-page="home"] .home-designer { padding: 45px 0; }
+  html[data-ideare-page="home"] .home-designer-copy h2 { font-size: clamp(36px, 9vw, 52px); }
+  html[data-ideare-page="home"] .home-designer .home-designer-card { min-height: 225px; padding: 20px; }
+  html[data-ideare-page="home"] .contact-section { padding: 40px 0; }
+  html[data-ideare-page="home"] .contact-section .card { padding: 17px; }
+}
+
+@media (max-height: 730px) and (min-width: 1200px) {
+  html[data-ideare-page="home"] .home-studio { min-height: 0; padding-block: 40px; }
+  html[data-ideare-page="home"] .service-story-header { padding-block: 18px 12px; }
+  html[data-ideare-page="home"] .service-story-grid .service-card { min-height: 190px; }
+  html[data-ideare-page="home"] #portfolio.portfolio-exhibition,
+  html[data-ideare-page="home"] #portfolio.portfolio-showcase { --pex-media-height: 235px; padding-block: 23px; }
+  html[data-ideare-page="home"] #inspiration .ci-landing { min-height: 0; }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-frame { height: 300px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ideare-page="home"] * { scroll-behavior: auto; }
+}

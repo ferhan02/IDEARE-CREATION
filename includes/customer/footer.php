@@ -21,6 +21,8 @@ $pageScripts = $pageScripts ?? [];
 <?php if (($idearePage ?? '') === 'home'): ?>
 <!-- Shared circular 3D Cabinet Inspirations gallery; independent of staff-published records. -->
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/concept-orbit.css">
+<!-- Homepage-only section sizing and spacing, loaded last to respect device CSS. -->
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/homepage-compact.css">
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/concept-orbit.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-showcase.js"></script>
 <?php endif; ?>

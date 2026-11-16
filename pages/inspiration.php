@@ -4,6 +4,12 @@
  * Uses the existing /api/concepts.php feed and /api/inspiration.php extras.
  * Homepage links to ?style=<slug> remain supported.
  */
+// The main style carousel lives on the homepage. This route is for an
+// individual style collection, opened from one of its carousel cards.
+if (!isset($_GET['style']) || !is_string($_GET['style']) || trim($_GET['style']) === '') {
+    header('Location: ../index.php#inspiration', true, 302);
+    exit;
+}
 $pageTitle = 'Cabinet Inspirations | IDEARE Creation';
 $pageStyles = ['assets/css/concept-orbit.css'];
 $pageScripts = ['assets/js/concept-orbit.js'];

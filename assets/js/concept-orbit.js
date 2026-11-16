@@ -1,13 +1,14 @@
 /**
  * IDEARE Cabinet Inspiration | compact 3D orbit / style detail showroom.
  * All images and concept metadata are supplied by the existing folder-driven API.
- * Scoped to pages/inspiration.php; existing homepage showroom remains unchanged.
+ * Homepage orbit and style-specific inspiration collections only.
  */
 (() => {
   'use strict';
   const app = document.getElementById('ci-app');
   const script = document.currentScript;
-  if (!app || !script?.src) return;
+  const isHome = document.documentElement.dataset.idearePage === 'home';
+  if ((!app && !isHome) || !script?.src) return;
 
   const root = new URL('../../', script.src);
   const url = path => new URL(path, root).href;
@@ -56,173 +57,258 @@
     return styles.find(item => item.id === query || item.name.toLowerCase().replace(/\s+/g, '-') === query) || null;
   };
 
-  function renderLanding(styles) {
-    app.classList.add('ci-is-landing');
-    const page = make('section', 'ci-landing');
-    page.setAttribute('aria-labelledby', 'ci-landing-title');
+  /** One shared, genuine circular 3D orbit for the homepage and showroom landing. */
+  function renderLanding(styles, isHome = false) {
+    let mount = app;
+    if (isHome) {
+      mount = document.getElementById('inspiration');
+      if (!mount) {
+        mount = make('section');
+        mount.id = 'inspiration';
+      }
+      // Keep Inspiration directly after Portfolio even if server-side featured
+      // records are empty. Replace only the former homepage inspiration section.
+      const portfolio = document.getElementById('portfolio');
+      const materials = document.getElementById('materials-overview');
+      if (portfolio?.parentElement && portfolio.nextElementSibling !== mount) {
+        portfolio.insertAdjacentElement('afterend', mount);
+      } else if (!mount.isConnected && materials?.parentElement) {
+        materials.insertAdjacentElement('beforebegin', mount);
+      } else if (!mount.isConnected) {
+        document.querySelector('main')?.appendChild(mount);
+      }
+      mount.className = 'home-section ci-home-section';
+    } else {
+      mount.classList.add('ci-is-landing');
+    }
+
+    const total = styles.length;
+    const page = make('section', `ci-landing${isHome ? ' ci-home-landing' : ''}`);
+    page.setAttribute('aria-labelledby', isHome ? 'ci-home-title' : 'ci-landing-title');
     const content = shell();
+    const eyebrow = `${String(total).padStart(2, '0')} DESIGN DIRECTION${total === 1 ? '' : 'S'}`;
     content.innerHTML = `
       <div class="ci-masthead">
-        <a class="ci-back" href="${url('index.php#inspiration')}">← BACK TO HOMEPAGE</a>
-        <span>IDEARE <span class="ci-gold">/</span> CABINET INSPIRATIONS</span>
+        ${isHome ? '<span>IDEARE <span class="ci-gold">/</span> CABINET INSPIRATION</span><span>CHOOSE A STYLE TO DISCOVER MORE</span>' : '<a class="ci-back" href="' + url('index.php#inspiration') + '">← BACK TO HOMEPAGE</a><span>IDEARE <span class="ci-gold">/</span> CABINET INSPIRATIONS</span>'}
       </div>
       <header class="ci-heading">
         <div>
-          <p class="ci-kicker"><span class="ci-dot"></span> FIVE DESIGN DIRECTIONS</p>
-          <h1 id="ci-landing-title">A space that feels <em>like you.</em></h1>
+          <p class="ci-kicker"><span class="ci-dot"></span><span class="ci-direction-count"></span></p>
+          <h${isHome ? '2' : '1'} id="${isHome ? 'ci-home-title' : 'ci-landing-title'}">A space that feels <em>like you.</em></h${isHome ? '2' : '1'}>
         </div>
         <p>Explore the styles, discover your favourite and find the details that make it yours.</p>
       </header>
-      <div class="ci-orbit-area" aria-label="Explore cabinet inspiration styles">
-        <div class="ci-orbit-frame" tabindex="0" aria-label="Rotating style carousel. Use mouse wheel, left or right arrow keys, or the controls below to browse.">
+      <div class="ci-orbit-area">
+        <div class="ci-orbit-frame" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Rotating cabinet inspiration styles. Scroll over the gallery, drag, swipe or use the arrows to rotate.">
           <span class="ci-orbit-aura" aria-hidden="true"></span>
+          <span class="ci-orbit-track" aria-hidden="true"></span>
           <div class="ci-orbit-ring"></div>
         </div>
         <div class="ci-orbit-controls">
-          <div class="ci-active-meta" aria-live="polite">
+          <div class="ci-active-meta" aria-live="polite" aria-atomic="true">
             <span class="ci-active-count"></span>
             <strong class="ci-active-title"></strong>
-            <span class="ci-active-subtitle">SELECT A CARD TO EXPLORE THE STYLE</span>
+            <span class="ci-active-subtitle">SELECT A STYLE TO EXPLORE ITS CONCEPTS</span>
           </div>
           <div class="ci-control-right">
-            <span class="ci-wheel-hint">SCROLL TO ROTATE <span aria-hidden="true">↔</span></span>
-            <button type="button" class="ci-arrow" data-ci-prev aria-label="Previous style">←</button>
-            <button type="button" class="ci-arrow" data-ci-next aria-label="Next style">→</button>
+            <span class="ci-wheel-hint">SCROLL / DRAG TO ROTATE <span aria-hidden="true">↔</span></span>
+            <button type="button" class="ci-arrow" data-ci-prev aria-label="Previous design style">←</button>
+            <button type="button" class="ci-arrow" data-ci-next aria-label="Next design style">→</button>
           </div>
         </div>
       </div>
-      <div class="ci-landing-bottom"><span>DESIGN <span class="ci-gold">·</span> BUILD <span class="ci-gold">·</span> CREATE</span><span>FIVE STYLES / ENDLESS POSSIBILITIES</span></div>`;
+      <div class="ci-landing-bottom"><span>DESIGN <span class="ci-gold">·</span> BUILD <span class="ci-gold">·</span> CREATE</span><span><span class="ci-bottom-count"></span> STYLES / ENDLESS POSSIBILITIES</span></div>`;
+    content.querySelector('.ci-direction-count').textContent = eyebrow;
+    content.querySelector('.ci-bottom-count').textContent = String(total).padStart(2, '0');
     page.appendChild(content);
-    app.replaceChildren(page);
+    mount.replaceChildren(page);
 
     const ring = content.querySelector('.ci-orbit-ring');
     const frame = content.querySelector('.ci-orbit-frame');
-    const cards = [];
-    styles.forEach((style, i) => {
+    const cards = styles.map((style, index) => {
       const anchor = make('a', 'ci-orbit-card');
       anchor.href = styleUrl(style.id);
-      anchor.setAttribute('aria-label', `Explore ${style.name} inspirations`);
-      anchor.style.setProperty('--ci-angle', `${i * (360 / styles.length)}deg`);
-      anchor.style.setProperty('--ci-card-index', String(i));
+      anchor.setAttribute('aria-label', `Explore ${style.name}: ${style.count ?? style.concepts?.length ?? 0} inspirations`);
+      anchor.dataset.ciIndex = String(index);
       const face = make('span', 'ci-orbit-face');
+      const shine = make('span', 'ci-orbit-shine');
+      shine.setAttribute('aria-hidden', 'true');
       const photo = make('span', 'ci-orbit-image');
-      setImage(photo, style.cover, `${style.name} interior cabinetry inspiration`, i === 0);
+      setImage(photo, style.cover, `${style.name} cabinetry inspiration`, index < 3);
       const info = make('span', 'ci-orbit-card-info');
-      info.append(make('strong', '', style.name), make('small', '', `${style.count || style.concepts.length} inspirations  ↗`));
-      face.append(photo, info);
+      info.append(make('strong', '', style.name), make('small', '', `${style.count ?? style.concepts?.length ?? 0} inspirations  ↗`));
+      face.append(photo, shine, info);
       anchor.appendChild(face);
       ring.appendChild(anchor);
-      cards.push(anchor);
+      return anchor;
     });
 
     const count = content.querySelector('.ci-active-count');
     const title = content.querySelector('.ci-active-title');
-    let step = 0;
-    let hovered = false;
-    let engagedUntil = 0;
-    let inView = true;
-    let wheelSum = 0;
-    let lastWheel = 0;
-    let start = null;
-    const angle = 360 / styles.length;
-    const normalized = i => ((i % styles.length) + styles.length) % styles.length;
-    const slot = i => ((i - normalized(step) + styles.length + Math.floor(styles.length / 2)) % styles.length) - Math.floor(styles.length / 2);
-    const paint = () => {
-      ring.style.setProperty('--ci-rotation', `${-step * angle}deg`);
-      count.textContent = `${String(normalized(step) + 1).padStart(2, '0')} / ${String(styles.length).padStart(2, '0')}`;
-      title.textContent = styles[normalized(step)].name;
-      cards.forEach((card, i) => {
-        const d = slot(i);
-        card.style.setProperty('--ci-slot', String(d));
-        const spacingWide = Math.min(295, Math.max(125, (frame.clientWidth - card.offsetWidth) / 4));
-        card.style.setProperty('--ci-x', `${(d * spacingWide).toFixed(1)}px`);
-        card.style.setProperty('--ci-y', `${Math.abs(d) * 10}px`);
-        card.style.setProperty('--ci-z', `${Math.abs(d) === 0 ? 95 : Math.abs(d) === 1 ? -25 : -145}px`);
-        card.style.setProperty('--ci-tilt', `${-d * 18}deg`);
-        card.style.setProperty('--ci-card-scale', Math.abs(d) === 0 ? '1' : Math.abs(d) === 1 ? '.94' : '.85');
-        card.style.zIndex = String(10 - Math.abs(d));
-        const spacing = Math.min(frame.clientWidth * .70, 270);
-        card.style.setProperty('--ci-shift', `${(d * spacing).toFixed(1)}px`);
-        card.style.setProperty('--ci-sway', `${-d * 22}deg`);
-        card.style.setProperty('--ci-mobile-scale', d === 0 ? '1' : '.82');
-        card.dataset.ciDistance = String(Math.abs(d));
-        card.classList.toggle('ci-is-front', d === 0);
-        if (d === 0) card.setAttribute('aria-current', 'true');
+    const TAU = Math.PI * 2;
+    const normalize = index => ((index % total) + total) % total;
+    let position = 0;       // continuous fractional position, not snapped chapters
+    let target = null;
+    let previousFrame = 0;
+    let lastActive = -1;
+    let viewable = true;
+    let hovering = false;
+    let focused = false;
+    let pauseUntil = 0;
+    let gesture = null;
+    let suppressClick = false;
+    let suppressTimer = 0;
+    let frameWidth = 0, frameHeight = 0, cardWidth = 0;
+    const autoSpeed = total / 43; // one smooth revolution approximately every 43s
+
+    function updateDimensions() {
+      const rect = frame.getBoundingClientRect();
+      frameWidth = rect.width;
+      frameHeight = rect.height;
+      cardWidth = cards[0]?.offsetWidth || 270;
+    }
+    const pause = (duration = 2200) => { pauseUntil = performance.now() + duration; };
+    const activeIndex = () => normalize(Math.round(position));
+    function updateMeta() {
+      const active = activeIndex();
+      if (active === lastActive) return;
+      lastActive = active;
+      title.textContent = styles[active].name;
+      count.textContent = `${String(active + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+      cards.forEach((card, index) => {
+        if (index === active) card.setAttribute('aria-current', 'true');
         else card.removeAttribute('aria-current');
       });
-    };
-    const turn = direction => {
-      step += direction;
-      engagedUntil = performance.now() + 8500;
-      paint();
-    };
-    paint();
-    window.addEventListener('resize', paint, { passive: true });
-    content.querySelector('[data-ci-prev]').addEventListener('click', () => turn(-1));
-    content.querySelector('[data-ci-next]').addEventListener('click', () => turn(1));
+    }
+    function draw() {
+      if (!frameWidth) updateDimensions();
+      const mobile = frameWidth <= 700;
+      const radiusX = Math.max(30, (frameWidth - cardWidth) * (mobile ? .43 : .47));
+      const radiusY = mobile ? Math.min(30, frameHeight * .08) : Math.min(58, frameHeight * .13);
+      const radiusZ = mobile ? 100 : 210;
+      cards.forEach((card, index) => {
+        const theta = (index - position) * TAU / total;
+        const depth = (1 + Math.cos(theta)) / 2; // front=1, back=0
+        const x = Math.sin(theta) * radiusX;
+        const y = (Math.cos(theta) * radiusY * .34) - ((1 - depth) * radiusY * .9);
+        const z = Math.cos(theta) * radiusZ;
+        const scale = (mobile ? .72 : .64) + depth * (mobile ? .24 : .28);
+        const yaw = -Math.sin(theta) * (mobile ? 31 : 46);
+        card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px),calc(-50% + ${y.toFixed(2)}px),${z.toFixed(2)}px) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+        card.style.opacity = String((mobile ? .34 : .43) + depth * (mobile ? .66 : .57));
+        card.style.zIndex = String(10 + Math.round(depth * 80));
+        card.style.setProperty('--ci-depth-shade', String(((1 - depth) * .43).toFixed(3)));
+      });
+      updateMeta();
+    }
+    function next(direction) {
+      pause(4200);
+      target = Math.round(target ?? position) + direction;
+      if (reduceMotion.matches) { position = target; target = null; draw(); }
+    }
+    function tick(time) {
+      const dt = previousFrame ? Math.min(.055, (time - previousFrame) / 1000) : 0;
+      previousFrame = time;
+      if (target !== null) {
+        const diff = target - position;
+        if (reduceMotion.matches || Math.abs(diff) < .002) { position = target; target = null; }
+        else position += diff * (1 - Math.exp(-dt * 8.2));
+      } else if (!reduceMotion.matches && viewable && !hovering && !focused && !document.hidden && time > pauseUntil) {
+        position += autoSpeed * dt;
+      }
+      if (viewable && !document.hidden) draw();
+      requestAnimationFrame(tick);
+    }
+    content.querySelector('[data-ci-prev]').addEventListener('click', () => next(-1));
+    content.querySelector('[data-ci-next]').addEventListener('click', () => next(1));
 
-    // Wheel control only inside the carousel frame; ordinary page scrolling is untouched elsewhere.
     frame.addEventListener('wheel', event => {
-      if (event.ctrlKey || event.metaKey) return; // preserve browser zoom gesture
-      const delta = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
-      if (!delta) return;
+      if (event.ctrlKey || event.metaKey) return;
+      const raw = Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+      if (!raw) return;
       event.preventDefault();
-      const now = performance.now();
-      if (now - lastWheel > 260) wheelSum = 0;
-      lastWheel = now;
-      wheelSum += delta;
-      if (Math.abs(wheelSum) < 38) return;
-      turn(wheelSum > 0 ? 1 : -1);
-      wheelSum = 0;
+      const pixels = event.deltaMode === 1 ? raw * 18 : event.deltaMode === 2 ? raw * frameHeight : raw;
+      const amount = Math.sign(pixels) * Math.min(1.2, Math.max(.065, Math.abs(pixels) / 290));
+      target = (target ?? position) + amount;
+      pause(3100);
+      if (reduceMotion.matches) { position = target; target = null; draw(); }
     }, { passive: false });
-
     frame.addEventListener('keydown', event => {
-      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        event.preventDefault();
-        turn(event.key === 'ArrowRight' ? 1 : -1);
-      }
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      next(event.key === 'ArrowRight' ? 1 : -1);
     });
+
     frame.addEventListener('pointerdown', event => {
-      if (event.pointerType === 'mouse') return;
-      start = { id: event.pointerId, x: event.clientX, y: event.clientY };
-    }, { passive: true });
-    frame.addEventListener('pointerup', event => {
-      if (!start || event.pointerId !== start.id) return;
-      const dx = event.clientX - start.x;
-      const dy = event.clientY - start.y;
-      start = null;
-      if (Math.abs(dx) < 45 || Math.abs(dx) < Math.abs(dy) * 1.25) return;
-      // On touch layouts a horizontal swipe navigates while vertical scroll remains native.
-      turn(dx < 0 ? 1 : -1);
-      frame.dataset.ciSwiped = 'true';
-      setTimeout(() => { delete frame.dataset.ciSwiped; }, 350);
-    }, { passive: true });
-    frame.addEventListener('pointercancel', () => { start = null; });
+      if (event.button !== 0 || event.target.closest('button')) return;
+      gesture = { id: event.pointerId, x: event.clientX, y: event.clientY, initial: position, moved: false };
+      pause(4400);
+    });
+    frame.addEventListener('pointermove', event => {
+      if (!gesture || gesture.id !== event.pointerId) return;
+      const dx = event.clientX - gesture.x;
+      const dy = event.clientY - gesture.y;
+      if (!gesture.moved && Math.abs(dx) < 8) return;
+      if (!gesture.moved && Math.abs(dx) < Math.abs(dy) * 1.2) return; // native vertical touch scroll
+      gesture.moved = true;
+      target = gesture.initial - dx / Math.max(110, cardWidth * .75);
+      pause(4000);
+      if (reduceMotion.matches) { position = target; target = null; draw(); }
+    });
+    const finish = event => {
+      if (!gesture || gesture.id !== event.pointerId) return;
+      const moved = gesture.moved;
+      gesture = null;
+      if (!moved) return;
+      suppressClick = true;
+      clearTimeout(suppressTimer);
+      suppressTimer = setTimeout(() => { suppressClick = false; }, 500);
+      if (target !== null) target = Math.round(target);
+      pause(4500);
+    };
+    frame.addEventListener('pointerup', finish);
+    frame.addEventListener('pointercancel', event => { if (gesture?.id === event.pointerId) gesture = null; });
     frame.addEventListener('click', event => {
-      if (frame.dataset.ciSwiped && event.target.closest('a')) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
+      if (!suppressClick || !event.target.closest('a')) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      suppressClick = false;
     }, true);
 
-    frame.addEventListener('pointerenter', () => { if (finePointer.matches) hovered = true; });
-    frame.addEventListener('pointerleave', () => { hovered = false; });
-    frame.addEventListener('focusin', () => { hovered = true; });
-    frame.addEventListener('focusout', event => {
-      if (!frame.contains(event.relatedTarget)) hovered = false;
+    frame.addEventListener('pointerenter', () => { if (finePointer.matches) hovering = true; });
+    frame.addEventListener('pointerleave', () => { hovering = false; });
+    frame.addEventListener('focusin', () => { focused = true; });
+    frame.addEventListener('focusout', event => { if (!frame.contains(event.relatedTarget)) focused = false; });
+    cards.forEach((card, index) => {
+      const face = card.querySelector('.ci-orbit-face');
+      card.addEventListener('focus', () => {
+        const nearest = index + Math.round((position - index) / total) * total;
+        target = nearest;
+        pause(4800);
+      });
+      card.addEventListener('pointermove', event => {
+        if (event.pointerType !== 'mouse' || !finePointer.matches) return;
+        const rect = face.getBoundingClientRect();
+        const u = (event.clientX - rect.left) / Math.max(1, rect.width) - .5;
+        const v = (event.clientY - rect.top) / Math.max(1, rect.height) - .5;
+        face.style.setProperty('--ci-pointer-ry', `${(u * 13).toFixed(1)}deg`);
+        face.style.setProperty('--ci-pointer-rx', `${(-v * 11).toFixed(1)}deg`);
+        face.style.setProperty('--ci-light-x', `${((u + .5) * 100).toFixed(1)}%`);
+        face.style.setProperty('--ci-light-y', `${((v + .5) * 100).toFixed(1)}%`);
+      });
+      card.addEventListener('pointerleave', () => {
+        face.style.removeProperty('--ci-pointer-ry');
+        face.style.removeProperty('--ci-pointer-rx');
+      });
     });
+
     if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(entries => { inView = !!entries[0]?.isIntersecting; }, { threshold: 0.15 });
-      observer.observe(frame);
+      new IntersectionObserver(entries => { viewable = !!entries[0]?.isIntersecting; }, { threshold: .08 }).observe(frame);
     }
-    // A measured, one-step turn rather than an endless fast spin.
-    if (!reduceMotion.matches) {
-      setInterval(() => {
-        if (!inView || hovered || document.hidden || reduceMotion.matches || performance.now() < engagedUntil) return;
-        step += 1;
-        paint();
-      }, 4700);
-    }
+    window.addEventListener('resize', () => { updateDimensions(); draw(); }, { passive: true });
+    updateDimensions();
+    draw();
+    requestAnimationFrame(tick);
   }
 
   function createDetailsDialog() {
@@ -282,7 +368,7 @@
       const masthead = make('nav', 'ci-detail-nav');
       masthead.setAttribute('aria-label', 'Inspiration navigation');
       const back = make('a', 'ci-back', '← ALL DESIGN STYLES');
-      back.href = url('pages/inspiration.php');
+      back.href = url('index.php#inspiration');
       masthead.append(back, make('span', 'ci-detail-mast-label', 'IDEARE / CABINET INSPIRATIONS'));
       const header = make('header', 'ci-detail-heading');
       const headingCopy = make('div');
@@ -395,7 +481,9 @@
       const styles = Array.isArray(data.styles) ? data.styles.filter(s => s && typeof s.id === 'string' && typeof s.name === 'string' && Array.isArray(s.concepts)) : [];
       if (!styles.length) throw new Error('No design styles found');
       const active = selectedStyle(styles);
-      if (active) renderDetail(styles, active); else renderLanding(styles);
+      if (isHome) renderLanding(styles, true);
+      else if (app && active) renderDetail(styles, active);
+      else if (app) window.location.replace(url('index.php#inspiration'));
     } catch (error) {
       console.warn('IDEARE Inspiration: gallery unavailable', error);
       const message = make('div', 'ci-shell ci-loading');
@@ -403,7 +491,7 @@
       const back = make('a', '', '← Back to homepage');
       back.href = url('index.php#inspiration');
       message.append(back);
-      app.replaceChildren(message);
+      if (app) app.replaceChildren(message); // On the homepage, retain existing fallback content.
     }
   }
   start();
