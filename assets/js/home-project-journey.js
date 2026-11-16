@@ -1,4 +1,5 @@
 /** IDEARE homepage / five stages of a complete project.
+ * Icons now serve as the timeline markers instead of duplicate numbered badges.
  * Independent of the homepage service cards and the dedicated services process. */
 (() => {
   'use strict';
@@ -13,6 +14,36 @@
     {title:'Construction Project',copy:'Our team coordinates and carries out the agreed building or renovation works, including applicable interior installations.',icon:'<path d="M3 21h18M5 21V9l7-6 7 6v12M9 21v-7h6v7M3 10h18"/>'},
     {title:'Handover Session',copy:'We inspect the completed project, review the finished work with you and complete the handover process.',icon:'<circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/>'}
   ];
+  // Keep the existing homepage timeline stylesheet authoritative, changing only
+  // the SVG badge treatment and removing the now redundant second icon row.
+  const markerStyles = document.createElement('style');
+  markerStyles.textContent = `
+    html[data-ideare-page="home"] .pj-step .pj-marker {
+      color:var(--pj-gold);
+      flex-shrink:0;
+    }
+    html[data-ideare-page="home"] .pj-step .pj-marker svg {
+      width:29px;height:29px;display:block;stroke:currentColor;
+      fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;
+      transition:transform .32s cubic-bezier(.2,.8,.2,1);
+    }
+    html[data-ideare-page="home"] .pj-step:is(.is-active,.is-complete) .pj-marker {
+      color:var(--pj-bg);
+    }
+    html[data-ideare-page="home"] .pj-step:hover .pj-marker svg {transform:scale(1.13)}
+    html[data-ideare-page="home"] .pj-step .pj-icon {display:none!important}
+    html[data-ideare-page="home"] .pj-step-title {margin-top:clamp(16px,2.6svh,25px)}
+    html[data-ideare-page="home"] .pj-step .pj-marker-num {display:none}
+    html[data-ideare-page="home"] .pj-current-number {display:none}
+    @media (max-width:720px) {
+      html[data-ideare-page="home"] .pj-step .pj-marker svg {width:24px;height:24px}
+      html[data-ideare-page="home"] .pj-step-title {margin-top:4px}
+    }
+    @media (prefers-reduced-motion:reduce) {
+      html[data-ideare-page="home"] .pj-step .pj-marker svg {transition:none}
+    }
+  `;
+  document.head.appendChild(markerStyles);
   const section = document.createElement('section');
   section.id = 'project-journey';
   section.className = 'pj-section';
@@ -28,7 +59,7 @@
         <div class="pj-rail" aria-hidden="true"><span class="pj-rail-fill"></span></div>
       </div>
       <div class="pj-footer">
-        <div class="pj-current" aria-live="polite" aria-atomic="true"><span class="pj-current-number">01 / 05</span><span class="pj-current-title">Consultation Session</span><span class="pj-current-hint">SELECT A STAGE TO EXPLORE</span></div>
+        <div class="pj-current" aria-live="polite" aria-atomic="true"><span class="pj-current-number" aria-hidden="true"></span><span class="pj-current-title">Consultation Session</span><span class="pj-current-hint">SELECT A STAGE TO EXPLORE</span></div>
         <div class="pj-actions"><button class="pj-arrow" type="button" data-pj-prev aria-label="Previous project stage" disabled>←</button><button class="pj-arrow" type="button" data-pj-next aria-label="Next project stage">→</button><a class="pj-cta" href="pages/book-appointment.php">Plan your project <span aria-hidden="true">↗</span></a></div>
       </div>
     </div>`;
@@ -44,14 +75,13 @@
     button.type = 'button';
     button.dataset.pjStep = String(i);
     button.setAttribute('aria-pressed',String(i === 0));
+    button.setAttribute('aria-label',`${stage.title}. ${stage.copy}`);
     const marker = make('span','pj-marker');
-    marker.append(make('span','pj-marker-num',String(i+1).padStart(2,'0')));
-    const icon = make('span','pj-icon');
-    icon.setAttribute('aria-hidden','true');
-    icon.innerHTML = `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">${stage.icon}</svg>`;
+    marker.setAttribute('aria-hidden','true');
+    marker.innerHTML = `<svg viewBox="0 0 24 24" width="29" height="29" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${stage.icon}</svg>`;
     const head = make('strong','pj-step-title',stage.title);
     const copy = make('span','pj-step-copy',stage.copy);
-    button.append(marker,icon,head,copy);
+    button.append(marker,head,copy);
     track.append(button);
   });
   if (services) services.insertAdjacentElement('afterend',section);
@@ -70,7 +100,6 @@
       button.setAttribute('aria-pressed',String(index===to));
     });
     section.style.setProperty('--pj-fill',`${to / (stages.length-1)*100}%`);
-    section.querySelector('.pj-current-number').textContent = `${String(to+1).padStart(2,'0')} / 05`;
     section.querySelector('.pj-current-title').textContent = stages[to].title;
     prev.disabled = to===0;
     next.disabled = to===stages.length-1;
