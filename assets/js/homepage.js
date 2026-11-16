@@ -102,10 +102,30 @@
     const old = document.querySelector('section.service-story#services-overview');
     if (!old || old.hasAttribute('data-services-cards')) return;
     const template = document.createElement('template');
-    template.innerHTML = "    <!-- SERVICES: Eight disciplines, presented as a native vertical grid. -->\n    <section class=\"service-story home-section\" id=\"services-overview\" data-services-cards aria-labelledby=\"service-story-heading\">\n        <div class=\"site-wrap service-story-header\">\n            <div>\n                <p class=\"service-story-eyebrow\">What we do <span aria-hidden=\"true\">/</span> Our expertise</p>\n                <h2 id=\"service-story-heading\">Everything you need.<br><em>One team.</em></h2>\n            </div>\n            <div class=\"service-story-header-side\">\n                <p>From a first design conversation to the final finishing detail, our expertise brings every part of your space together — thoughtfully and seamlessly.</p>\n                <span class=\"service-story-meta\">Eight specialities · One coordinated vision</span>\n            </div>\n        </div>\n\n        <div class=\"site-wrap service-story-grid\" aria-label=\"Our eight services\">\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">01</span>\n                <div class=\"service-card-body\">\n                    <h3>3D Design &amp; Consultation</h3>\n                    <p>Visual planning and design advice tailored to your layout, priorities and budget.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">02</span>\n                <div class=\"service-card-body\">\n                    <h3>Construction</h3>\n                    <p>Building and development works, from project preparation to practical completion.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">03</span>\n                <div class=\"service-card-body\">\n                    <h3>Custom Cabinetry</h3>\n                    <p>Kitchen cabinets, built-in storage and made-to-measure furniture produced for each space.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">04</span>\n                <div class=\"service-card-body\">\n                    <h3>Aluminium, Glass &amp; Metal</h3>\n                    <p>Aluminium and glass works alongside welding and related fabrication.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">05</span>\n                <div class=\"service-card-body\">\n                    <h3>Flooring</h3>\n                    <p>Timber-look and other flooring options selected to suit the use and character of each space.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">06</span>\n                <div class=\"service-card-body\">\n                    <h3>Wall Finishes</h3>\n                    <p>Wallpaper and decorative wall treatments as part of a coordinated interior scheme.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">07</span>\n                <div class=\"service-card-body\">\n                    <h3>Sofas &amp; Upholstery</h3>\n                    <p>Custom sofa and seating design with a focus on comfort, function and interior coordination.</p>\n                </div>\n            </article>\n            <article class=\"service-card\">\n                <span class=\"service-card-number\">08</span>\n                <div class=\"service-card-body\">\n                    <h3>Blinds &amp; Curtains</h3>\n                    <p>Roller and automated blinds, curtains and other window-covering solutions.</p>\n                </div>\n            </article>\n        </div>\n\n        <div class=\"service-story-footer\">\n            <div class=\"site-wrap service-story-footer-inner\">\n                <p>Have a space in mind? Let's bring it to life.</p>\n                <div class=\"service-story-footer-actions\">\n                    <a class=\"btn primary\" href=\"public/pages/services.php\">Explore All Services <span aria-hidden=\"true\">↗</span></a>\n                    <a class=\"btn\" href=\"pages/book-appointment.php\">Book a Consultation</a>\n                </div>\n            </div>\n        </div>\n    </section>\n\n";
+    template.innerHTML = " <!-- SERVICES: Eight disciplines, presented as a native vertical grid. -->\n<section aria-labelledby=\"service-story-heading\" class=\"service-story home-section\" data-services-cards=\"\" id=\"services-overview\">\n<div class=\"site-wrap service-story-header\">\n<div>\n<p class=\"service-story-eyebrow\">What we do <span aria-hidden=\"true\">/</span> Our expertise</p>\n<h2 id=\"service-story-heading\">Everything you need.<br/><em>One team.</em></h2>\n</div>\n<div class=\"service-story-header-side\">\n<p>From a first design conversation to the final finishing detail, our expertise brings every part of your space together — thoughtfully and seamlessly.</p>\n<span class=\"service-story-meta\">Eight specialities · One coordinated vision</span>\n</div>\n</div>\n<div aria-label=\"Our eight services\" class=\"site-wrap service-story-grid\">\n<article aria-expanded=\"false\" aria-label=\"Expand 3D Design &amp; Consultation details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Client consultation\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Consultation.png\"/></div>\n<div class=\"service-card-body\">\n<h3>3D Design &amp; Consultation</h3>\n<p aria-hidden=\"true\">Visual planning and design advice tailored to your layout, priorities and budget.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Construction details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Construction site\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Construction.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Construction</h3>\n<p aria-hidden=\"true\">Building and development works, from project preparation to practical completion.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Custom Cabinetry details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Custom cabinetry installation\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Cabinetry.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Custom Cabinetry</h3>\n<p aria-hidden=\"true\">Kitchen cabinets, built-in storage and made-to-measure furniture produced for each space.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Aluminium, Glass &amp; Metal details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Aluminium, glass and metal fabrication\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Aluminium.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Aluminium, Glass &amp; Metal</h3>\n<p aria-hidden=\"true\">Aluminium and glass works alongside welding and related fabrication.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Flooring details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Flooring materials and installation\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Flooring.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Flooring</h3>\n<p aria-hidden=\"true\">Timber-look and other flooring options selected to suit the use and character of each space.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Wall Finishes details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Completed interior and wall finishes\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Interior.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Wall Finishes</h3>\n<p aria-hidden=\"true\">Wallpaper and decorative wall treatments as part of a coordinated interior scheme.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Sofas &amp; Upholstery details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Custom sofas and upholstery\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Sofas.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Sofas &amp; Upholstery</h3>\n<p aria-hidden=\"true\">Custom sofa and seating design with a focus on comfort, function and interior coordination.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n<article aria-expanded=\"false\" aria-label=\"Expand Blinds &amp; Curtains details\" class=\"service-card\" data-service-card=\"\" role=\"button\" tabindex=\"0\">\n\n<div aria-hidden=\"true\" class=\"service-card-media\"><img alt=\"Window blinds and curtains\" decoding=\"async\" loading=\"lazy\" src=\"assets/images/Services/Blinds.png\"/></div>\n<div class=\"service-card-body\">\n<h3>Blinds &amp; Curtains</h3>\n<p aria-hidden=\"true\">Roller and automated blinds, curtains and other window-covering solutions.</p>\n<span aria-hidden=\"true\" class=\"service-card-hint\">Explore service  +</span></div>\n</article>\n</div>\n<div class=\"service-story-footer\">\n<div class=\"site-wrap service-story-footer-inner\">\n<p>Have a space in mind? Let's bring it to life.</p>\n<div class=\"service-story-footer-actions\">\n<a class=\"btn primary\" href=\"public/pages/services.php\">Explore All Services <span aria-hidden=\"true\">↗</span></a>\n<a class=\"btn\" href=\"pages/book-appointment.php\">Book a Consultation</a>\n</div>\n</div>\n</div>\n</section>\n";
     const replacement = template.content.querySelector('section');
     if (!replacement) return;
     old.replaceWith(replacement);
+    // Resolve the exact local Services PNG filenames relative to the site's assets folder.
+    // This also works when the homepage is served with a query string or a different base URL.
+    const assetsURL = document.querySelector('script[src*="assets/js/homepage.js"]')?.src;
+    const servicesImageBase = assetsURL
+      ? new URL('../images/Services/', assetsURL)
+      : new URL('assets/images/Services/', document.baseURI);
+    replacement.querySelectorAll('.service-card-media img').forEach((img) => {
+      const imageFile = img.getAttribute('src').split('/').pop();
+      img.src = new URL(imageFile, servicesImageBase).href;
+      const handleError = () => {
+        img.hidden = true;
+        img.classList.add('image-unavailable');
+        const media = img.closest('.service-card-media');
+        if (media && !media.querySelector('img:not(.image-unavailable)')) {
+          media.classList.add('service-card-media-missing');
+        }
+      };
+      img.addEventListener('error', handleError, {once:true});
+      if (img.complete && img.naturalWidth === 0) handleError();
+    });
     /* IDEARE / Services card entrance. No pinned sections and no scroll interception. */
 (() => {
   'use strict';
@@ -138,6 +158,73 @@
   window.addEventListener('pagehide', () => observer.disconnect(), {once:true});
 })();
 
+  /* Deliberate-hover expansion and persistent click/tap expansion. */
+    const cards = [...replacement.querySelectorAll('[data-service-card]')];
+    const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)');
+    let selected = null;
+    const timers = new WeakMap();
+    const cancelHover = card => {
+      const timer = timers.get(card);
+      if (timer) window.clearTimeout(timer);
+      timers.delete(card);
+    };
+    const close = card => {
+      if (!card) return;
+      cancelHover(card);
+      card.classList.remove('is-expanded');
+      card.setAttribute('aria-expanded', 'false');
+      card.setAttribute('aria-label', 'Expand ' + card.querySelector('h3').textContent.trim() + ' details');
+      card.querySelector('.service-card-body p')?.setAttribute('aria-hidden', 'true');
+    };
+    const expand = card => {
+      cards.forEach(other => { if (other !== card) close(other); });
+      card.classList.add('is-expanded');
+      card.setAttribute('aria-expanded', 'true');
+      card.setAttribute('aria-label', 'Collapse ' + card.querySelector('h3').textContent.trim() + ' details');
+      card.querySelector('.service-card-body p')?.setAttribute('aria-hidden', 'false');
+    };
+    cards.forEach(card => {
+      card.addEventListener('pointerenter', () => {
+        if (!hoverCapable.matches || selected === card) return;
+        cancelHover(card);
+        timers.set(card, window.setTimeout(() => {
+          if (selected && selected !== card) return;
+          expand(card);
+        }, 650));
+      });
+      card.addEventListener('pointerleave', () => {
+        cancelHover(card);
+        if (selected !== card) close(card);
+      });
+      const toggle = () => {
+        cancelHover(card);
+        if (selected === card) {
+          selected = null;
+          close(card);
+        } else {
+          selected = card;
+          expand(card);
+        }
+      };
+      card.addEventListener('click', toggle);
+      card.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          toggle();
+        }
+        if (event.key === 'Escape') {
+          selected = null;
+          close(card);
+          card.blur();
+        }
+      });
+    });
+    document.addEventListener('pointerdown', event => {
+      if (selected && !selected.contains(event.target)) {
+        close(selected);
+        selected = null;
+      }
+    });
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render, {once:true});
   else render();
