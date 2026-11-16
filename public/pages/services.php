@@ -73,9 +73,9 @@ $services = [
 ];
 foreach ($services as &$service) {
     $service['cover'] = $siteAsset($service['coverPath']);
-    foreach ($service['steps'] as &$step) {
+    foreach ($service['steps'] as $stepIndex => &$step) {
         $step['imagePath'] = $processDir . $step['file'];
-        $step['image'] = $siteAsset($step['imagePath']);
+        $step['image'] = $siteAsset($step['imagePath']) ?? ($stepIndex === 0 ? $service['cover'] : null);
     }
     unset($step);
 }
@@ -105,7 +105,7 @@ $designerUrl = $customerRoot . 'designer/index.php';
         <?php endif; ?>
         <span class="sx-hero-visual-wash" aria-hidden="true"></span>
         <div class="sx-hero-vertical" aria-hidden="true">DESIGN · BUILD · CREATE</div>
-        <div class="sx-hero-visual-label"><small>01 / 04</small><span>FROM THE IDEA<br>TO THE BUILT SPACE</span></div>
+        <div class="sx-hero-visual-label"><span>FROM THE IDEA<br>TO THE BUILT SPACE</span></div>
       </div>
     </div>
     <div class="sx-hero-bottom site-wrap"><span>FOUR CONNECTED DISCIPLINES</span><span>DISCOVER THE PROCESS <span aria-hidden="true">↓</span></span></div>
@@ -116,45 +116,43 @@ $designerUrl = $customerRoot . 'designer/index.php';
       <header class="sx-showcase-heading">
         <div class="sx-showcase-heading-main"><p class="sx-overline"><span class="sx-overline-rule"></span> WHAT WE DO</p>
           <h2 id="sx-showcase-heading">The work behind <em>every space.</em></h2></div>
-        <p>Select a discipline to explore the three steps that shape its process. Each service can stand on its own or work alongside other agreed services.</p>
+        <p>Choose a service and discover how we bring it to life.</p>
       </header>
       <nav class="sx-service-nav" aria-label="Choose a service" data-sx-services>
         <?php foreach ($services as $key => $service): ?>
-        <a href="?service=<?= $h($key) ?>#services-presentation" data-sx-service="<?= $h($key) ?>" class="sx-service-tab<?= $key === $activeKey ? ' is-active' : '' ?>" <?= $key === $activeKey ? 'aria-current="true"' : '' ?>><span><?= $h($service['number']) ?></span><?= $h($service['name']) ?></a>
+        <a href="?service=<?= $h($key) ?>#services-presentation" data-sx-service="<?= $h($key) ?>" class="sx-service-tab<?= $key === $activeKey ? ' is-active' : '' ?>" <?= $key === $activeKey ? 'aria-current="true"' : '' ?>><?= $h($service['name']) ?></a>
         <?php endforeach; ?>
       </nav>
       <div class="sx-service-stage" data-sx-stage>
         <aside class="sx-service-aside" aria-live="polite" aria-atomic="true">
-          <span class="sx-service-index" data-sx-number><?= $h($activeService['number']) ?> <span>/ 04</span></span>
           <p class="sx-mini-label" data-sx-eyebrow><?= $h($activeService['eyebrow']) ?></p>
           <h3 data-sx-name><?= $h($activeService['name']) ?></h3>
           <p class="sx-service-description" data-sx-description><?= $h($activeService['description']) ?></p>
-          <p class="sx-service-note" data-sx-note <?= empty($activeService['note']) ? 'hidden' : '' ?>><?= $h($activeService['note'] ?? '') ?></p>
-          <div class="sx-service-aside-footer"><div class="sx-aside-track"><span data-sx-aside-fill style="width:<?= round(($activeStep + 1)/3*100) ?>%"></span></div><span data-sx-step-counter><?= str_pad((string)($activeStep + 1), 2, '0', STR_PAD_LEFT) ?> / 03</span></div>
           <a class="sx-aside-link" href="<?= $h($activeKey === 'interior-design' ? $designerUrl : $bookUrl) ?>" data-sx-aside-link><?= $activeKey === 'interior-design' ? 'Open Cabinet Designer' : 'Discuss this service' ?> <span aria-hidden="true">↗</span></a>
+          <details class="sx-service-scope" data-sx-scope <?= empty($activeService['note']) ? 'hidden' : '' ?>><summary>About the project scope</summary><p data-sx-note><?= $h($activeService['note'] ?? '') ?></p></details>
         </aside>
         <div class="sx-process-area">
           <div class="sx-process-cards" data-sx-cards aria-label="Three steps in <?= $h($activeService['name']) ?>">
           <?php foreach ($activeService['steps'] as $i => $step): ?>
-            <button class="sx-process-card<?= $i === $activeStep ? ' is-selected' : '' ?>" type="button" data-sx-card="<?= $i ?>" aria-pressed="<?= $i === $activeStep ? 'true' : 'false' ?>" aria-label="Step <?= $i + 1 ?>: <?= $h($step['title']) ?>">
+            <button class="sx-process-card<?= $i === $activeStep ? ' is-selected' : '' ?>" type="button" data-sx-card="<?= $i ?>" aria-pressed="<?= $i === $activeStep ? 'true' : 'false' ?>" aria-label="<?= $h($step['title']) ?>">
               <span class="sx-card-media">
                 <?php if ($step['image']): ?><img src="<?= $h($step['image']) ?>" alt="<?= $h($step['subject']) ?>" loading="lazy" decoding="async" width="600" height="800"><?php else: ?>
-                <span class="sx-image-pending" aria-hidden="true"><span class="sx-placeholder-grid"></span><span class="sx-placeholder-arch"></span><span class="sx-placeholder-note">PHOTO PENDING</span><small><?= $h(basename($step['imagePath'])) ?></small></span>
+                <span class="sx-image-pending" aria-hidden="true"><span class="sx-placeholder-grid"></span><span class="sx-placeholder-arch"></span><span class="sx-placeholder-note">PHOTOGRAPH COMING SOON</span></span>
                 <?php endif; ?>
               </span>
               <span class="sx-card-shade"></span>
-              <span class="sx-card-top"><span>STEP <?= str_pad((string)($i + 1), 2, '0', STR_PAD_LEFT) ?></span><span aria-hidden="true">↗</span></span>
-              <span class="sx-card-bottom"><strong><?= $h($step['title']) ?></strong><span class="sx-card-brief"><?= $h($step['doing']) ?></span></span>
+              <span class="sx-card-top" aria-hidden="true">↗</span>
+              <span class="sx-card-bottom"><strong><?= $h($step['title']) ?></strong></span>
             </button>
           <?php endforeach; ?>
           </div>
           <div class="sx-process-toolbar">
-            <div class="sx-current-detail" aria-live="polite"><span class="sx-current-marker" data-sx-detail-number>01</span><div><strong data-sx-detail-title><?= $h($activeService['steps'][$activeStep]['title']) ?></strong><p data-sx-detail-expect>What you can expect: <?= $h($activeService['steps'][$activeStep]['expect']) ?></p></div></div>
+            <div class="sx-current-detail" aria-live="polite"><div><strong data-sx-detail-title><?= $h($activeService['steps'][$activeStep]['title']) ?></strong><p data-sx-detail-expect><?= $h($activeService['steps'][$activeStep]['doing']) ?></p></div></div>
             <div class="sx-controls"><button type="button" class="sx-control" data-sx-prev-step aria-label="Previous process step" <?= $activeStep === 0 ? 'disabled' : '' ?>>←</button><button type="button" class="sx-control" data-sx-next-step aria-label="Next process step" <?= $activeStep === 2 ? 'disabled' : '' ?>>→</button></div>
           </div>
         </div>
       </div>
-      <div class="sx-section-foot"><span>THREE STEPS. A CLEARER DIRECTION.</span><span>CHOOSE A SERVICE TO CONTINUE</span></div>
+
     </div>
   </section>
 
@@ -163,10 +161,10 @@ $designerUrl = $customerRoot . 'designer/index.php';
       <header><p class="sx-overline"><span class="sx-overline-rule"></span> YOUR STARTING POINT</p><h2 id="sx-guidance-title">WHAT ARE <em>YOU PLANNING?</em></h2><p>Not every project needs every service. Tell us what you are planning and explore a suitable starting point.</p></header>
       <div class="sx-guidance-grid">
         <div class="sx-choice-list" role="group" aria-label="What are you planning?">
-          <button type="button" class="sx-choice is-selected" data-sx-choice="cabinetry" aria-pressed="true"><span>01</span><strong>Custom Cabinetry</strong><small>Kitchen cabinets, wardrobes or storage.</small></button>
-          <button type="button" class="sx-choice" data-sx-choice="interior" aria-pressed="false"><span>02</span><strong>Interior Design</strong><small>A new direction for my interior.</small></button>
-          <button type="button" class="sx-choice" data-sx-choice="construction" aria-pressed="false"><span>03</span><strong>Renovation and Construction</strong><small>Building or renovation work.</small></button>
-          <button type="button" class="sx-choice" data-sx-choice="unsure" aria-pressed="false"><span>04</span><strong>Not Sure Yet</strong><small>Help deciding where to begin.</small></button>
+          <button type="button" class="sx-choice is-selected" data-sx-choice="cabinetry" aria-pressed="true"><strong>Custom Cabinetry</strong><small>Kitchen cabinets, wardrobes or storage.</small></button>
+          <button type="button" class="sx-choice" data-sx-choice="interior" aria-pressed="false"><strong>Interior Design</strong><small>A new direction for my interior.</small></button>
+          <button type="button" class="sx-choice" data-sx-choice="construction" aria-pressed="false"><strong>Renovation and Construction</strong><small>Building or renovation work.</small></button>
+          <button type="button" class="sx-choice" data-sx-choice="unsure" aria-pressed="false"><strong>Not Sure Yet</strong><small>Help deciding where to begin.</small></button>
         </div>
         <aside class="sx-guidance-result" aria-live="polite" aria-atomic="true"><p class="sx-mini-label">SUGGESTED STARTING POINT</p><span class="sx-result-mark" aria-hidden="true">↗</span><h3 data-sx-result-title>Explore your cabinetry layout.</h3><p data-sx-result-copy>Start with a custom layout in the Cabinet Designer, then discuss materials, measurements and the details with our team.</p><div class="sx-result-actions"><a data-sx-result-primary class="sx-btn sx-btn-primary" href="<?= $h($designerUrl) ?>">Open Cabinet Designer <span aria-hidden="true">↗</span></a><a data-sx-result-secondary class="sx-btn sx-btn-quiet" href="<?= $h($bookUrl) ?>">Book consultation <span aria-hidden="true">↗</span></a></div><p class="sx-result-note">Your project can begin at the stage that suits you.</p></aside>
       </div>

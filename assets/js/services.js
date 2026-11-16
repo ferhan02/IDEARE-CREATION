@@ -16,22 +16,18 @@
   const stage = page.querySelector('[data-sx-stage]');
   const cards = page.querySelector('[data-sx-cards]');
   const nodes = {
-    number:page.querySelector('[data-sx-number]'),
     eyebrow:page.querySelector('[data-sx-eyebrow]'),
     name:page.querySelector('[data-sx-name]'),
     description:page.querySelector('[data-sx-description]'),
     note:page.querySelector('[data-sx-note]'),
-    fill:page.querySelector('[data-sx-aside-fill]'),
-    counter:page.querySelector('[data-sx-step-counter]'),
+    scope:page.querySelector('[data-sx-scope]'),
     link:page.querySelector('[data-sx-aside-link]'),
-    detailNumber:page.querySelector('[data-sx-detail-number]'),
     detailTitle:page.querySelector('[data-sx-detail-title]'),
     detailExpect:page.querySelector('[data-sx-detail-expect]'),
     prev:page.querySelector('[data-sx-prev-step]'),
     next:page.querySelector('[data-sx-next-step]')
   };
   if (!stage || !cards || !nav || Object.values(nodes).some(node=>!node)) return;
-  const two = n => String(n + 1).padStart(2,'0');
   let active = services[config.activeService] ? config.activeService : keys[0];
   let step = Math.max(0,Math.min(2,Number(config.activeStep) || 0));
   let transitionTimer = 0;
@@ -56,14 +52,14 @@
     const box = create('span','sx-image-pending');
     box.setAttribute('aria-hidden','true');
     box.append(create('span','sx-placeholder-grid'),create('span','sx-placeholder-arch'),
-      create('span','sx-placeholder-note','PHOTO PENDING'),create('small','',String(imagePath||'').split('/').pop()));
+      create('span','sx-placeholder-note','PHOTOGRAPH COMING SOON'));
     return box;
   };
   function buildCard(item,i) {
     const btn = create('button','sx-process-card');
     btn.type = 'button';
     btn.dataset.sxCard = String(i);
-    btn.setAttribute('aria-label',`Step ${i + 1}: ${item.title}`);
+    btn.setAttribute('aria-label',item.title);
     const visual = create('span','sx-card-media');
     if (item.image) {
       const img = create('img');
@@ -77,20 +73,18 @@
       visual.append(img);
     } else visual.append(placeholder(item.imagePath));
     const head = create('span','sx-card-top');
-    head.append(create('span','','STEP ' + two(i)),create('span','','↗'));
+    head.textContent = '↗';
+    head.setAttribute('aria-hidden','true');
     const body = create('span','sx-card-bottom');
-    body.append(create('strong','',item.title),create('span','sx-card-brief',item.doing));
+    body.append(create('strong','',item.title));
     btn.append(visual,create('span','sx-card-shade'),head,body);
     return btn;
   }
   function announceStep() {
     const data = services[active];
     const item = data.steps[step];
-    nodes.detailNumber.textContent = two(step);
     nodes.detailTitle.textContent = item.title;
-    nodes.detailExpect.textContent = 'What you can expect: ' + item.expect;
-    nodes.counter.textContent = `${two(step)} / 03`;
-    nodes.fill.style.width = `${Math.round((step + 1)/3 * 100)}%`;
+    nodes.detailExpect.textContent = item.doing;
     nodes.prev.disabled = step === 0;
     nodes.next.disabled = step === 2;
     [...cards.children].forEach((card,i) => {
@@ -119,12 +113,12 @@
       if (selected) tab.setAttribute('aria-current','true');
       else tab.removeAttribute('aria-current');
     });
-    nodes.number.replaceChildren(document.createTextNode(data.number + ' '),create('span','','/ 04'));
     nodes.eyebrow.textContent = data.eyebrow;
     nodes.name.textContent = data.name;
     nodes.description.textContent = data.description;
     nodes.note.textContent = data.note || '';
-    nodes.note.hidden = !data.note;
+    nodes.scope.hidden = !data.note;
+    nodes.scope.open = false;
     const linkToDesigner = key === 'interior-design';
     nodes.link.href = linkToDesigner ? config.designerUrl : config.bookUrl;
     nodes.link.replaceChildren(document.createTextNode(linkToDesigner?'Open Cabinet Designer ':'Discuss this service '),create('span','','↗'));

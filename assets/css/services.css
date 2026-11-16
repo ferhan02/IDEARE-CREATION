@@ -242,3 +242,84 @@ html[data-theme="dark"] .sx-page {
 @media (prefers-reduced-motion:reduce) {
   .sx-page *, .sx-page *::before,.sx-page *::after {scroll-behavior:auto!important;animation:none!important;transition-duration:.01ms!important}
 }
+
+/* Refinement: the photography and step names carry the story.
+   Keep supporting detail short, with no decorative numbering. */
+.sx-showcase {padding-block:clamp(24px,3.4svh,46px);}
+.sx-showcase-heading {grid-template-columns:minmax(0,1.25fr) minmax(200px,.65fr);gap:clamp(16px,3vw,40px);}
+.sx-showcase-heading h2 {font-size:clamp(35px,3.35vw,54px);}
+.sx-showcase-heading > p {font-size:clamp(12px,1vw,14px);max-width:340px;line-height:1.55;}
+.sx-service-nav {margin:clamp(14px,2svh,22px) 0 clamp(14px,2svh,21px);}
+.sx-service-tab {justify-content:center;gap:0;text-align:center;padding:13px 10px;}
+.sx-service-stage {grid-template-columns:minmax(210px,.58fr) minmax(0,1.9fr);gap:clamp(24px,3.5vw,52px);}
+.sx-service-aside {display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:0;padding:clamp(10px,2vw,24px) 0;}
+.sx-service-aside .sx-mini-label {margin:0;}
+.sx-service-aside h3 {font-size:clamp(31px,3vw,48px);margin-top:10px;line-height:1.04;}
+.sx-service-description {font-size:clamp(13px,1vw,15px);line-height:1.6;margin-top:15px!important;max-width:390px;}
+.sx-aside-link {margin-top:clamp(20px,3svh,34px);font-size:12px;min-width:0;width:min(100%,245px);}
+.sx-service-scope {font-size:11px;line-height:1.6;color:var(--sx-muted);max-width:390px;margin-top:15px;}
+.sx-service-scope summary {cursor:pointer;font-weight:650;list-style:none;color:var(--sx-muted);text-decoration:underline;text-decoration-color:var(--sx-line);text-underline-offset:4px;}
+.sx-service-scope summary::before {content:'+';display:inline-block;margin-right:7px;color:var(--sx-accent);}
+.sx-service-scope[open] summary::before {content:'−';}
+.sx-service-scope summary::-webkit-details-marker {display:none;}
+.sx-service-scope p {margin-top:8px;}
+.sx-process-cards {gap:clamp(9px,1vw,16px);}
+.sx-process-card {aspect-ratio:3/4;min-height:260px;max-height:clamp(280px,45svh,425px);border-radius:13px!important;}
+.sx-card-shade {background:linear-gradient(180deg,rgba(0,0,0,.08),transparent 47%,rgba(0,0,0,.8) 100%);}
+.sx-card-top {inset:13px 16px auto auto;font-size:18px;font-weight:450;color:rgba(255,255,255,.85);}
+.sx-card-bottom {inset:auto 16px 22px;gap:0;}
+.sx-card-bottom strong {font-size:clamp(24px,1.95vw,33px);line-height:1.1;}
+.sx-process-card.is-selected {border-color:#d0aa7d!important;box-shadow:0 0 0 1px #d0aa7d,0 18px 38px rgba(0,0,0,.22)!important;}
+.sx-process-toolbar {min-height:0;padding:16px 0 10px;align-items:center;}
+.sx-current-detail {min-width:0;max-width:75%;}
+.sx-current-detail strong {font-size:15px;}
+.sx-current-detail p {font-size:12px;line-height:1.5;margin-top:4px;}
+.sx-image-pending {position:absolute;inset:0;display:block;overflow:hidden;background:linear-gradient(145deg,#655646 0%,#403c36 55%,#1d1c1a 100%);}
+.sx-placeholder-arch {position:absolute;top:16%;left:23%;width:54%;aspect-ratio:4/5;opacity:.66;border:1px solid rgba(233,206,171,.47);border-radius:160px 160px 0 0;transform:rotate(-7deg);}
+.sx-placeholder-arch::after {inset:18px;}
+.sx-placeholder-note {position:absolute;top:11%;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.11em;color:rgba(242,222,193,.72);}
+.sx-choice {gap:6px;justify-content:center;}
+.sx-choice strong {font-size:clamp(17px,1.6vw,24px);}
+.sx-choice small {opacity:.8;}
+@media (max-width:899px) {
+  .sx-showcase-heading {grid-template-columns:1fr;gap:6px;}
+  .sx-showcase-heading > p {justify-self:start;}
+  .sx-service-stage {grid-template-columns:1fr;gap:20px;}
+  .sx-service-aside {display:flex;align-items:flex-start;gap:0;padding:0;}
+  .sx-service-aside .sx-mini-label {margin:0;}
+  .sx-service-aside h3 {margin-top:5px;font-size:clamp(30px,5vw,43px);}
+  .sx-service-description {margin-top:8px!important;max-width:740px;}
+  .sx-aside-link {margin-top:12px;}
+  .sx-process-card {min-height:220px;max-height:360px;}
+}
+@media (max-width:650px) {
+  .sx-showcase {padding-block:30px 35px;}
+  .sx-showcase-heading h2 {font-size:clamp(32px,8vw,44px);}
+  .sx-service-nav {margin:15px 0 17px;}
+  .sx-service-tab {padding:11px 14px;}
+  .sx-service-aside {display:flex;}
+  .sx-service-aside h3 {font-size:clamp(29px,7.3vw,39px);}
+  .sx-service-description {font-size:13px;line-height:1.55;}
+  .sx-aside-link {font-size:11px;margin-top:11px;}
+  .sx-service-scope {margin-top:10px;font-size:10px;}
+  .sx-process-card {flex:0 0 min(75vw,315px);min-height:0;max-height:none;aspect-ratio:4/5;}
+  .sx-card-bottom strong {font-size:clamp(24px,6.3vw,30px);}
+  .sx-process-toolbar {padding-top:12px;gap:9px;}
+  .sx-current-detail {max-width:none;flex:1;}
+  .sx-current-detail p {font-size:11px;}
+  .sx-choice {min-height:106px;}
+}
+@media (max-width:400px) {
+  .sx-choice {display:flex;align-items:flex-start;min-height:0;gap:4px;}
+  .sx-choice strong,.sx-choice small {grid-column:auto;}
+}
+@media (max-height:790px) and (min-width:900px) {
+  .sx-showcase {padding-top:18px;padding-bottom:16px;}
+  .sx-service-nav {margin:11px 0 13px;}
+  .sx-service-tab {padding-block:9px;}
+  .sx-process-card {min-height:245px;max-height:40svh;}
+  .sx-service-aside h3 {font-size:clamp(30px,2.8vw,41px);}
+  .sx-process-toolbar {padding-top:10px;padding-bottom:5px;}
+}
+/* Do not add empty screen height beneath a completed presentation. */
+.sx-showcase {min-height:0;}

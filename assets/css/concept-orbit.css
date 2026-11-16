@@ -364,3 +364,39 @@ html[data-theme="dark"] .ci-page {
   .ci-orbit-card,.ci-orbit-face,.ci-orbit-image img,.ci-orbit-shine {transition:none!important;}
   .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {transform:translateY(-4px) scale(1.035);}
 }
+
+/* Full-colour, layered architectural panels.
+   Perspective, physical edges and shadows create depth instead of dimming cards. */
+.ci-orbit-card,
+.ci-orbit-card[data-ci-distance="2"] {opacity:1!important;filter:drop-shadow(0 16px 22px rgba(0,0,0,.3));}
+.ci-orbit-face::before {opacity:0!important;}
+.ci-orbit-card .ci-orbit-depth {
+  position:absolute;inset:0;display:block;
+  border-radius:19px;
+  transform:translate3d(9px,8px,-19px);
+  background:linear-gradient(105deg,#e5d0ad 0%,#8b6c4b 20%,#392c25 60%,#a78c6b 100%);
+  border:1px solid rgba(241,221,187,.65);
+  box-shadow:3px 9px 23px rgba(0,0,0,.38),inset -4px 0 8px rgba(0,0,0,.35);
+  pointer-events:none;
+}
+.ci-orbit-card .ci-orbit-depth::after {
+  content:'';position:absolute;inset:3px 4px 4px 3px;
+  border-radius:16px;border:1px solid rgba(255,238,210,.19);
+}
+.ci-orbit-card .ci-orbit-face {position:absolute;inset:0;transform:translate3d(0,0,9px);border-width:2px;border-color:rgba(244,231,210,.85);}
+.ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {
+  transform:translate3d(0,-9px,39px) rotateX(var(--ci-pointer-rx,0deg)) rotateY(var(--ci-pointer-ry,0deg)) scale(1.07);
+}
+.ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-depth {
+  box-shadow:5px 14px 28px rgba(0,0,0,.52),inset -5px 0 8px rgba(0,0,0,.3);
+}
+.ci-orbit-card .ci-orbit-image img {filter:none!important;}
+.ci-orbit-card-info {background:linear-gradient(180deg,transparent 0%,rgba(7,6,5,.10) 23%,rgba(7,6,5,.85) 100%);}
+@media (max-width:700px) {
+  .ci-orbit-card,.ci-orbit-card[data-ci-distance="2"] {opacity:1!important;pointer-events:auto;}
+  .ci-orbit-card .ci-orbit-depth {transform:translate3d(6px,6px,-13px);}
+  .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {transform:translate3d(0,-6px,20px) scale(1.045);}
+}
+@media (prefers-reduced-motion:reduce) {
+  .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {transform:translate3d(0,-3px,12px) scale(1.025);}
+}

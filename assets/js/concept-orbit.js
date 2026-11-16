@@ -86,7 +86,7 @@
     const page = make('section', `ci-landing${isHome ? ' ci-home-landing' : ''}`);
     page.setAttribute('aria-labelledby', isHome ? 'ci-home-title' : 'ci-landing-title');
     const content = shell();
-    const eyebrow = `${String(total).padStart(2, '0')} DESIGN DIRECTION${total === 1 ? '' : 'S'}`;
+    const eyebrow = `DESIGN DIRECTION${total === 1 ? '' : 'S'}`;
     content.innerHTML = `
       <div class="ci-masthead">
         ${isHome ? '<span>IDEARE <span class="ci-gold">/</span> CABINET INSPIRATION</span><span>CHOOSE A STYLE TO DISCOVER MORE</span>' : '<a class="ci-back" href="' + url('index.php#inspiration') + '">← BACK TO HOMEPAGE</a><span>IDEARE <span class="ci-gold">/</span> CABINET INSPIRATIONS</span>'}
@@ -106,7 +106,6 @@
         </div>
         <div class="ci-orbit-controls">
           <div class="ci-active-meta" aria-live="polite" aria-atomic="true">
-            <span class="ci-active-count"></span>
             <strong class="ci-active-title"></strong>
             <span class="ci-active-subtitle">SELECT A STYLE TO EXPLORE ITS CONCEPTS</span>
           </div>
@@ -117,9 +116,8 @@
           </div>
         </div>
       </div>
-      <div class="ci-landing-bottom"><span>DESIGN <span class="ci-gold">·</span> BUILD <span class="ci-gold">·</span> CREATE</span><span><span class="ci-bottom-count"></span> STYLES / ENDLESS POSSIBILITIES</span></div>`;
+      <div class="ci-landing-bottom"><span>DESIGN <span class="ci-gold">·</span> BUILD <span class="ci-gold">·</span> CREATE</span><span>ENDLESS POSSIBILITIES</span></div>`;
     content.querySelector('.ci-direction-count').textContent = eyebrow;
-    content.querySelector('.ci-bottom-count').textContent = String(total).padStart(2, '0');
     page.appendChild(content);
     mount.replaceChildren(page);
 
@@ -130,20 +128,21 @@
       anchor.href = styleUrl(style.id);
       anchor.setAttribute('aria-label', `Explore ${style.name}: ${style.count ?? style.concepts?.length ?? 0} inspirations`);
       anchor.dataset.ciIndex = String(index);
+      const depth = make('span', 'ci-orbit-depth');
+      depth.setAttribute('aria-hidden', 'true');
       const face = make('span', 'ci-orbit-face');
       const shine = make('span', 'ci-orbit-shine');
       shine.setAttribute('aria-hidden', 'true');
       const photo = make('span', 'ci-orbit-image');
       setImage(photo, style.cover, `${style.name} cabinetry inspiration`, index < 3);
       const info = make('span', 'ci-orbit-card-info');
-      info.append(make('strong', '', style.name), make('small', '', `${style.count ?? style.concepts?.length ?? 0} inspirations  ↗`));
+      info.append(make('strong', '', style.name), make('small', '', 'Explore style ↗'));
       face.append(photo, shine, info);
-      anchor.appendChild(face);
+      anchor.append(depth, face);
       ring.appendChild(anchor);
       return anchor;
     });
 
-    const count = content.querySelector('.ci-active-count');
     const title = content.querySelector('.ci-active-title');
     const TAU = Math.PI * 2;
     const normalize = index => ((index % total) + total) % total;
@@ -174,7 +173,6 @@
       if (active === lastActive) return;
       lastActive = active;
       title.textContent = styles[active].name;
-      count.textContent = `${String(active + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
       cards.forEach((card, index) => {
         if (index === active) card.setAttribute('aria-current', 'true');
         else card.removeAttribute('aria-current');
@@ -195,9 +193,9 @@
         const scale = (mobile ? .72 : .64) + depth * (mobile ? .24 : .28);
         const yaw = -Math.sin(theta) * (mobile ? 31 : 46);
         card.style.transform = `translate3d(calc(-50% + ${x.toFixed(2)}px),calc(-50% + ${y.toFixed(2)}px),${z.toFixed(2)}px) rotateY(${yaw.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
-        card.style.opacity = String((mobile ? .34 : .43) + depth * (mobile ? .66 : .57));
+        card.style.opacity = '1';
         card.style.zIndex = String(10 + Math.round(depth * 80));
-        card.style.setProperty('--ci-depth-shade', String(((1 - depth) * .43).toFixed(3)));
+        card.style.setProperty('--ci-depth-shade', '0');
       });
       updateMeta();
     }
@@ -372,14 +370,14 @@
       masthead.append(back, make('span', 'ci-detail-mast-label', 'IDEARE / CABINET INSPIRATIONS'));
       const header = make('header', 'ci-detail-heading');
       const headingCopy = make('div');
-      headingCopy.append(make('p', 'ci-detail-eyebrow', 'DESIGN DIRECTION / ' + String(styles.indexOf(style) + 1).padStart(2, '0')));
+      headingCopy.append(make('p', 'ci-detail-eyebrow', 'DESIGN DIRECTION'));
       const h1 = make('h1', '', style.name);
       h1.id = 'ci-detail-title';
       headingCopy.append(h1, make('p', 'ci-detail-description', style.description));
       const tools = make('div', 'ci-detail-tools');
       const consult = make('a', 'ci-detail-consult', 'Start a project  ↗');
       consult.href = appointmentUrl(style.name, '');
-      tools.append(make('span', '', `${style.count} concepts to explore`), consult);
+      tools.append(make('span', '', 'Explore the collection'), consult);
       header.append(headingCopy, tools);
       const stylesNav = make('nav', 'ci-style-tabs');
       stylesNav.setAttribute('aria-label', 'Switch design style');
