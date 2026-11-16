@@ -162,3 +162,76 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render, {once:true});
   else render();
 })();
+
+
+/** IDEARE homepage: cohesive editorial accent typography and an in-view typewriter. */
+(() => {
+  'use strict';
+  if (document.documentElement.dataset.idearePage !== 'home') return;
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+  const targets = [
+    '#home-hero-title > span',
+    '#home-about-title > span',
+    '#pj-title > em',
+    '#ci-home-title > em',
+    '#service-title-04 > em'
+  ];
+  const initialized = new WeakSet();
+  const observedContainer = new WeakMap();
+  const observer = !reduced.matches && 'IntersectionObserver' in window
+    ? new IntersectionObserver(entries => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          const phrase = observedContainer.get(entry.target);
+          if (phrase) activate(phrase);
+        }
+      }, { threshold: 0.2, rootMargin: '0px 0px -6% 0px' }) : null;
+
+  function activate(element) {
+    element.classList.remove('is-type-pending');
+    if (reduced.matches || !observer) {
+      element.classList.add('is-type-complete');
+      return;
+    }
+    element.classList.add('is-typing');
+    element.addEventListener('animationend', event => {
+      if (event.animationName !== 'ideare-type-reveal') return;
+      element.classList.remove('is-typing');
+      element.classList.add('is-type-complete');
+    }, { once: true });
+  }
+
+  function attach() {
+    for (const selector of targets) {
+      const element = document.querySelector(selector);
+      if (!element || initialized.has(element)) continue;
+      initialized.add(element);
+      element.classList.add('ideare-artistic-phrase', 'ideare-typewriter');
+      const chars = Array.from(element.textContent.trim()).length;
+      element.style.setProperty('--ideare-typing-chars', String(Math.max(1, chars)));
+      element.style.setProperty('--ideare-typing-duration', `${Math.min(2.35, Math.max(1.05, chars * .083)).toFixed(2)}s`);
+      if (observer) {
+        element.classList.add('is-type-pending');
+        const container = element.parentElement || element;
+        observedContainer.set(container, element);
+        observer.observe(container);
+      } else activate(element);
+    }
+  }
+
+  // The About paragraph in the homepage HTML contains an unwanted em dash.
+  const aboutCopy = document.querySelector('#about .studio-description');
+  if (aboutCopy) aboutCopy.textContent = aboutCopy.textContent.replace('under one roof — from', 'under one roof, from');
+
+  attach();
+  // The project journey and rotating Inspiration gallery are injected by other scripts.
+  // Observe additions only until all five phrases are attached.
+  if (targets.every(selector => document.querySelector(selector))) return;
+  const changes = new MutationObserver(() => {
+    attach();
+    if (targets.every(selector => document.querySelector(selector))) changes.disconnect();
+  });
+  changes.observe(document.querySelector('main') || document.body, { childList: true, subtree: true });
+  window.addEventListener('pagehide', () => { changes.disconnect(); observer?.disconnect(); }, { once: true });
+})();

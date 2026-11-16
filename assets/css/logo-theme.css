@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@1,550&display=swap');
 /* IDEARE logo sizing + theme compatibility
    Keeps the customer navbar at its intended compact height.
 */
@@ -155,4 +156,113 @@ html[data-theme="dark"][data-ideare-page="home"] .home-studio::before {
         #302a27 0%,
         rgba(48, 42, 39, .65) 28%,
         transparent 100%);
+}
+
+
+   All rules are homepage-only; legacy layouts, designer and staff stay untouched. */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,550,50,1&display=swap');
+
+html[data-ideare-page="home"] {
+  --ideare-phrase-gold: #b17b49;
+  --ideare-phrase-gold-on-dark: #e2b985;
+}
+html[data-theme="dark"][data-ideare-page="home"] {
+  --ideare-phrase-gold: #e2b985;
+  --ideare-phrase-gold-on-dark: #e2b985;
+}
+
+/* Keep the two About columns balanced inside a comfortable, central reading width. */
+@media (min-width: 1200px) {
+  html[data-ideare-page="home"] #about.home-studio .studio-content.site-wrap {
+    width: min(1530px, calc(100% - clamp(120px, 10vw, 210px)));
+    max-width: none;
+    padding-inline: clamp(12px, 1.7vw, 30px);
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, .67fr);
+    column-gap: clamp(30px, 4.4vw, 78px);
+  }
+  html[data-ideare-page="home"] #about .studio-story { max-width: 790px; }
+  html[data-ideare-page="home"] #about .studio-established { justify-self: end; width: min(100%, 430px); }
+}
+@media (min-width: 768px) and (max-width: 1199px) {
+  html[data-ideare-page="home"] #about.home-studio .studio-content.site-wrap {
+    width: calc(100% - clamp(64px, 7vw, 100px));
+    padding-inline: 8px;
+  }
+}
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] #about.home-studio .studio-content.site-wrap {
+    width: calc(100% - 32px);
+    padding-inline: 4px;
+  }
+}
+
+/* The same artistic lettering everywhere: a warm bronze in light sections,
+   and its luminous champagne counterpart over imagery and dark sections. */
+html[data-ideare-page="home"] :is(
+  #home-hero-title > span,
+  #home-about-title > span,
+  #pj-title > em,
+  #ci-home-title > em,
+  #service-title-04 > em
+),
+html[data-ideare-page="home"] .ideare-artistic-phrase {
+  font-family: 'Fraunces', Georgia, serif !important;
+  font-style: italic !important;
+  font-weight: 550 !important;
+  font-variation-settings: 'SOFT' 50, 'WONK' 1;
+  letter-spacing: -.052em;
+  line-height: 1.13;
+  text-wrap: nowrap;
+  color: var(--ideare-phrase-gold) !important;
+  text-shadow: none;
+}
+/* The photo hero is always dark even when the global site theme is light. */
+html[data-ideare-page="home"] #home-hero-title > span,
+html[data-ideare-page="home"] #service-title-04 > em {
+  color: var(--ideare-phrase-gold-on-dark) !important;
+}
+/* The rotating Inspiration gallery uses a charcoal backdrop by default. */
+html[data-theme="dark"][data-ideare-page="home"] #ci-home-title > em,
+html[data-theme="dark"][data-ideare-page="home"] #pj-title > em,
+html[data-theme="dark"][data-ideare-page="home"] #home-about-title > span {
+  color: var(--ideare-phrase-gold-on-dark) !important;
+}
+
+/* Safari/Firefox/Chromium: reveal the whole measured phrase in stepped increments.
+   No text mutations during typing; no layout shifting, wrapping or accessibility loss. */
+html[data-ideare-page="home"] .ideare-artistic-phrase.ideare-typewriter {
+  display: inline-block;
+  position: relative;
+  vertical-align: baseline;
+  max-width: 100%;
+}
+html[data-ideare-page="home"] .ideare-artistic-phrase.ideare-typewriter.is-type-pending {
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+}
+html[data-ideare-page="home"] .ideare-artistic-phrase.ideare-typewriter.is-typing {
+  animation: ideare-type-reveal var(--ideare-typing-duration, 1.7s) steps(var(--ideare-typing-chars, 16), end) both;
+}
+html[data-ideare-page="home"] .ideare-artistic-phrase.ideare-typewriter.is-type-complete {
+  clip-path: none;
+  -webkit-clip-path: none;
+}
+@keyframes ideare-type-reveal {
+  from { clip-path: inset(0 100% 0 0); -webkit-clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); -webkit-clip-path: inset(0 0 0 0); }
+}
+
+/* At narrow widths, preserve all of each phrase inside its column. */
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] :is(#home-hero-title > span,#home-about-title > span,#pj-title > em,#ci-home-title > em,#service-title-04 > em) {
+    letter-spacing: -.065em;
+    font-size: .89em;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ideare-page="home"] .ideare-artistic-phrase.ideare-typewriter {
+    animation: none !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
 }

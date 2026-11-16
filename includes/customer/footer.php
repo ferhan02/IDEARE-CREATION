@@ -13,6 +13,8 @@ $pageScripts = $pageScripts ?? [];
     <span class="location-footer-copy">Architecture &amp; Interior Design</span>
   </div>
 </footer>
+<!-- Shared palette loaded last for every customer page and the 3D Designer. -->
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/ideare-unified-theme.css?v=20261116">
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/theme-icons.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/site.js"></script>
 <?php foreach ($pageScripts as $script): ?>

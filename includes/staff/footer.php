@@ -1,5 +1,7 @@
 </div>
 </div>
+<!-- Shared palette loaded after staff page and dark mode styles. -->
+<link rel="stylesheet" href="<?= h(ideare_root_url('assets/css/ideare-unified-theme.css?v=20261116')) ?>">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="<?= h(ideare_root_url('assets/js/ideare-alerts.js')) ?>"></script>
 <script src="<?= h(ideare_root_url('assets/js/theme-icons.js')) ?>"></script>
