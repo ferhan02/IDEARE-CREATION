@@ -28,6 +28,8 @@ $pageScripts = $pageScripts ?? [];
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/concept-orbit.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/home-project-journey.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-showcase.js"></script>
+<!-- One wheel gesture navigates one readable homepage panel. -->
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/home-section-scroll.js"></script>
 <?php endif; ?>
 <!-- This loader uses matchMedia, not user-agent strings or a paid detection API. -->
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/responsive/shared.js"></script>
