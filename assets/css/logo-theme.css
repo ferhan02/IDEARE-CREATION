@@ -64,3 +64,95 @@ html[data-theme="dark"] .brand-logo-image {
         transition: none;
     }
 }
+
+/* ===========================================================
+   Homepage image transition and customer navigation refinement.
+   This existing, globally loaded theme sheet also handles the
+   shared navigation surface. The homepage rules remain scoped.
+   =========================================================== */
+
+/* Warm beige rather than stark white in light mode.  Retain the
+   existing dark palette when the site theme is dark. */
+html[data-theme="light"] .site-header {
+    background: rgba(236, 225, 210, .96);
+    border-bottom-color: rgba(111, 83, 55, .24);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+html[data-theme="light"] .site-header .site-nav {
+    color: #33291f;
+}
+html[data-theme="light"] .site-header .site-nav a {
+    color: #594838;
+}
+html[data-theme="light"] .site-header .site-nav a:hover,
+html[data-theme="light"] .site-header .site-nav a:focus-visible {
+    color: #7a4e2c;
+}
+html[data-theme="light"] .site-header .site-theme-toggle,
+html[data-theme="light"] .site-header .nav-toggle {
+    background-color: rgba(247, 238, 225, .83);
+    color: #5a412b;
+    border-color: rgba(114, 84, 54, .26);
+}
+@media (max-width: 1199px) {
+    html[data-theme="light"] .site-header .site-nav,
+    html[data-theme="light"] .site-header .site-nav.open {
+        background: #eee2d2;
+        border-color: rgba(111, 83, 55, .22);
+    }
+}
+
+/* Move the About introduction inward without squeezing the text
+   or forcing extra vertical height. Responsive on all devices. */
+html[data-ideare-page="home"] .home-studio .studio-content {
+    padding-left: clamp(16px, 3vw, 56px);
+}
+@media (max-width: 767px) {
+    html[data-ideare-page="home"] .home-studio .studio-content {
+        padding-left: clamp(12px, 3.8vw, 20px);
+        padding-right: clamp(10px, 2.8vw, 16px);
+    }
+}
+
+/* The scroll-fade now passes through charcoal before easing into
+   the warm studio colour. Preserve the filmic dark palette in dark mode. */
+html[data-ideare-page="home"] .home-hero::after {
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        transparent 59%,
+        rgba(5, 6, 6, .24) 69%,
+        rgba(4, 4, 4, .81) 83%,
+        rgba(31, 25, 22, .84) 89%,
+        rgba(164, 133, 108, .83) 96%,
+        #e7d6c7 100%);
+    opacity: 1;
+}
+html[data-theme="dark"][data-ideare-page="home"] .home-hero::after {
+    background: linear-gradient(to bottom,
+        transparent 0%,
+        transparent 58%,
+        rgba(4, 4, 4, .42) 76%,
+        rgba(4, 4, 4, .85) 88%,
+        #302a27 100%);
+}
+/* Feather the opposite side of the seam over the photograph. */
+html[data-ideare-page="home"] .home-studio::before {
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0 0 auto;
+    height: clamp(70px, 12svh, 148px);
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+        #e7d6c7 0%,
+        rgba(231, 214, 199, .68) 28%,
+        rgba(231, 214, 199, 0) 100%);
+}
+html[data-theme="dark"][data-ideare-page="home"] .home-studio::before {
+    background: linear-gradient(to bottom,
+        #302a27 0%,
+        rgba(48, 42, 39, .65) 28%,
+        transparent 100%);
+}
