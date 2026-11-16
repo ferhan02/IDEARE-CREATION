@@ -28,8 +28,94 @@ $pageScripts = $pageScripts ?? [];
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/concept-orbit.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/home-project-journey.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-showcase.js"></script>
-<!-- One wheel gesture navigates one readable homepage panel. -->
-<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/home-section-scroll.js"></script>
+<!-- Homepage wheel navigation is inline so browser cache and missing asset paths cannot disable it. -->
+<script>
+(() => {
+  'use strict';
+  if (window.__ideareSectionWheelReady) return;
+  window.__ideareSectionWheelReady = true;
+  const desktop = () => innerWidth >= 900;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const exclusions = '.ci-orbit-frame,.ci-orbit-area,[role="dialog"],dialog,.portfolio-modal,.portfolio-image-viewer,input,textarea,select,[contenteditable],[data-scroll-native],.modal';
+  const header = () => document.querySelector('.site-header')?.getBoundingClientRect().height || 70;
+  const maxY = () => Math.max(0, document.documentElement.scrollHeight - innerHeight);
+  const topY = el => el.getBoundingClientRect().top + window.scrollY;
+  let gesture = false, lastInput = 0, release = 0, active = false, raf = 0, destination = null, token = 0;
+  const clamp = (v,a,b) => Math.max(a, Math.min(b,v));
+  function stops() {
+    const main = document.querySelector('main');
+    if (!main) return [];
+    const sections = [...main.children].filter(el => el.tagName === 'SECTION' && el.getClientRects().length && getComputedStyle(el).display !== 'none');
+    const lim = maxY(), h = header(), usable = Math.max(300, innerHeight-h);
+    const pos = [0];
+    for (const section of sections) {
+      const start = clamp(topY(section)-h, 0, lim);
+      const end = clamp(topY(section)+section.getBoundingClientRect().height-innerHeight, start, lim);
+      pos.push(start);
+      const segments = Math.ceil((end-start)/(usable*.85));
+      for (let i=1;i<=segments;i++) pos.push(start+(end-start)*i/segments);
+    }
+    pos.push(lim);
+    const sorted = pos.map(Math.round).sort((a,b)=>a-b);
+    return sorted.filter((v,i)=>!i || v-sorted[i-1]>12);
+  }
+  function nativeArea(target, dir) {
+    let el = target instanceof Element ? target : target?.parentElement;
+    while (el && el !== document.body && el !== document.documentElement) {
+      if (el.matches(exclusions)) return true;
+      const st = getComputedStyle(el);
+      if (/(auto|scroll)/.test(st.overflowY) && el.scrollHeight > el.clientHeight + 5) {
+        if (dir > 0 && el.scrollTop+el.clientHeight < el.scrollHeight-3) return true;
+        if (dir < 0 && el.scrollTop > 3) return true;
+      }
+      el = el.parentElement;
+    }
+    return false;
+  }
+  function cancel() { token++; cancelAnimationFrame(raf);active=false;destination=null; }
+  function animate(to) {
+    cancel();
+    const from = window.scrollY, dist = to-from;
+    if (Math.abs(dist)<3) return;
+    if (reduce.matches) {window.scrollTo(0,to);return;}
+    const id=++token, start=performance.now(), duration=clamp(590+Math.abs(dist)*.16,610,940);
+    active=true;destination=to;
+    const ease=t=>1-Math.pow(1-t,4);
+    function tick(now) {
+      if (id!==token) return;
+      const t=clamp((now-start)/duration,0,1);
+      window.scrollTo({top:from+dist*ease(t),behavior:'instant'});
+      if (t<1) raf=requestAnimationFrame(tick);
+      else {window.scrollTo({top:to,behavior:'instant'});active=false;destination=null;}
+    }
+    raf=requestAnimationFrame(tick);
+  }
+  window.addEventListener('wheel', event => {
+    if (!desktop() || event.ctrlKey || event.metaKey || event.shiftKey || event.defaultPrevented) return;
+    if (Math.abs(event.deltaX)>Math.abs(event.deltaY)*1.25 || !event.deltaY) return;
+    if (document.body.style.overflow === 'hidden' || document.querySelector('dialog[open],.portfolio-modal[aria-hidden="false"]')) return;
+    const dir=Math.sign(event.deltaY);
+    if (nativeArea(event.target,dir)) return;
+    const points=stops();
+    if (points.length<2) return;
+    if (event.cancelable) event.preventDefault();
+    const now=performance.now();
+    if (now-lastInput>400) gesture=false;
+    lastInput=now;
+    clearTimeout(release);
+    release=setTimeout(()=>{gesture=false;},460);
+    if (gesture || active) return;
+    const current=window.scrollY;
+    const next=dir>0 ? points.find(p=>p>current+16) : [...points].reverse().find(p=>p<current-16);
+    if (next===undefined) return;
+    gesture=true;
+    animate(next);
+  },{capture:true,passive:false});
+  document.addEventListener('click', e=>{if(e.target.closest?.('a[href*="#"]')){cancel();gesture=true;clearTimeout(release);release=setTimeout(()=>gesture=false,400);}},true);
+  window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Home'||e.key==='End'){cancel();gesture=false;}});
+  window.addEventListener('pagehide',cancel);
+})();
+</script>
 <?php endif; ?>
 <!-- This loader uses matchMedia, not user-agent strings or a paid detection API. -->
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/responsive/shared.js"></script>
