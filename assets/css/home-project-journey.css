@@ -5,6 +5,9 @@ html[data-ideare-page="home"] .pj-section {
   --pj-muted:#6c6256;
   --pj-gold:#9e7b54;
   --pj-line:rgba(74,57,39,.18);
+  --pj-highlight:#805c34;
+  --pj-highlight-copy:#433323;
+  --pj-highlight-glow:rgba(170,120,57,.16);
   --pj-fill:0%;
   position:relative;isolation:isolate;overflow:hidden;
   padding:clamp(32px,5svh,58px) 0 clamp(30px,4svh,53px);
@@ -13,6 +16,7 @@ html[data-ideare-page="home"] .pj-section {
 }
 html[data-theme="dark"][data-ideare-page="home"] .pj-section {
   --pj-bg:#1d1b18;--pj-ink:#f6eee3;--pj-muted:#bbb0a1;--pj-gold:#d4b086;--pj-line:rgba(238,218,189,.16);
+  --pj-highlight:#ffe1ad;--pj-highlight-copy:#f6e4c9;--pj-highlight-glow:rgba(255,206,140,.33);
 }
 .pj-section::before {content:"";position:absolute;inset:0;z-index:-1;opacity:.25;background-image:linear-gradient(90deg,var(--pj-line) 1px,transparent 1px);background-size:12.5% 100%;pointer-events:none}
 .pj-section *,.pj-section *::before,.pj-section *::after {box-sizing:border-box}
@@ -31,7 +35,7 @@ html[data-theme="dark"][data-ideare-page="home"] .pj-section {
 .pj-rail-fill {display:block;height:2px;width:var(--pj-fill);background:var(--pj-gold);transform:translateY(-.5px);transition:width .65s cubic-bezier(.2,.7,.2,1)}
 .pj-step {position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:clamp(205px,28svh,265px);padding:0 12px 17px 0!important;border:0!important;border-radius:0;background:none!important;box-shadow:none!important;color:var(--pj-ink);text-align:left;transition:transform .35s ease,opacity .3s ease!important}
 .pj-step:hover {transform:translateY(-5px)}
-.pj-marker {width:62px;height:62px;display:grid;place-items:center;border:1px solid var(--pj-line);border-radius:50%;background:var(--pj-bg);color:var(--pj-muted);font:700 15px/1 var(--font-mono,monospace);transition:background .32s,color .32s,border-color .32s,transform .38s}
+.pj-marker {width:62px;height:62px;display:grid;place-items:center;border:1px solid var(--pj-line);border-radius:50%;background:var(--pj-bg);color:var(--pj-muted);font:700 15px/1 var(--font-mono,monospace);transition:background .32s,color .32s,border-color .32s,transform .38s,box-shadow .3s ease}
 .pj-step:is(.is-active,.is-complete) .pj-marker {background:var(--pj-ink);color:var(--pj-bg);border-color:var(--pj-ink)}
 .pj-step.is-active .pj-marker {transform:scale(1.11);box-shadow:0 0 0 5px color-mix(in srgb,var(--pj-gold) 15%,transparent)}
 .pj-icon {margin:clamp(19px,3svh,28px) 0 17px;color:var(--pj-gold);display:block;height:29px}
@@ -49,6 +53,40 @@ html[data-theme="dark"][data-ideare-page="home"] .pj-section {
 .pj-section .pj-arrow:hover:not(:disabled) {background:var(--pj-ink);color:var(--pj-bg)}
 .pj-cta {display:inline-flex;align-items:center;gap:15px;padding:12px 15px;margin-left:9px;border:1px solid var(--pj-gold);border-radius:100px;color:var(--pj-ink);font-size:11px;font-weight:750;text-decoration:none;white-space:nowrap;transition:background .2s,color .2s}
 .pj-cta:hover {background:var(--pj-ink);color:var(--pj-bg)}
+/* Override the global button border and hover glow. Only the icon and text illuminate. */
+html[data-ideare-page="home"] .pj-section button.pj-step,
+html[data-ideare-page="home"] .pj-section button.pj-step:hover,
+html[data-ideare-page="home"] .pj-section button.pj-step:focus,
+html[data-ideare-page="home"] .pj-section button.pj-step:active {
+  border:0!important;outline:0!important;background:transparent!important;
+  box-shadow:none!important;filter:none!important;
+}
+html[data-ideare-page="home"] .pj-section .pj-step .pj-step-title,
+html[data-ideare-page="home"] .pj-section .pj-step .pj-step-copy {
+  transition:color .25s ease,text-shadow .28s ease,opacity .25s ease!important;
+}
+html[data-ideare-page="home"] .pj-section .pj-step:is(:hover,:focus-visible) .pj-step-title,
+html[data-ideare-page="home"] .pj-section .pj-step.is-active .pj-step-title {
+  color:var(--pj-highlight);
+  text-shadow:0 0 11px var(--pj-highlight-glow),0 0 24px var(--pj-highlight-glow);
+}
+html[data-ideare-page="home"] .pj-section .pj-step:is(:hover,:focus-visible) .pj-step-copy,
+html[data-ideare-page="home"] .pj-section .pj-step.is-active .pj-step-copy {
+  color:var(--pj-highlight-copy);
+  text-shadow:0 0 12px var(--pj-highlight-glow);
+  opacity:1;
+}
+html[data-ideare-page="home"] .pj-section .pj-step:is(:hover,:focus-visible) .pj-marker {
+  color:var(--pj-highlight);border-color:var(--pj-gold);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--pj-gold) 14%,transparent),0 0 22px var(--pj-highlight-glow);
+}
+html[data-ideare-page="home"] .pj-section .pj-step.is-active:is(:hover,:focus-visible) .pj-marker {
+  box-shadow:0 0 0 5px color-mix(in srgb,var(--pj-gold) 19%,transparent),0 0 22px var(--pj-highlight-glow);
+}
+/* Keyboard focus is indicated on the circular icon rather than the full rectangular button. */
+html[data-ideare-page="home"] .pj-section .pj-step:focus-visible .pj-marker {
+  outline:2px solid var(--pj-gold);outline-offset:6px;
+}
 @media (hover:hover) and (prefers-reduced-motion:no-preference) {
   .pj-section.pj-visible .pj-step {animation:pj-show .6s cubic-bezier(.2,.8,.2,1) both}
   .pj-section.pj-visible .pj-step:nth-child(3) {animation-delay:.06s}
