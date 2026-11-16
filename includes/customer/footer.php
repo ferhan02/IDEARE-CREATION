@@ -19,9 +19,10 @@ $pageScripts = $pageScripts ?? [];
 <script src="<?= htmlspecialchars($customerRoot . ltrim($script, '/'), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endforeach; ?>
 <?php if (($idearePage ?? '') === 'home'): ?>
+<!-- Shared circular 3D Cabinet Inspirations gallery; independent of staff-published records. -->
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/concept-orbit.css">
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/concept-orbit.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-showcase.js"></script>
-<!-- Cabinet Inspiration now uses the style-first Concepts showroom. -->
-<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/concept-showroom.js"></script>
 <?php endif; ?>
 <!-- This loader uses matchMedia, not user-agent strings or a paid detection API. -->
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/responsive/shared.js"></script>

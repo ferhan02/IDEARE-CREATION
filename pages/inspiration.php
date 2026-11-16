@@ -1,19 +1,22 @@
 <?php
-/** IDEARE style-first cabinet inspiration showroom. Published staff designs remain available below. */
-$pageTitle = 'Cabinet Inspiration | IDEARE Creation';
-$pageScripts = ['assets/js/concept-showroom.js'];
+/**
+ * IDEARE cabinet inspirations — compact 3D style discovery and style collections.
+ * Uses the existing /api/concepts.php feed and /api/inspiration.php extras.
+ * Homepage links to ?style=<slug> remain supported.
+ */
+$pageTitle = 'Cabinet Inspirations | IDEARE Creation';
+$pageStyles = ['assets/css/concept-orbit.css'];
+$pageScripts = ['assets/js/concept-orbit.js'];
 require __DIR__ . '/../includes/customer/header.php';
 ?>
-<main class="cs-page" id="main-content">
-  <div class="cs-page-context cs-shell site-wrap">
-    <a class="cs-back" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>index.php#inspiration">← Back to homepage</a>
-    <p class="cs-eyebrow">IDEARE / CABINET INSPIRATION</p>
-    <h1 class="cs-page-title">Explore designs. Discover possibilities.</h1>
-    <p class="cs-page-subtitle">Discover cabinetry ideas through five distinct design styles. Choose the look that speaks to you, then explore kitchen, media wall and wardrobe concepts.</p>
-  </div>
-  <div data-inspiration-page="all" class="cs-shell site-wrap" aria-live="polite">
-    <p class="ic-loading-message">Preparing the design gallery…</p>
-    <p><a href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>designer/index.php">Or start your own cabinet design</a></p>
+<main class="ci-page" id="main-content">
+  <div id="ci-app" class="ci-app">
+    <div class="ci-shell ci-loading" role="status">
+      <p>IDEARE / CABINET INSPIRATION</p>
+      <h1>Explore designs. Discover possibilities.</h1>
+      <span>Loading your inspiration collection…</span>
+      <p><a href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>index.php#inspiration">← Back to homepage</a></p>
+    </div>
   </div>
 </main>
 <?php require __DIR__ . '/../includes/customer/footer.php'; ?>
