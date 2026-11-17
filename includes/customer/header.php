@@ -57,6 +57,96 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-showcase-overrides.css">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-theme.css">
 <?php endif; ?>
+<!-- Homepage presentation cleanup. These selectors also work when the site opens at /. -->
+<style id="ideare-home-cleanup">
+/* Remove only the decorative content requested; retain actual titles, cards, and actions. */
+.home-hero-kicker,
+.home-hero-scroll,
+.service-story-topline > span:last-child,
+.service-story-opening-side,
+.pj-footer,
+.portfolio-description,
+.portfolio-intro-side,
+.portfolio-gallery-counter,
+.portfolio-gallery-hint,
+.portfolio-photo-counter,
+.portfolio-photo-count-static,
+.portfolio-exhibition-status .portfolio-status-caption,
+.ic-intro .ic-eyebrow,
+.ic-hero-corner,
+.ic-hero-foot,
+.ic-feature-kicker,
+.ic-preview-heading,
+.ic-feature-controls > span,
+.ic-endline,
+.ic-results { display: none !important; }
+/* Cabinet style orbit: headings and orientation text shown in the latest screenshots. */
+.ci-home-landing .ci-masthead,
+.ci-home-landing .ci-heading > p,
+.ci-home-landing .ci-kicker,
+.ci-home-landing .ci-active-subtitle,
+.ci-home-landing .ci-wheel-hint,
+.ci-home-landing .ci-landing-bottom,
+/* Portfolio kicker is constructed in portfolio-showcase.js, not index.php. */
+.portfolio-showcase .portfolio-kicker,
+/* Keep the style title and actual arrow navigation. */
+.ci-home-landing .ci-heading > div > .ci-kicker { display: none !important; }
+.ci-home-landing .ci-heading { gap: 0 !important; }
+.ci-home-landing .ci-orbit-controls { min-height: 0 !important; }
+/* Collapse the empty space left behind by removed captions and metadata. */
+.portfolio-intro, .portfolio-gallery-footer, .portfolio-exhibition-footer,
+.service-story-opening-grid { min-height: 0; }
+.portfolio-intro-side, .service-story-opening-side { margin: 0; padding: 0; }
+</style>
+<script id="ideare-home-cleanup-script">
+/* Also handle decorative labels created dynamically by homepage components. */
+(function () {
+  'use strict';
+  const matches = [
+    /^IDEARE\s*\/\s*ARCHITECTURE\s*&\s*INTERIOR\s*DESIGN$/i,
+    /^SCROLL TO EXPLORE$/i,
+    /^FROM A FIRST DESIGN CONVERSATION TO THE FINAL FINISHING DETAIL,/i,
+    /^EIGHT SPECIALTIES\s*[·•-]\s*ONE COORDINATED VISION$/i,
+    /^SELECT A STAGE TO EXPLORE$/i,
+    /^EXPLORE A PROJECT TO SEE THE FULL COLLECTION OF PHOTOGRAPHS/i,
+    /^A SELECTION OF PLACES, INTERIORS AND ENVIRONMENTS SHAPED BY THE IDEARE TEAM/i,
+    /^IDEARE\s*\/\s*CABINET INSPIRATIONS?$/i,
+    /^DESIGN DIRECTIONS$/i,
+    /^DESIGN\s*[·•-]\s*BUILD\s*[·•-]\s*CREATE$/i,
+    /^ENDLESS POSSIBILITIES$/i
+  ];
+  function tidy() {
+    const main = document.querySelector('main');
+    if (!main) return;
+    const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+    const toHide = new Set();
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      const value = node.textContent.replace(/\s+/g, ' ').trim();
+      if (!value || value.length > 350 || !matches.some(r => r.test(value))) continue;
+      let el = node.parentElement;
+      if (!el) continue;
+      /* Hide a decorative caption, never an interactive button or its parent. */
+      if (el.closest('button, a, [role="button"], .pj-step')) continue;
+      if (el.matches('b, strong, em, small')) el = el.parentElement;
+      if (el && !el.matches('main, section, article, header')) toHide.add(el);
+    }
+    toHide.forEach(el => { if (!el.hidden) { el.hidden = true; el.style.setProperty('display','none','important'); } });
+  }
+  let queued = false;
+  function schedule() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => { queued = false; tidy(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule, {once:true});
+  else schedule();
+  const observer = new MutationObserver(schedule);
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.querySelector('main')) observer.observe(document.querySelector('main'), {childList:true, subtree:true});
+  }, {once:true});
+})();
+</script>
 </head>
 <body>
 <header class="site-header">
