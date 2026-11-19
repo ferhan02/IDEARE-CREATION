@@ -1,0 +1,280 @@
+/*
+ * IDEARE / Premium Cabinet Inspiration Orbit
+ * Source: assets/js/concept-orbit.js (the real orbit component).
+ * This layer intentionally changes no shared fonts, gallery data, or detail pages.
+ * A single requestAnimationFrame now owns the moving card transforms.
+ */
+
+/* Premium photographic panels: a restrained champagne edge instead of a heavy box. */
+.ci-home-section .ci-orbit-frame {
+  isolation: isolate;
+  perspective: 1550px;
+  perspective-origin: 50% 49%;
+  user-select: none;
+  -webkit-user-select: none;
+  overscroll-behavior: contain;
+  cursor: grab;
+}
+.ci-home-section .ci-orbit-frame.ci-is-dragging {
+  cursor: grabbing;
+}
+.ci-home-section .ci-orbit-frame.ci-is-dragging,
+.ci-home-section .ci-orbit-frame.ci-is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+.ci-home-section .ci-orbit-ring {
+  transform: none !important;
+  transform-style: preserve-3d;
+}
+.ci-home-section .ci-orbit-card {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: none !important; /* eliminates animation-frame/CSS-transition conflict */
+  opacity: 1 !important;
+  filter: drop-shadow(0 19px 25px rgba(0,0,0,.23));
+  will-change: transform;
+}
+.ci-home-section .ci-orbit-card .ci-orbit-depth {
+  inset: 1px;
+  border-radius: 21px;
+  transform: translate3d(8px, 9px, -17px);
+  background: linear-gradient(112deg,
+    #ebd5b3 0%, #ab8560 9%, #5b4433 29%, #29231f 55%, #98734f 82%, #d8bd95 100%);
+  border: 1px solid rgba(244,220,181,.64);
+  box-shadow: 4px 14px 29px rgba(0,0,0,.39), inset -5px 0 9px rgba(0,0,0,.22);
+}
+.ci-home-section .ci-orbit-card .ci-orbit-depth::after {
+  inset: 3px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,240,215,.19);
+}
+.ci-home-section .ci-orbit-card .ci-orbit-face {
+  inset: 0;
+  position: absolute;
+  border-radius: 21px;
+  border: 1.5px solid rgba(244,227,201,.83);
+  background: #241d18;
+  box-shadow:
+    0 0 0 1px rgba(38,27,18,.36),
+    0 21px 51px rgba(0,0,0,.40),
+    inset 0 0 0 1px rgba(255,249,235,.15);
+  overflow: hidden;
+  transform: translate3d(0,0,9px);
+  transition: border-color .25s ease, box-shadow .32s ease !important;
+  isolation: isolate;
+}
+.ci-home-section .ci-orbit-card .ci-orbit-face::after {
+  content: '';
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  inset: 4px;
+  border: 1px solid rgba(255,245,224,.23);
+  border-radius: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+.ci-home-section .ci-orbit-card .ci-orbit-face::before {
+  opacity: 0 !important;
+}
+.ci-home-section .ci-orbit-card .ci-orbit-image img {
+  transform: scale(1.025);
+  object-position: center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: transform .6s cubic-bezier(.2,.7,.2,1) !important;
+  filter: none !important;
+}
+.ci-home-section .ci-orbit-card-info {
+  padding: clamp(62px, 7.4svh, 90px) clamp(19px,2vw,28px) clamp(20px,2.9svh,29px);
+  gap: 7px;
+  background: linear-gradient(180deg,transparent 0%,rgba(9,8,7,.1) 25%,rgba(7,6,5,.79) 76%,rgba(7,6,5,.93) 100%);
+}
+.ci-home-section .ci-orbit-card-info strong {
+  font-size: clamp(20px,1.65vw,28px);
+  font-weight: 680;
+  letter-spacing: -.045em;
+  line-height: 1.15;
+}
+.ci-home-section .ci-orbit-card-info small {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+.ci-home-section .ci-orbit-shine {
+  background:
+    linear-gradient(120deg,rgba(255,255,255,.16),transparent 28%,transparent 65%,rgba(247,213,167,.05)),
+    radial-gradient(circle at var(--ci-light-x,52%) var(--ci-light-y,33%),rgba(255,233,199,.20),transparent 44%);
+  opacity: .28;
+  transition: opacity .3s ease;
+}
+.ci-home-section .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {
+  border-color: #f2d5ac;
+  transform: translate3d(0,-5px,23px) rotateX(var(--ci-pointer-rx,0deg)) rotateY(var(--ci-pointer-ry,0deg)) scale(1.035);
+  box-shadow:
+    0 31px 76px rgba(0,0,0,.56),
+    0 0 0 1px rgba(239,201,152,.48),
+    0 0 29px rgba(224,173,110,.13);
+}
+.ci-home-section .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-shine { opacity: .78; }
+.ci-home-section .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-image img { transform: scale(1.055); }
+.ci-home-section .ci-is-dragging .ci-orbit-face,
+.ci-home-section .ci-is-dragging .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {
+  transform: translate3d(0,0,9px) !important;
+  transition: none !important;
+}
+.ci-home-section .ci-is-dragging .ci-orbit-card .ci-orbit-image img { transform: scale(1.025) !important; }
+.ci-home-section .ci-is-dragging .ci-orbit-shine { opacity: .26 !important; }
+
+/* A slightly banked, low-contrast orbit plane adds a real spatial cue. */
+.ci-home-section .ci-orbit-track {
+  left: 50%;
+  top: 52%;
+  width: min(83%,1260px);
+  height: 71%;
+  border-radius: 50%;
+  border: 1px solid rgba(216,184,145,.18);
+  transform: translate(-50%,-50%) rotateX(73deg) rotateZ(-6deg);
+  background: radial-gradient(ellipse,rgba(211,166,110,.10),rgba(216,178,127,.028) 51%,transparent 71%);
+  box-shadow:
+    0 0 37px rgba(229,184,129,.035),
+    inset 0 0 58px rgba(229,177,117,.06);
+}
+.ci-home-section .ci-orbit-aura {
+  top: 53%;
+  width: min(82vw,1200px);
+  height: 71%;
+  opacity: .65;
+  filter: blur(34px);
+}
+.ci-home-section .ci-orbit-controls {
+  position: relative;
+  z-index: 10;
+  flex: none;
+  border-top: 1px solid rgba(222,190,152,.26);
+  padding-top: clamp(11px,1.5svh,19px);
+}
+.ci-home-section .ci-active-title {
+  font-size: clamp(19px,1.32vw,25px);
+  letter-spacing: -.035em;
+  font-weight: 680;
+}
+.ci-home-section .ci-arrow {
+  width: clamp(40px,3vw,49px);
+  height: clamp(40px,3vw,49px);
+  transition: background .25s ease,border-color .25s ease,transform .25s ease !important;
+}
+.ci-home-section .ci-arrow:hover { transform: translateY(-2px); }
+
+/* Desktop at native 100% zoom: one real viewport, no whole-section scaling. */
+@media (min-width:1200px) {
+  html[data-ideare-page="home"] #inspiration.ci-home-section {
+    height: calc(100svh - var(--ci-nav-height, 70px));
+    min-height: 0 !important;
+    max-height: none;
+    margin: 0 !important;
+    padding: 0 !important;
+    scroll-margin-top: var(--ci-nav-height,70px);
+    overflow: hidden;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-landing {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100%;
+    padding: 0 !important;
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-landing > .ci-shell {
+    width: min(1660px,calc(100% - clamp(48px,5vw,108px)));
+    height: 100%;
+    min-height: 0;
+    padding: clamp(19px,2.6svh,35px) 0 clamp(17px,2.5svh,33px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-masthead { flex: none; }
+  html[data-ideare-page="home"] #inspiration .ci-heading {
+    flex: none;
+    margin-top: clamp(7px,1.5svh,18px);
+    margin-bottom: clamp(1px,.8svh,9px);
+    align-items: flex-end;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-heading :is(h1,h2) {
+    font-size: clamp(49px,4.75vw,84px);
+    line-height: 1.02;
+    max-width: 100%;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-area {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 0;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-frame {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-card {
+    width: clamp(300px,48svh,460px);
+    height: clamp(258px,40svh,425px);
+  }
+  html[data-ideare-page="home"] #inspiration .ci-landing-bottom {
+    flex: none;
+    margin-top: clamp(8px,1.2svh,16px);
+  }
+}
+@media (min-width:1200px) and (max-height:720px) {
+  html[data-ideare-page="home"] #inspiration .ci-landing > .ci-shell {
+    padding-top: 13px;
+    padding-bottom: 12px;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-heading { margin-top: 4px; margin-bottom: 0; }
+  html[data-ideare-page="home"] #inspiration .ci-heading :is(h1,h2) { font-size: clamp(42px,4.2vw,64px); }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-card { width: clamp(310px,56svh,394px); height: clamp(255px,47svh,327px); }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-controls { padding-top: 9px; }
+}
+
+/* Tablet and phone keep their content-led layout and vertical touch gestures. */
+@media (max-width:1199px) {
+  .ci-home-section .ci-orbit-card { transition: none !important; }
+  .ci-home-section .ci-orbit-frame { touch-action: pan-y; }
+}
+@media (max-width:700px) {
+  .ci-home-section .ci-orbit-card .ci-orbit-depth { transform: translate3d(5px,6px,-12px); }
+  .ci-home-section .ci-orbit-card .ci-orbit-face,
+  .ci-home-section .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face { border-radius: 16px; }
+  .ci-home-section .ci-orbit-card-info { padding: 52px 15px 16px; }
+  .ci-home-section .ci-orbit-card-info strong { font-size: 19px; }
+  .ci-home-section .ci-orbit-track { width: 108%; height: 67%; }
+}
+
+/* Light mode respects the established IDEARE palette. */
+html[data-theme="light"][data-ideare-page="home"] #inspiration .ci-orbit-track {
+  border-color: rgba(136,99,62,.22);
+  background: radial-gradient(ellipse,rgba(195,150,99,.10),transparent 69%);
+}
+html[data-theme="light"][data-ideare-page="home"] #inspiration .ci-orbit-card .ci-orbit-face {
+  box-shadow: 0 18px 44px rgba(69,45,29,.24), inset 0 0 0 1px rgba(255,251,242,.17);
+}
+html[data-theme="light"][data-ideare-page="home"] #inspiration .ci-orbit-card .ci-orbit-depth {
+  background: linear-gradient(112deg,#e4cfb0,#9d7955 22%,#4d3b2b 59%,#c8aa81 100%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ci-home-section .ci-orbit-card,
+  .ci-home-section .ci-orbit-card .ci-orbit-face,
+  .ci-home-section .ci-orbit-card .ci-orbit-image img {
+    transition: none !important;
+    animation: none !important;
+  }
+  .ci-home-section .ci-orbit-card:is(:hover,:focus-visible) .ci-orbit-face {
+    transform: translate3d(0,0,9px) !important;
+  }
+}

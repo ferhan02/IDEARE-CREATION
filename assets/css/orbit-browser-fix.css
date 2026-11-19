@@ -1,0 +1,50 @@
+/* Prevent Firefox/Chrome from lifting card links into drag ghosts. */
+.ci-orbit-frame,
+.ci-orbit-card,
+.ci-orbit-card *,
+.ci-orbit-image,
+.ci-orbit-image img {
+  -webkit-user-drag:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.ci-orbit-frame { cursor:grab; }
+.ci-orbit-frame.ci-pointer-pressed,
+.ci-orbit-frame.ci-pointer-dragging {cursor:grabbing!important;}
+.ci-orbit-frame.ci-pointer-dragging .ci-orbit-face,
+.ci-orbit-frame.ci-pointer-dragging .ci-orbit-image img,
+.ci-orbit-frame.ci-pointer-dragging .ci-orbit-depth {
+  transition:none!important;
+}
+/* While rotating, a stationary mouse should not add a second, conflicting
+ * hover transform to whichever card happens to pass under the pointer. */
+.ci-orbit-frame.ci-pointer-dragging .ci-orbit-card .ci-orbit-face {
+  transform:translate3d(0,0,9px)!important;
+}
+.ci-orbit-frame.ci-pointer-dragging .ci-orbit-shine {opacity:0!important;}
+
+/* Firefox optimizations: moving transformed cards plus CSS filters require
+ * repeated off-screen compositing. Keep full-resolution images and the 3D
+ * geometry, but use cheaper shadows and avoid blur/filter layers. */
+.ci-is-firefox .ci-orbit-card,
+.ci-is-firefox .ci-orbit-card[data-ci-distance="2"] {
+  filter:none!important;
+  -webkit-filter:none!important;
+  will-change:transform;
+}
+.ci-is-firefox .ci-orbit-face {
+  box-shadow:0 10px 26px rgba(0,0,0,.32),0 1px 4px rgba(0,0,0,.25)!important;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  backdrop-filter:none!important;
+}
+.ci-is-firefox .ci-orbit-card:hover .ci-orbit-face {
+  box-shadow:0 17px 38px rgba(0,0,0,.42),0 0 0 1px rgba(220,177,126,.34)!important;
+}
+.ci-is-firefox .ci-orbit-shine {mix-blend-mode:normal!important;}
+.ci-is-firefox .ci-orbit-aura {filter:none!important;opacity:.6;}
+.ci-is-firefox .ci-orbit-track {box-shadow:none!important;}
+.ci-is-firefox .ci-orbit-depth {box-shadow:2px 4px 10px rgba(0,0,0,.23)!important;}
+@media (prefers-reduced-motion:reduce) {
+  .ci-is-firefox .ci-orbit-card {will-change:auto;}
+}

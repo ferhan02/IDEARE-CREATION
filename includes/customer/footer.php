@@ -28,6 +28,9 @@ $pageScripts = $pageScripts ?? [];
 <!-- Homepage-only section sizing and spacing, loaded last to respect device CSS. -->
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/homepage-compact.css">
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/concept-orbit.js"></script>
+<!-- Orbit link-drag suppression and Firefox compositing optimizations. -->
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/orbit-browser-fix.css?v=20261117">
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/orbit-browser-fix.js?v=20261117"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/home-project-journey.js"></script>
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-showcase.js"></script>
 <!-- Homepage wheel navigation is inline so browser cache and missing asset paths cannot disable it. -->
