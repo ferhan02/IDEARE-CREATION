@@ -70,3 +70,45 @@ html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-inspector {
 @media(max-width:760px){html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-topline{padding:5px 8px!important;gap:4px;min-height:43px;} .id3-studio .studio-brand{gap:5px;} .id3-studio .studio-brand img{width:53px;height:28px;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-topline h1{font-size:13px;}html.studio-fullscreen .id3-studio #autosave-status,.id3-studio .id3-top-actions button span,.id3-studio .studio-brand .id3-kicker{display:none;}html.studio-fullscreen .id3-studio .id3-top-actions{gap:4px;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-steps{justify-content:flex-start;padding:0 4px!important;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-steps button{font-size:10px;min-height:34px;flex:1 0 auto;padding:4px 8px!important;}.id3-studio .studio-toolrow{display:grid;grid-template-columns:1fr;gap:3px;}.id3-studio .studio-controls{justify-content:space-between;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-catalog{flex-wrap:wrap;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-catalog>button{padding:4px 6px!important;min-height:31px;}.id3-studio .studio-controls .id3-primary{min-height:31px!important;padding:5px 10px!important;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-room-layout{display:flex;flex-direction:column;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .studio-room-tools{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:0 8px;padding:8px;border-right:0;border-bottom:1px solid var(--studio-line);max-height:190px;}.id3-studio .studio-room-tools h3,.id3-studio .studio-room-tools .id3-note{grid-column:1/-1;}.id3-studio .studio-room-tools .id3-note{font-size:11px;margin:4px 0;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-plan-panel{flex:1;height:auto;}.id3-studio .studio-room-bar{padding:6px 8px;}.id3-studio .studio-room-bar small{font-size:10px;}.id3-studio .studio-canvas-label{top:7px;left:8px;}.id3-studio .studio-canvas-bottom{bottom:7px;left:6px;transform:none;max-width:calc(100% - 52px);gap:3px;padding:3px;}.id3-studio .studio-canvas-bottom button{font-size:10px!important;padding:5px!important;}.id3-studio .studio-canvas-bottom #selection-badge{display:none;}.id3-studio .studio-zoom{right:6px;bottom:7px;}.id3-studio .studio-zoom button{width:32px;height:32px;}html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-inspector{top:auto!important;bottom:46px!important;right:6px!important;width:min(260px,calc(100% - 12px))!important;max-height:47%!important;}.id3-studio .studio-items{top:55px;left:6px;max-height:55%;}.id3-studio #studio-library-preview{display:none!important;}}
 .id3-studio .studio-controls button:disabled {opacity:.42;cursor:default;}
 @media(max-width:440px){.id3-studio .studio-controls button:not(.id3-primary){font-size:10px!important;padding:4px!important;}.id3-studio .studio-controls{gap:1px;}.id3-studio .studio-controls .id3-primary{font-size:10px!important;padding:5px 6px!important;}}
+
+/* IDEARE Studio 2.1 · catalogue-first customer controls */
+html[data-ideare-page="designer"] .studio-legacy-source,
+html[data-ideare-page="designer"] .studio-handle-source,
+html[data-ideare-page="designer"] .id3-edit-mode[hidden],
+html[data-ideare-page="designer"] .studio-hinge-control[hidden],
+html[data-ideare-page="designer"] .id3-detail label[hidden] {display:none!important}
+html[data-ideare-page="designer"] .studio-finish-library {padding:12px 0 4px;display:grid;gap:12px}
+html[data-ideare-page="designer"] .studio-finish-current {display:flex;align-items:center;gap:10px;border-radius:12px;padding:10px;border:1px solid var(--id3-line);background:var(--id3-soft)}
+html[data-ideare-page="designer"] .studio-finish-current-swatch {flex:none;width:55px;height:55px;display:block;border-radius:8px;background-color:#a58767;background-size:cover;background-position:center;border:1px solid #978a79}
+html[data-ideare-page="designer"] .studio-finish-current small {display:block;font-size:10px;color:var(--id3-muted);margin-bottom:5px}
+html[data-ideare-page="designer"] .studio-finish-current strong {display:block;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
+html[data-ideare-page="designer"] .studio-finish-find-label {margin:0 0 -7px!important}
+html[data-ideare-page="designer"] .studio-finish-filters {display:flex;gap:5px;flex-wrap:wrap}
+html[data-ideare-page="designer"] .studio-finish-filters button {border:1px solid var(--id3-line);background:var(--id3-soft);color:var(--id3-ink);padding:6px 9px;font-size:11px;border-radius:20px}
+html[data-ideare-page="designer"] .studio-finish-filters button[aria-pressed="true"] {background:#92714c;color:#fff;border-color:#92714c}
+html[data-ideare-page="designer"] .studio-finish-results {max-height:340px;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:1px}
+html[data-ideare-page="designer"] .studio-finish-grid {display:flex;gap:7px;overflow-x:auto;padding:3px 0 8px;scrollbar-width:thin}
+html[data-ideare-page="designer"] .studio-finish-recents>small {display:block;margin-bottom:7px;color:var(--id3-muted);font-size:11px}
+html[data-ideare-page="designer"] .studio-finish-tile {position:relative;min-width:0;display:flex;flex-direction:column;gap:5px;border:1px solid var(--id3-line);background:var(--id3-surface);padding:4px;border-radius:10px;color:var(--id3-ink);text-align:left}
+html[data-ideare-page="designer"] .studio-finish-tile.compact {min-width:74px;width:74px;flex:none}
+html[data-ideare-page="designer"] .studio-finish-tile.active {border-color:#bd935b;box-shadow:0 0 0 1px #bd935b}
+html[data-ideare-page="designer"] .studio-finish-thumb {display:block;width:100%;aspect-ratio:1.15;background:linear-gradient(125deg,#b49d7d,#e0d0b3);border-radius:6px;overflow:hidden}
+html[data-ideare-page="designer"] .studio-finish-thumb img {width:100%;height:100%;object-fit:cover;display:block}
+html[data-ideare-page="designer"] .studio-finish-name {font-size:10px;line-height:1.25;min-height:26px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+html[data-ideare-page="designer"] .studio-finish-check {position:absolute;top:7px;right:7px;border-radius:50%;background:#fff;color:#5b442b;font-weight:900;width:18px;height:18px;display:grid;place-items:center;font-size:12px}
+html[data-ideare-page="designer"] .studio-handle-gallery {padding-top:8px}
+html[data-ideare-page="designer"] .studio-handle-title {font-size:12px;font-weight:700;margin:4px 0 8px}
+html[data-ideare-page="designer"] .studio-handle-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+html[data-ideare-page="designer"] .studio-handle-tile {border:1px solid var(--id3-line);background:var(--id3-surface);color:var(--id3-ink);padding:7px;border-radius:10px;display:grid;gap:5px;min-width:0;text-align:center}
+html[data-ideare-page="designer"] .studio-handle-tile.active {border-color:#b58d54;box-shadow:0 0 0 1px #b58d54}
+html[data-ideare-page="designer"] .studio-handle-tile small {font-size:10px;line-height:1.2}
+html[data-ideare-page="designer"] .studio-handle-drawing {position:relative;display:grid;place-items:center;height:61px;background:linear-gradient(90deg,#bea17a,#d0b792);border:1px solid #917350;border-radius:3px}
+html[data-ideare-page="designer"] .studio-handle-drawing i {height:27px;width:4px;display:block;background:#2c2b2a;border-radius:2px}
+html[data-ideare-page="designer"] .studio-handle-drawing.gold i {background:#d8ad60}
+html[data-ideare-page="designer"] .studio-handle-drawing.recessed i {width:39px;height:6px;background:#7f6348;border-radius:1px;box-shadow:inset 0 3px 2px #382a20}
+html[data-ideare-page="designer"] .studio-handle-drawing.handleless i {display:none}
+html[data-ideare-page="designer"] .studio-style-actions {display:flex;gap:7px;flex-wrap:wrap;margin:8px 13px 12px}
+html[data-ideare-page="designer"] .studio-style-actions button {border:1px solid var(--id3-line);padding:8px 10px;border-radius:8px;background:var(--id3-soft);color:var(--id3-ink);font-size:11px;flex:1;min-width:125px}
+html[data-ideare-page="designer"] #studio-replace {font-size:11px}
+html[data-ideare-page="designer"] .studio-attachment-note {font-size:11px;color:var(--id3-muted)}
+@media(max-width:620px){html[data-ideare-page="designer"] .studio-finish-results {grid-template-columns:repeat(3,minmax(0,1fr))}}
