@@ -1,0 +1,36 @@
+/* IDEARE cabinet designer v2. Scoped to the existing studio only. */
+.id3-studio .ideare-icon-catalog {display:flex;align-items:center;gap:3px;min-width:0;}
+.id3-studio .ideare-icon-catalog >button[data-menu] {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:76px;min-height:66px;padding:8px 11px!important;border-radius:8px;color:var(--studio-ink);font-size:11px;line-height:1.2;white-space:nowrap;}
+.id3-studio .ideare-icon-catalog >button[data-menu] .ideare-catalog-icon {display:grid;place-items:center;font-size:23px;width:40px;height:36px;border:1px solid var(--studio-line);border-radius:4px;transition:background .2s,color .2s,transform .2s;}
+.id3-studio .ideare-icon-catalog >button[data-menu]:hover .ideare-catalog-icon {transform:translateY(-2px);border-color:var(--studio-accent);}
+.id3-studio .ideare-icon-catalog >button[data-menu].active .ideare-catalog-icon {background:var(--studio-ink);color:var(--studio-paper);border-color:var(--studio-ink);}
+.id3-studio .ideare-environment {margin:12px 0;display:grid;gap:9px;min-width:0;}
+.id3-studio .ideare-room-palette {border:1px solid var(--studio-line);border-radius:10px;background:color-mix(in srgb,var(--studio-paper) 93%,var(--studio-ink));overflow:hidden;}
+.id3-studio .ideare-room-palette summary {padding:12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--studio-ink);}
+.id3-studio .ideare-swatch-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 10px 12px;max-height:194px;overflow:auto;scrollbar-width:thin;}
+.id3-studio .ideare-swatch {min-width:0;display:flex;flex-direction:column;gap:4px;align-items:center;padding:5px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--studio-ink);cursor:pointer;font:inherit;font-size:10px;text-align:center;}
+.id3-studio .ideare-swatch i {width:100%;height:32px;display:block;border-radius:5px;background:var(--swatch);border:1px solid #00000014;box-shadow:inset 0 1px 1px #ffffff55;}
+.id3-studio .ideare-swatch span {max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.id3-studio .ideare-swatch.is-selected {border-color:var(--studio-accent);background:color-mix(in srgb,var(--studio-accent) 14%,transparent);}
+.id3-studio .ideare-swatch:focus-visible {outline:2px solid var(--studio-accent);outline-offset:2px;}
+.id3-studio .ideare-preview-theme {position:absolute;z-index:9;right:14px;top:13px;border:1px solid #a79e93;border-radius:99px;background:#f9f6f0ed;color:#2e2925;box-shadow:0 4px 20px #00000018;font-size:11px;font-weight:650;padding:9px 13px;cursor:pointer;}
+.id3-studio [data-preview-theme=dark] {background:#22252a;}
+.id3-studio [data-preview-theme=dark] .studio-canvas-label, .id3-studio [data-preview-theme=dark] .studio-canvas-bottom, .id3-studio [data-preview-theme=dark] .studio-instructions {color:#e5e2df;}
+.id3-studio [data-preview-theme=dark] .ideare-preview-theme {background:#31363b;color:#f6f1e8;border-color:#636a70;}
+.id3-studio #ideare-resize-toggle {width:36px;height:36px;font-size:23px;line-height:1;cursor:pointer;}
+.id3-studio #ideare-resize-toggle[aria-pressed=true] {color:#fff;background:#937047;border-color:#937047;}
+.id3-studio #ideare-resize-grip {position:absolute;z-index:14;display:grid;place-items:center;transform:translate(-50%,-50%);width:37px;height:37px;background:#b28a5d;color:#fff;font-size:22px;line-height:1;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 14px #0005;cursor:nwse-resize;user-select:none;touch-action:none;}
+.id3-studio #ideare-resize-grip[hidden] {display:none!important;}
+.id3-studio #ideare-resize-grip.ideare-invalid {background:#bb4646;}
+.id3-studio .ideare-resize-active, .id3-studio .ideare-resize-active * {user-select:none!important;}
+.id3-studio #designer-canvas {touch-action:none;-webkit-user-drag:none;}
+.ideare-swal-popup {border-radius:14px!important;background:var(--studio-paper,#f9f6f0)!important;color:var(--studio-ink,#28231e)!important;box-shadow:0 16px 55px #0002!important;}
+.ideare-swal-confirm,.ideare-swal-cancel {padding:11px 20px!important;margin:5px!important;border-radius:7px!important;font-weight:650!important;cursor:pointer!important;}
+.ideare-swal-confirm {background:#a17b50!important;color:#fff!important;border:1px solid #a17b50!important;}
+.ideare-swal-cancel {background:transparent!important;color:var(--studio-ink,#28231e)!important;border:1px solid #938879!important;}
+@media(max-width:1100px){.id3-studio .ideare-icon-catalog >button[data-menu]{min-width:58px;padding:7px!important;font-size:10px;}.id3-studio .ideare-icon-catalog >button[data-menu] .ideare-catalog-icon{width:33px;height:33px;}}
+@media(max-width:640px){.id3-studio .ideare-icon-catalog{overflow-x:auto;max-width:100%;scrollbar-width:thin;}.id3-studio .ideare-swatch-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.id3-studio .ideare-preview-theme{top:8px;right:8px;padding:7px 9px;}}
+.id3-studio .ideare-icon-catalog >button.ideare-menu-extra{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-width:70px;min-height:66px;padding:8px 9px!important;border-radius:8px;color:var(--studio-ink);font-size:11px;line-height:1.2;white-space:nowrap;}
+.id3-studio .ideare-menu-extra .ideare-catalog-icon{display:grid;place-items:center;font-size:23px;width:40px;height:36px;border:1px solid var(--studio-line);border-radius:4px;}
+.id3-studio .ideare-megagrid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr));max-height:min(52vh,480px);overflow:auto;}
+.id3-studio .ideare-megagrid button[hidden]{display:none!important;}
