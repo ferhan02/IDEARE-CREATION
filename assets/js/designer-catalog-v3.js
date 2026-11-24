@@ -215,6 +215,9 @@ function realizeItem(item){
 }
 addExtras=()=>{for(const item of model.extras){if(!item.id)continue;const group=realizeItem(item);extraGroup.add(group);}};
 
+// Expose only catalogue metadata / geometry for the next scoped studio upgrade.
+window.IDEAREDesignerCatalogV3={products,findProfile,realizeItem};
+
 // Drawers: always equal-height fronts and internal pull-outs. Saved custom ratios
 // are ignored, and the former layout/ratio controls are removed from the UI.
 drawerRatios=c=>Array.from({length:Math.max(0,Math.min(6,Math.round(Number(c.drawers)||0)))},()=>1);

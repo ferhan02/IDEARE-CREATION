@@ -10,6 +10,7 @@ $files=[
  __DIR__.'/../assets/js/designer-studio.js',
  __DIR__.'/../assets/js/designer-interactions-v2.js',
  __DIR__.'/../assets/js/designer-catalog-v3.js',
+ __DIR__.'/../assets/js/designer-enhancements-v4.js',
 ];
 $parts=[];
 foreach ($files as $file) {

@@ -7,11 +7,11 @@ if(!root)return;
 const V='ideare_designer_environment_v2';
 const palette={
   floors:[
-    ['oak','Natural oak','#c8ab83','wood'],['walnut','Smoked walnut','#80644d','wood'],
-    ['ash','Pale ash','#e2d5c2','wood'],['marble','Calacatta marble','#e8e7e2','stone'],
-    ['terrazzo','Warm terrazzo','#cdc6b6','terrazzo'],['concrete','Polished concrete','#b3b3ae','stone'],
-    ['slate','Slate tile','#5e6063','tile'],['sand','Sandstone','#c4b19a','stone'],
-    ['ivory','Ivory porcelain','#f2eee6','tile'],['charcoal','Charcoal tile','#494b4d','tile']
+    ['oak','SPC natural oak','#c8ab83','spc'],['walnut','SPC smoked walnut','#80644d','spc'],
+    ['ash','SPC pale ash','#e2d5c2','spc'],['marble','Calacatta marble','#e8e7e2','solid'],
+    ['terrazzo','Warm terrazzo','#cdc6b6','solid'],['concrete','Polished concrete','#b3b3ae','solid'],
+    ['slate','Slate tile','#5e6063','solid'],['sand','Sandstone','#c4b19a','solid'],
+    ['ivory','Ivory porcelain','#f2eee6','solid'],['charcoal','Charcoal tile','#494b4d','solid']
   ],
   walls:[
     ['warm-white','Warm white','#f2eee6'],['ivory','Ivory','#e8e0d2'],
@@ -58,9 +58,25 @@ if(canvasWrap){const themeButton=document.createElement('button');themeButton.ty
 // Shared room textures are generated once per finish choice and reused through redraws.
 const textures=new Map();
 function roomTexture(key){if(textures.has(key))return textures.get(key);const entry=palette.floors.find(x=>x[0]===key)||palette.floors[0];const [, ,color,type]=entry,c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle=color;g.fillRect(0,0,512,512);let seed=11;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};
- if(type==='wood'){for(let i=0;i<7;i++){const x=i*75-12;g.fillStyle=i%2?'#0000000d':'#ffffff14';g.fillRect(x,0,72,512);g.strokeStyle='#3d291c30';g.lineWidth=2;g.strokeRect(x,0,72,512);for(let t=0;t<22;t++){g.strokeStyle=t%2?'#ffffff22':'#3b27151c';g.beginPath();const xx=x+rand()*68;g.moveTo(xx,0);g.bezierCurveTo(xx+rand()*9,160,xx-rand()*9,330,xx+(rand()-.5)*12,512);g.stroke();}}}
- else if(type==='tile'||type==='stone'){g.strokeStyle='#77777736';g.lineWidth=3;for(let v=0;v<=512;v+=128){g.beginPath();g.moveTo(v,0);g.lineTo(v,512);g.moveTo(0,v);g.lineTo(512,v);g.stroke();}if(type==='stone'){g.lineWidth=1.5;for(let i=0;i<17;i++){g.strokeStyle=i%3?'#ffffff4a':'#62626229';let x=rand()*512,y=rand()*512;g.beginPath();g.moveTo(x,y);g.bezierCurveTo(x+100,y+30,x-30,y+80,x+145,y+115);g.stroke();}}}
- else{for(let i=0;i<1100;i++){g.fillStyle=i%3?'#ffffff30':'#55555522';g.beginPath();g.arc(rand()*512,rand()*512,2+rand()*8,0,Math.PI*2);g.fill();}}
+ // Only SPC flooring receives visible panel seams and subtle wood grain.
+ // All other finishes are completely plain, even when the optional measurement grid is on.
+ if(type==='spc'){
+  const panels=6, panelW=512/panels;
+  for(let i=0;i<panels;i++){
+   const x=i*panelW;
+   g.fillStyle=i%2?'#ffffff0a':'#00000008';g.fillRect(x,0,panelW,512);
+   g.strokeStyle='#392b1b32';g.lineWidth=1.2;g.beginPath();g.moveTo(x,0);g.lineTo(x,512);g.stroke();
+   for(let j=0;j<8;j++){
+    const y=j*64+(i%2)*32;
+    g.strokeStyle='#30201518';g.beginPath();g.moveTo(x,y);g.lineTo(x+panelW,y);g.stroke();
+   }
+   for(let j=0;j<12;j++){
+    const cx=x+rand()*panelW, shift=(rand()-.5)*10;
+    g.strokeStyle=j%3===0?'#ffffff21':'#3e2b191b';g.lineWidth=.6+rand()*1.2;
+    g.beginPath();g.moveTo(cx,-2);g.bezierCurveTo(cx+shift,130,cx-shift,350,cx+shift,514);g.stroke();
+   }
+  }
+ }
  const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(Math.max(1,model.room.width/1100),Math.max(1,model.room.depth/1100));textures.set(key,t);return t;}
 function applyEnvironment(){if(!worldGroup)return;const floor=worldGroup.children.find(o=>o.isMesh&&o.geometry?.type==='ShapeGeometry');if(floor){const texture=roomTexture(environment.floor);texture.repeat.set(Math.max(1,model.room.width/1100),Math.max(1,model.room.depth/1100));floor.material.map=texture;floor.material.color.set('#fff');floor.material.needsUpdate=true;}const wall=palette.walls.find(o=>o[0]===environment.wall)||palette.walls[0];worldGroup.traverse(o=>{if(o.name==='room_wall')o.material.color.set(wall[2]);});if(scene)scene.background=new THREE.Color(environment.preview==='light'?'#eceae5':'#22252a');}
 const oldAddRoom=addRoom;addRoom=()=>{oldAddRoom();applyEnvironment();};
@@ -114,7 +130,7 @@ function syncResizeUI(){const c=selected();resizeBtn.hidden=!c;grip.hidden=!resi
 resizeBtn.addEventListener('click',()=>{resizeMode=!resizeMode;syncResizeUI();});
 const footprint=c=>{const swap=Math.abs(Math.round(c.rotation/90))%2===1;const w=swap?c.depth:c.width,d=swap?c.width:c.depth;return {left:c.x-w/2,right:c.x+w/2,back:c.z-d/2,front:c.z+d/2,w,d};};
 const vertical=c=>[c.category==='wall-cabinets'?1350:0,(c.category==='wall-cabinets'?1350:0)+c.height];
-function fitsResized(c){if(!cabinetFitsPolygon(c))return false;if(vertical(c)[1]>model.room.height)return false;const a=footprint(c),av=vertical(c);return !model.cabinets.some(o=>{if(o.uid===c.uid)return false;const b=footprint(o),bv=vertical(o);return Math.min(av[1],bv[1])>Math.max(av[0],bv[0])+1&&Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.front,b.front)>Math.max(a.back,b.back)+1;});}
+function fitsResized(c){if(window.IDEAREPlacementV4?.valid && !window.IDEAREPlacementV4.valid(c))return false;if(!cabinetFitsPolygon(c))return false;if(vertical(c)[1]>model.room.height)return false;const a=footprint(c),av=vertical(c);return !model.cabinets.some(o=>{if(o.uid===c.uid)return false;const b=footprint(o),bv=vertical(o);return Math.min(av[1],bv[1])>Math.max(av[0],bv[0])+1&&Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.front,b.front)>Math.max(a.back,b.back)+1;});}
 function worldOnPlane(e,y){if(!camera||!raycaster)return null;const rect=canvas.getBoundingClientRect();const p=new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(p,camera);return raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-y),new THREE.Vector3());}
 function snapSide(value,axis,c){let best=Math.round(value/25)*25,dist=55;const targets=[axis==='x'?model.room.width:model.room.depth,0];for(const o of model.cabinets){if(o.uid===c.uid)continue;const p=footprint(o);targets.push(axis==='x'?p.left:p.back,axis==='x'?p.right:p.front);}for(const v of targets){const d=Math.abs(value-v);if(d<dist){best=v;dist=d;}}return best;}
 function relocateGeometry(c){const prev=meshById.get(c.uid);if(!prev)return;cabinetGroup.remove(prev);const next=makeCabinet(c);cabinetGroup.add(next);meshById.set(c.uid,next);disposeGroup(prev);}
@@ -144,7 +160,7 @@ moveBtn?.addEventListener('pointercancel',()=>{hideShared(false);},false);
 // Use the project's SweetAlert2 theme when available for destructive actions.
 // Capture before the original native confirm handlers run.
 const studioConfirm=async(title,text,confirmText)=>{
- const S=window.Swal;if(!S?.fire)return window.confirm(`${title}\n${text}`);
+ const S=window.Swal;if(!S?.fire){notify('Design confirmation is unavailable. Check the SweetAlert2 connection.',true);return false;}
  const r=await S.fire({title,text,icon:'warning',showCancelButton:true,confirmButtonText:confirmText,cancelButtonText:'Cancel',reverseButtons:true,customClass:{popup:'ideare-swal-popup',confirmButton:'ideare-swal-confirm',cancelButton:'ideare-swal-cancel'},buttonsStyling:false});return r.isConfirmed;
 };
 function deleteAction(id,one){const button=document.querySelector(id);button?.addEventListener('click',async e=>{e.preventDefault();e.stopImmediatePropagation();const c=selected();if(one&&!c)return;if(!one&&!model.cabinets.length)return;
