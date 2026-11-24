@@ -427,7 +427,7 @@ window.addEventListener('pagehide',()=>{thumbRenderer?.dispose();thumbRenderer?.
 
 // Load IDEARE's existing SweetAlert2 wrapper before base boot/restore.
 // No native browser alert/confirm/prompt is used by v4.
-const loadScriptV4=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=()=>resolve();s.onerror=()=>reject(new Error('Unable to load '+src));document.head.append(s);});
+const loadScriptV4=src=>new Promise((resolve,reject)=>{const s=document.createElement('script');const timer=setTimeout(()=>{s.remove();reject(new Error('Timed out loading '+src));},5000);s.src=src;s.onload=()=>{clearTimeout(timer);resolve();};s.onerror=()=>{clearTimeout(timer);reject(new Error('Unable to load '+src));};document.head.append(s);});
 async function ensureAlerts(){if(!window.Swal?.fire){try{await loadScriptV4('https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js');}catch(err){console.warn('SweetAlert2 unavailable',err);return false;}}
  if(!window.IdeaREAlert){try{await loadScriptV4('../assets/js/ideare-alerts.js');}catch(err){console.warn('IDEARE alert theme unavailable',err);}}
  return !!window.Swal?.fire;
@@ -442,5 +442,5 @@ window.addEventListener('click',async e=>{
  catch(_){if(window.Swal?.fire)window.Swal.fire({title:'Your private design link',input:'text',inputValue:url,inputAttributes:{readonly:'readonly'},confirmButtonText:'Done',customClass:{popup:'ideare-swal-popup',confirmButton:'ideare-swal-confirm'},buttonsStyling:false});else notify('Clipboard permission was denied. Copy the link from the saved design panel.',true);}
 },true);
 const oldBootV4=boot;
-boot=async()=>{await ensureAlerts();await oldBootV4();const fixed=repairLegacyMounts();if(fixed)changed(false);};
+boot=async()=>{await ensureAlerts().catch(err=>console.warn("IDEARE alert startup",err));await oldBootV4();const fixed=repairLegacyMounts();if(fixed)changed(false);};
 })();

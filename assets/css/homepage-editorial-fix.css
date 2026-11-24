@@ -1,0 +1,63 @@
+/* IDEARE homepage only. Fixed editorial accent colours, independent of theme. */
+html[data-ideare-page="home"][data-theme] :is(
+  #home-hero-title > span,
+  #home-about-title > span,
+  #pj-title > em,
+  #ci-home-title > em,
+  #service-title-04 > em,
+  #services-overview .service-story-header h2 > em,
+  #inspiration .ci-home-landing .ci-heading h2 > em
+) {
+  font-family: 'Fraunces', Georgia, serif !important;
+  font-style: italic !important;
+  font-weight: 550 !important;
+  font-variation-settings: 'SOFT' 50, 'WONK' 1;
+  letter-spacing: -.052em;
+  line-height: 1.13;
+  color: #b17b49 !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: none;
+}
+/* The hero has the same dark photograph in both modes. */
+html[data-ideare-page="home"][data-theme] #home-hero-title#home-hero-title > span,
+html[data-ideare-page="home"][data-theme] #service-title-04#service-title-04 > em {
+  color: #e2b985 !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 2px 12px rgba(0,0,0,.22);
+}
+/* Match the existing stepped reveal, including dynamically rendered headings. */
+html[data-ideare-page="home"] .ideare-editorial-reveal {
+  display: inline-block;
+  position: relative;
+  vertical-align: baseline;
+  max-width: 100%;
+}
+html[data-ideare-page="home"] .ideare-editorial-reveal.is-editorial-pending {
+  clip-path: inset(0 100% 0 0);
+  -webkit-clip-path: inset(0 100% 0 0);
+}
+html[data-ideare-page="home"] .ideare-editorial-reveal.is-editorial-typing {
+  animation: ideare-editorial-reveal var(--ideare-typing-duration, 1.7s) steps(var(--ideare-typing-chars, 16), end) both;
+}
+@keyframes ideare-editorial-reveal {
+  from { clip-path: inset(0 100% 0 0); -webkit-clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0); -webkit-clip-path: inset(0); }
+}
+/* Prevent any flash while the dynamic services template is being replaced. */
+html[data-ideare-page="home"] main :is(#materials-overview,.home-materials,#services-overview .service-story-footer,#services-overview .service-story-outro) {
+  display: none !important;
+}
+@media (max-width: 767px) {
+  html[data-ideare-page="home"][data-theme] :is(#services-overview .service-story-header h2 > em,#inspiration .ci-home-landing .ci-heading h2 > em) {
+    font-size: .89em;
+    letter-spacing: -.065em;
+    white-space: normal;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ideare-page="home"] .ideare-editorial-reveal {
+    animation: none !important;
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+  }
+}

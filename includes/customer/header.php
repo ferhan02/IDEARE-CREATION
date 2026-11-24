@@ -56,6 +56,9 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-phone.css" media="(max-width: 767px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-showcase-overrides.css">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-theme.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@1,9..144,550,50,1&amp;display=swap">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/homepage-editorial-fix.css?v=20261124">
+<script defer src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/homepage-editorial-fix.js?v=20261124"></script>
 <?php endif; ?>
 <!-- Homepage presentation cleanup. These selectors also work when the site opens at /. -->
 <style id="ideare-home-cleanup">
@@ -162,7 +165,6 @@ $customerRoot = $customerRoot ?? (
       <a href="<?= $customerRoot ?>public/pages/about.php">About</a>
       <a href="<?= $customerRoot ?>public/pages/services.php">Services</a>
       <a href="<?= $customerRoot ?>index.php#portfolio">Portfolio</a>
-      <a href="<?= $customerRoot ?>material-catalogue.php">Materials</a>
       <a href="<?= $customerRoot ?>designer/index.php">Cabinet Designer</a>
       <a href="<?= $customerRoot ?>index.php#contact">Contact</a>
       <button class="theme-toggle site-theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode" title="Switch to dark mode">
