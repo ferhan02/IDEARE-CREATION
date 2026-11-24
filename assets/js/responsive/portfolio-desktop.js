@@ -1,6 +1,6 @@
 /* Desktop: seamless continuous marquee with direct drag, wheel and keyboard control. */
 import { mountGalleryGestures } from './portfolio-gestures.js';
-export function mountPortfolioDesktop({motion}={}) {
+export function mountPortfolioDesktop({motion,device="desktop"}={}) {
     const root=document.querySelector('#portfolio.portfolio-showcase');
     const track=root?.querySelector('[data-portfolio-track]');
     const group=root?.querySelector('[data-portfolio-group]');
@@ -11,14 +11,14 @@ export function mountPortfolioDesktop({motion}={}) {
     clone.dataset.portfolioClone='true';clone.setAttribute('aria-hidden','true');
     clone.querySelectorAll('[data-portfolio-open]').forEach(b=>b.tabIndex=-1);
     clone.querySelectorAll('img').forEach(i=>i.alt='');track.append(clone);
-    root.dataset.portfolioLayout='desktop';
+    root.dataset.portfolioLayout=device;
     track.style.setProperty('animation','none','important');
     let width=0,position=0,target=0,dragStart=0,dragging=false,last=0,until=0,raf=0,hover=false,focused=false,visible=true;
     const wrap=x=>width?((x%width)+width)%width:0;
     const paint=()=>{track.style.transform=`translate3d(${-wrap(position)}px,0,0)`;};
     const measure=()=>{width=group.getBoundingClientRect().width;paint();};
     const rest=()=>{until=performance.now()+3200;};
-    const step=()=>{const cards=group.querySelectorAll('.portfolio-project');return cards.length>1?Math.abs(cards[1].offsetLeft-cards[0].offsetLeft):viewport.clientWidth;};
+    const step=()=>{const cards=group.querySelectorAll('.portfolio-project');const first=cards[0]; if(!first)return viewport.clientWidth; const next=[...cards].find(card=>card.offsetLeft>first.offsetLeft+1); return next?next.offsetLeft-first.offsetLeft:first.offsetWidth+(parseFloat(getComputedStyle(group).columnGap)||0);};
     function tick(t){
         const dt=last?Math.min(.05,(t-last)/1000):0;last=t;
         if(visible&&!document.hidden){

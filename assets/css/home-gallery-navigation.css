@@ -170,34 +170,6 @@ html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-gallery {
   background: transparent !important;
 }
 
-/* Uniform homepage carousel cards, not the photographs inside the popup.
-   Keep the existing desktop continuous track and single-slide mobile/tablet
-   controller geometry. All cards share the same 16:9 frame at each breakpoint. */
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project {
-  box-sizing: border-box;
-  aspect-ratio: 16 / 9 !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: none !important;
-  align-self: center;
-  margin-block: 0;
-}
-html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] .portfolio-project {
-  width: clamp(300px, 30vw, 510px) !important;
-  flex: 0 0 clamp(300px, 30vw, 510px) !important;
-}
-html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] .portfolio-track-group {
-  align-items: center;
-  gap: clamp(14px, 1.4vw, 24px);
-  padding-right: clamp(14px, 1.4vw, 24px);
-}
-html[data-ideare-page="home"] #portfolio:is([data-portfolio-layout="tablet"], [data-portfolio-layout="phone"]) .portfolio-project {
-  width: 100% !important;
-  flex: 0 0 100% !important;
-}
-html[data-ideare-page="home"] #portfolio .portfolio-project-image {
-  width: 100%; height: 100%; object-fit: cover;
-}
 /* The nested photo viewer continues to show the original image uncropped. */
 html[data-ideare-page="home"] .portfolio-modal .portfolio-image-viewer-image { object-fit: contain; }
 @media (max-width: 767px) {
@@ -207,4 +179,100 @@ html[data-ideare-page="home"] .portfolio-modal .portfolio-image-viewer-image { o
 }
 @media (prefers-reduced-motion: reduce) {
   html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close { transition: none !important; }
+}
+
+/* Compact title and equal-size project cards in a horizontally moving grid. */
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-heading,
+html[data-ideare-page="home"] #portfolio.portfolio-exhibition .portfolio-exhibition-intro h2 {
+  font-size: clamp(30px, 3vw, 49px) !important;
+  line-height: 1.08;
+}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project {
+  box-sizing: border-box;
+  aspect-ratio: 16 / 9 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0;
+}
+/* Three identical rows at every breakpoint. Explicit grid tracks prevent
+   aspect-ratio from fighting the old staggered card geometry. */
+html[data-ideare-page="home"] #portfolio.portfolio-showcase {
+  --portfolio-grid-gap: clamp(7px, 1.2vw, 16px);
+  --portfolio-card-height: clamp(75px, calc((100svh - var(--ideare-nav-height, 70px) - 185px - 2 * var(--portfolio-grid-gap)) / 3), 190px);
+  --portfolio-card-width: calc(var(--portfolio-card-height) * 16 / 9);
+}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-viewport {
+  height: auto !important; max-height: none !important;
+  padding: 8px 0 !important; overflow: hidden !important;
+}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-track {
+  display: flex !important; width: max-content !important; height: auto !important;
+  gap: 0 !important; align-items: start !important; animation: none !important;
+}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-track-group {
+  position: relative !important; display: grid !important; grid-auto-flow: column !important;
+  grid-template-rows: repeat(3, var(--portfolio-card-height)) !important;
+  grid-template-columns: none !important; grid-auto-columns: var(--portfolio-card-width) !important;
+  gap: var(--portfolio-grid-gap) !important; width: max-content !important;
+  height: auto !important; max-height: none !important;
+  padding: 0 var(--portfolio-grid-gap) 0 0 !important; margin: 0 !important;
+  flex: 0 0 auto !important; align-items: start !important; transform: none !important;
+}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-track-group .portfolio-project {
+  position: relative !important; inset: auto !important; grid-area: auto !important;
+  width: var(--portfolio-card-width) !important; min-width: 0 !important; max-width: none !important;
+  height: var(--portfolio-card-height) !important; min-height: 0 !important; max-height: none !important;
+  margin: 0 !important; align-self: start !important; justify-self: start !important;
+  transform: none !important; translate: none !important; rotate: none !important;
+  flex: none !important; aspect-ratio: 16 / 9 !important;
+}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project-copy {padding: clamp(7px, 1vw, 14px);}
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project-title {font-size: clamp(11px, 1.15vw, 18px);}
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] #portfolio.portfolio-showcase {--portfolio-card-height: min(31vw, 145px);}
+}
+html[data-ideare-page="home"] #portfolio .portfolio-project-image { width:100%;height:100%;object-fit:cover; }
+/* Bare photographs: no surrounding cards, contrasting backgrounds or rules.
+   Keep the existing gallery columns and the full-width cover photo. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: visible;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo .portfolio-modal-photo-trigger {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo img {
+  display: block;
+  width: auto !important;
+  height: auto !important;
+  max-width: 100%;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  object-fit: contain;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo figcaption {
+  padding: 8px 0 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--project-caption);
+  text-align: center;
+  font-size: clamp(10px, .8vw, 13px);
 }

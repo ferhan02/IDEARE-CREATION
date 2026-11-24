@@ -1,4 +1,2 @@
-import { mountPortfolioSlider } from './portfolio-slider.js';
-export function mountPortfolioPhone({ motion } = {}) {
-    return mountPortfolioSlider({ motion, device: 'phone' });
-}
+import { mountPortfolioDesktop } from './portfolio-desktop.js';
+export function mountPortfolioPhone({motion}={}) { return mountPortfolioDesktop({motion,device:'phone'}); }
