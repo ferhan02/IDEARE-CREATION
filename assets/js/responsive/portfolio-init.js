@@ -19,9 +19,18 @@ function mountGrid() {
   root.querySelectorAll('.pov-controls,.portfolio-grid-controls').forEach(el => el.remove());
   root.dataset.portfolioLayout = 'uniform-grid';
   group.style.setProperty('--portfolio-columns', Math.ceil(cards.length / 3));
+  // Fill the final bottom-row slot before leaving an extra card in the middle.
+  // With 20 projects the row counts become 7 / 6 / 7.
+  cards.forEach((card, index) => {
+    const lastMiddle = index === cards.length - 1 && cards.length % 3 === 2;
+    const row = lastMiddle ? 3 : index % 3 + 1;
+    card.style.setProperty('--project-grid-row', row);
+    card.style.setProperty('--project-grid-column', Math.floor(index / 3) + 1);
+    card.classList.toggle('is-editorial-middle', row === 2);
+  });
   const css = document.createElement('link');
   css.rel = 'stylesheet';
-  css.href = new URL('../../css/portfolio-pov.css?v=20261124-grid-repair-2', import.meta.url).href;
+  css.href = new URL('../../css/portfolio-pov.css?v=20261124-editorial-balanced-4', import.meta.url).href;
   document.head.append(css);
   const controls = document.createElement('div');
   controls.className = 'portfolio-grid-controls';

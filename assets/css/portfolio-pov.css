@@ -2,9 +2,11 @@
    expanded project images, modal and Inspiration are intentionally untouched. */
 html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] {
   --grid-gap: clamp(8px, 1vw, 16px);
-  --grid-card-h: clamp(92px, calc((100svh - var(--ideare-measured-header, var(--ideare-nav-height, 70px)) - 200px - 2 * var(--grid-gap)) / 3), 190px);
+  --grid-card-h: clamp(112px, calc((100svh - var(--ideare-measured-header, var(--ideare-nav-height, 70px)) - 145px - 2 * var(--grid-gap)) / 3), 270px);
   --grid-card-w: calc(var(--grid-card-h) * 16 / 9);
-  padding-block: clamp(16px, 3svh, 32px) !important;
+  --grid-stagger: calc((var(--grid-card-w) + var(--grid-gap)) / 2);
+  --grid-inset: clamp(12px,3vw,48px);
+  padding-block: clamp(10px, 1.6svh, 20px) !important;
   min-width: 0;
 }
 html[data-ideare-page="home"] body #portfolio[data-portfolio-layout="uniform-grid"] .portfolio-shell {width:100%;max-width:none;min-width:0;}
@@ -29,10 +31,10 @@ html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-
   grid-auto-columns:var(--grid-card-w)!important;grid-auto-rows:var(--grid-card-h)!important;
   gap:var(--grid-gap)!important;width:max-content!important;min-width:0!important;max-width:none!important;
   height:auto!important;max-height:none!important;align-items:stretch!important;justify-items:stretch!important;
-  padding:0 clamp(12px,3vw,48px)!important;margin:0!important;transform:none!important;overflow:visible!important;
+  padding:0 calc(var(--grid-inset) + var(--grid-stagger)) 0 var(--grid-inset)!important;margin:0!important;transform:none!important;overflow:visible!important;
 }
 html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-track-group > .portfolio-project {
-  box-sizing:border-box;position:relative!important;inset:auto!important;grid-area:auto!important;
+  box-sizing:border-box;position:relative!important;inset:auto!important;grid-area:var(--project-grid-row, auto) / var(--project-grid-column, auto)!important;
   width:var(--grid-card-w)!important;height:var(--grid-card-h)!important;min-width:0!important;min-height:0!important;max-width:none!important;max-height:none!important;
   margin:0!important;padding:0;align-self:stretch!important;justify-self:stretch!important;flex:none!important;aspect-ratio:16/9!important;
   transform:none!important;translate:none!important;rotate:none!important;overflow:hidden!important;cursor:pointer;
@@ -49,5 +51,36 @@ html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-
 #portfolio[data-portfolio-layout="uniform-grid"] .portfolio-grid-controls button {display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid var(--portfolio-line);border-radius:50%;background:transparent;color:var(--portfolio-text);font-size:24px;cursor:pointer;}
 #portfolio[data-portfolio-layout="uniform-grid"] .portfolio-grid-controls button:disabled {opacity:.35;cursor:default;}
 #portfolio[data-portfolio-layout="uniform-grid"] .portfolio-viewport.is-gallery-dragging,#portfolio[data-portfolio-layout="uniform-grid"] .portfolio-viewport.is-gallery-dragging * {cursor:grabbing!important;user-select:none!important;}
-@media(max-width:767px){html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"]{--grid-card-h:clamp(105px,30vw,155px);}}
+@media(max-width:767px){html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"]{--grid-card-h:clamp(125px,36vw,190px);}}
 @media(prefers-reduced-motion:no-preference){#portfolio[data-portfolio-layout="uniform-grid"] .portfolio-project{scale:1;transition:scale .4s cubic-bezier(.2,1.5,.4,1)!important;}#portfolio[data-portfolio-layout="uniform-grid"] .portfolio-viewport:not(.is-gallery-dragging) .portfolio-project:active{scale:.96 .93;transition:scale .12s ease!important;}}
+
+/* Editorial running-bond arrangement: shift only the middle row horizontally.
+   Reserve its exact offset in the scrollable track so the final card is reachable.
+   Never change row height, card dimensions, or project order. */
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-track-group > .portfolio-project.is-editorial-middle {
+  left: var(--grid-stagger) !important;
+}
+/* Photos first: all captions, metadata and shade are invisible at rest.
+   Keyboard focus gets the same treatment as hover; touch opens normally. */
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project-copy {
+  opacity:0 !important; transform:translateY(8px) !important;
+  pointer-events:none; transition:opacity .28s ease, transform .38s cubic-bezier(.2,.75,.25,1) !important;
+  padding:clamp(10px,1.25vw,20px) !important;
+}
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project-shade {
+  opacity:0 !important; transition:opacity .3s ease !important;
+  background:linear-gradient(0deg,rgba(0,0,0,.83),rgba(0,0,0,.25) 52%,transparent 85%) !important;
+}
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project-title {font-size:clamp(14px,1.3vw,21px)!important;}
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project-placeholder > * {opacity:0;transition:opacity .28s ease;}
+@media (hover:hover) and (pointer:fine) {
+  html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-viewport:not(.is-gallery-dragging) .portfolio-project:hover .portfolio-project-copy {opacity:1!important;transform:none!important;}
+  html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-viewport:not(.is-gallery-dragging) .portfolio-project:hover .portfolio-project-shade {opacity:1!important;}
+  html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-viewport:not(.is-gallery-dragging) .portfolio-project:hover .portfolio-project-placeholder > * {opacity:1;}
+}
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project:focus-visible .portfolio-project-copy {opacity:1!important;transform:none!important;}
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project:focus-visible .portfolio-project-shade {opacity:1!important;}
+html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project:focus-visible .portfolio-project-placeholder > * {opacity:1;}
+@media(prefers-reduced-motion:reduce){
+  html[data-ideare-page="home"] body #portfolio.portfolio-showcase[data-portfolio-layout="uniform-grid"] .portfolio-project :is(.portfolio-project-copy,.portfolio-project-shade,.portfolio-project-placeholder > *) {transition:none!important;}
+}
