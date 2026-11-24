@@ -1,225 +1,44 @@
-/* Shared tablet/phone slider mechanics. Project cards and images are shared;
- * only responsive CSS and this device-mounted behaviour change.
- */
-export function mountPortfolioSlider({ motion, device = 'phone' } = {}) {
-    const root = document.querySelector('#portfolio.portfolio-showcase');
-    const viewport = root?.querySelector('[data-portfolio-viewport]');
-    const group = root?.querySelector('[data-portfolio-group]');
-    const counter = root?.querySelector('[data-portfolio-counter]');
-    if (!root || !viewport || !group) return () => {};
-
-    group.querySelectorAll('[data-portfolio-clone]').forEach(node => node.remove());
-
-    const originalSlides = [...group.querySelectorAll('.portfolio-project')];
-    if (originalSlides.length < 2) {
-        root.dataset.portfolioLayout = device;
-        return () => { delete root.dataset.portfolioLayout; };
+/* Tablet/phone: frame-rate independent drag easing and seamless slide settling. */
+import { mountGalleryGestures } from './portfolio-gestures.js';
+export function mountPortfolioSlider({motion,device='phone'}={}) {
+    const root=document.querySelector('#portfolio.portfolio-showcase');
+    const viewport=root?.querySelector('[data-portfolio-viewport]');
+    const group=root?.querySelector('[data-portfolio-group]');
+    if(!root||!viewport||!group)return ()=>{};
+    group.querySelectorAll('[data-portfolio-clone]').forEach(n=>n.remove());
+    const slides=[...group.querySelectorAll('.portfolio-project')],count=slides.length;
+    root.dataset.portfolioLayout=device;
+    if(count<2)return ()=>{delete root.dataset.portfolioLayout;};
+    const last=slides[count-1].cloneNode(true),first=slides[0].cloneNode(true);
+    for(const c of [last,first]){c.dataset.portfolioClone='true';c.setAttribute('aria-hidden','true');c.tabIndex=-1;c.querySelectorAll('*').forEach(n=>{if('tabIndex'in n)n.tabIndex=-1;});c.querySelectorAll('img').forEach(n=>n.alt='');}
+    group.prepend(last);group.append(first);
+    group.style.setProperty('transition','none','important');
+    let position=1,target=1,origin=1,anchor=1,dragging=false,hover=false,focused=false,visible=true,raf=0,lastTime=0,until=performance.now()+6500,wheelSum=0,wheelTime=0;
+    const rest=()=>{until=performance.now()+6500;};
+    const paint=()=>{group.style.transform=`translate3d(${-position*100}%,0,0)`;};
+    const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+    function normalize(){if(target===0&&Math.abs(position)<.001){position=target=count;}else if(target===count+1&&Math.abs(position-target)<.001){position=target=1;}}
+    function go(dir){if(dragging)return;normalize();target=clamp(Math.round(target)+dir,0,count+1);rest();}
+    function tick(t){const dt=lastTime?Math.min(.05,(t-lastTime)/1000):0;lastTime=t;
+        if(visible&&!document.hidden){
+            if(!dragging&&!hover&&!focused&&!motion?.matches&&!root.classList.contains('is-modal-open')&&t>until)go(1);
+            const delta=target-position;position+=motion?.matches?delta:delta*(1-Math.exp(-dt*(dragging?19:13)));
+            if(!dragging&&Math.abs(target-position)<.001){position=target;normalize();}paint();
+        }raf=requestAnimationFrame(tick);
     }
-
-    const lastClone = originalSlides[originalSlides.length - 1].cloneNode(true);
-    const firstClone = originalSlides[0].cloneNode(true);
-
-    [lastClone, firstClone].forEach(clone => {
-        clone.dataset.portfolioClone = 'true';
-        clone.setAttribute('aria-hidden', 'true');
-        clone.tabIndex = -1;
-        clone.querySelectorAll('*').forEach(child => {
-            if ('tabIndex' in child) child.tabIndex = -1;
-        });
-        clone.querySelectorAll('img').forEach(image => { image.alt = ''; });
+    const gesture=mountGalleryGestures(viewport,{
+        begin(){normalize();dragging=true;origin=position;anchor=clamp(Math.round(position),0,count+1);target=position;rest();},
+        move(dx){target=clamp(origin-dx/Math.max(1,viewport.clientWidth),Math.max(0,anchor-1),Math.min(count+1,anchor+1));rest();},
+        end(dx,cancel,velocity){dragging=false;const threshold=Math.min(55,viewport.clientWidth*.15);const travel=dx+(motion?.matches?0:velocity*100);target=clamp(anchor+(!cancel&&Math.abs(travel)>threshold?(travel<0?1:-1):0),0,count+1);rest();},
+        wheel(delta){const now=performance.now();if(now-wheelTime>180)wheelSum=0;wheelTime=now;wheelSum+=delta;if(Math.abs(wheelSum)>=45){go(Math.sign(wheelSum));wheelSum=0;}},
+        key(dir){go(dir);}
     });
-
-    group.insertBefore(lastClone, group.firstChild);
-    group.appendChild(firstClone);
-
-    root.dataset.portfolioLayout = device;
-
-    let current = 1;
-    let timer = null;
-    let pointerStart = null;
-    let ignoreNextClick = false;
-    let transitionReset = false;
-    let hoveredByMouse = false;
-    let keyboardNavigation = false;
-
-    const slideCount = originalSlides.length;
-    const hoverCards = [...group.querySelectorAll('.portfolio-project')];
-
-    const activeIndex = () => ((current - 1) % slideCount + slideCount) % slideCount;
-
-    const updateCounter = () => {
-        if (counter) {
-            counter.textContent = `${String(activeIndex() + 1).padStart(2, '0')}  /  ${String(slideCount).padStart(2, '0')}`;
-        }
-    };
-
-    const paint = () => {
-        group.style.transform = `translate3d(-${current * 100}%, 0, 0)`;
-        updateCounter();
-    };
-
-    const goTo = next => {
-        if (transitionReset) return;
-        current = next;
-        paint();
-    };
-
-    const next = () => goTo(current + 1);
-    const previous = () => goTo(current - 1);
-
-    const onTransitionEnd = event => {
-        if (event.target !== group || event.propertyName !== 'transform') return;
-
-        if (current === slideCount + 1 || current === 0) {
-            transitionReset = true;
-            current = current === 0 ? slideCount : 1;
-            group.style.transition = 'none';
-            paint();
-            group.getBoundingClientRect();
-            group.style.removeProperty('transition');
-            window.requestAnimationFrame(() => { transitionReset = false; });
-        }
-    };
-
-    const stop = () => {
-        if (timer !== null) window.clearInterval(timer);
-        timer = null;
-    };
-
-    const canAutoplay = () => !motion?.matches &&
-        !document.hidden &&
-        !root.classList.contains('is-modal-open') &&
-        !hoveredByMouse &&
-        !(keyboardNavigation && root.contains(document.activeElement));
-
-    const start = () => {
-        stop();
-        if (canAutoplay()) timer = window.setInterval(next, 6500);
-    };
-
-    const onCardEnter = event => {
-        if (event.pointerType === 'touch') return;
-        hoveredByMouse = true;
-        stop();
-    };
-
-    const onCardLeave = event => {
-        if (event.pointerType === 'touch') return;
-        if (event.relatedTarget?.closest?.('.portfolio-project')) return;
-        hoveredByMouse = false;
-        start();
-    };
-
-    const onFocusIn = () => {
-        if (keyboardNavigation) stop();
-    };
-
-    const onFocusOut = event => {
-        if (!root.contains(event.relatedTarget)) {
-            keyboardNavigation = false;
-            start();
-        }
-    };
-
-    const onKeyboardNavigation = event => {
-        if (event.key === 'Tab') keyboardNavigation = true;
-    };
-
-    const onModalOpen = () => stop();
-    const onModalClose = () => start();
-    const onVisibility = () => document.hidden ? stop() : start();
-    const onMotion = () => motion?.matches ? stop() : start();
-
-    const onPointerDown = event => {
-        keyboardNavigation = false;
-        pointerStart = {
-            x: event.clientX,
-            y: event.clientY,
-            pointerType: event.pointerType
-        };
-        stop();
-    };
-
-    const onPointerCancel = () => {
-        pointerStart = null;
-        start();
-    };
-
-    const onPointerUp = event => {
-        if (!pointerStart) return;
-
-        const startPoint = pointerStart;
-        const dx = event.clientX - startPoint.x;
-        const dy = event.clientY - startPoint.y;
-        pointerStart = null;
-
-        if (
-            startPoint.pointerType !== 'mouse' &&
-            Math.abs(dx) > 46 &&
-            Math.abs(dx) > Math.abs(dy) * 1.25
-        ) {
-            ignoreNextClick = true;
-            if (dx < 0) next();
-            else previous();
-            window.setTimeout(() => { ignoreNextClick = false; }, 450);
-        }
-
-        start();
-    };
-
-    const suppressSwipeClick = event => {
-        if (!ignoreNextClick) return;
-        event.preventDefault();
-        event.stopPropagation();
-        ignoreNextClick = false;
-    };
-
-    paint();
-
-    group.addEventListener('transitionend', onTransitionEnd);
-    hoverCards.forEach(card => {
-        card.addEventListener('pointerenter', onCardEnter);
-        card.addEventListener('pointerleave', onCardLeave);
-    });
-    root.addEventListener('focusin', onFocusIn);
-    root.addEventListener('focusout', onFocusOut);
-    document.addEventListener('keydown', onKeyboardNavigation);
-    viewport.addEventListener('pointerdown', onPointerDown, { passive: true });
-    viewport.addEventListener('pointerup', onPointerUp, { passive: true });
-    viewport.addEventListener('pointercancel', onPointerCancel, { passive: true });
-    root.addEventListener('click', suppressSwipeClick, true);
-    document.addEventListener('portfolio:modal-open', onModalOpen);
-    document.addEventListener('portfolio:modal-close', onModalClose);
-    document.addEventListener('visibilitychange', onVisibility);
-    motion?.addEventListener?.('change', onMotion);
-
-    start();
-
-    return () => {
-        stop();
-        group.removeEventListener('transitionend', onTransitionEnd);
-
-        hoverCards.forEach(card => {
-            card.removeEventListener('pointerenter', onCardEnter);
-            card.removeEventListener('pointerleave', onCardLeave);
-        });
-
-        root.removeEventListener('focusin', onFocusIn);
-        root.removeEventListener('focusout', onFocusOut);
-        document.removeEventListener('keydown', onKeyboardNavigation);
-        viewport.removeEventListener('pointerdown', onPointerDown);
-        viewport.removeEventListener('pointerup', onPointerUp);
-        viewport.removeEventListener('pointercancel', onPointerCancel);
-        root.removeEventListener('click', suppressSwipeClick, true);
-        document.removeEventListener('portfolio:modal-open', onModalOpen);
-        document.removeEventListener('portfolio:modal-close', onModalClose);
-        document.removeEventListener('visibilitychange', onVisibility);
-        motion?.removeEventListener?.('change', onMotion);
-
-        lastClone.remove();
-        firstClone.remove();
-        group.style.removeProperty('transform');
-        group.style.removeProperty('transition');
-        delete root.dataset.portfolioLayout;
-    };
+    const enter=e=>{if(e.pointerType!=='touch')hover=true;};const leave=e=>{if(e.pointerType!=='touch'){hover=false;rest();}};
+    const focus=e=>{if(e.target.matches(':focus-visible'))focused=true;};const blur=e=>{if(!viewport.contains(e.relatedTarget)){focused=false;rest();}};
+    const open=()=>rest(),close=()=>rest(),visibility=()=>rest(),change=()=>rest();
+    viewport.addEventListener('pointerenter',enter);viewport.addEventListener('pointerleave',leave);viewport.addEventListener('focusin',focus);viewport.addEventListener('focusout',blur);
+    document.addEventListener('portfolio:modal-open',open);document.addEventListener('portfolio:modal-close',close);document.addEventListener('visibilitychange',visibility);motion?.addEventListener?.('change',change);
+    const io='IntersectionObserver'in window?new IntersectionObserver(es=>{visible=es[0].isIntersecting;rest();}):null;io?.observe(viewport);
+    paint();raf=requestAnimationFrame(tick);
+    return ()=>{cancelAnimationFrame(raf);gesture();io?.disconnect();viewport.removeEventListener('pointerenter',enter);viewport.removeEventListener('pointerleave',leave);viewport.removeEventListener('focusin',focus);viewport.removeEventListener('focusout',blur);document.removeEventListener('portfolio:modal-open',open);document.removeEventListener('portfolio:modal-close',close);document.removeEventListener('visibilitychange',visibility);motion?.removeEventListener?.('change',change);last.remove();first.remove();group.style.removeProperty('transform');group.style.removeProperty('transition');delete root.dataset.portfolioLayout;};
 }

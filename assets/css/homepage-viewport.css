@@ -1,0 +1,88 @@
+/* IDEARE: full-screen homepage chapters. Loaded after homepage-compact.css.
+   The visible viewport excludes the sticky customer header. Content may grow
+   beyond a screen on small devices or when an interactive card is expanded. */
+html[data-ideare-page="home"] {
+  --ideare-chapter-height: calc(100vh - var(--ideare-measured-header, var(--ideare-nav-height, 70px)));
+}
+@supports (height: 100svh) {
+  html[data-ideare-page="home"] {
+    --ideare-chapter-height: calc(100svh - var(--ideare-measured-header, var(--ideare-nav-height, 70px)));
+  }
+}
+
+/* Direct chapters only: nested sections, dialogs, footer and Contact retain
+   their existing dimensions. No display override here: previously hidden
+   sections (including Materials) remain hidden. */
+html[data-ideare-page="home"] body main > section:not(#contact):not(.contact-section):not([hidden]) {
+  box-sizing: border-box;
+  min-height: var(--ideare-chapter-height);
+}
+
+/* Photo hero and studio already use flex; keep the existing copy and photo
+   layers, and simply center them within the full-height panel. */
+html[data-ideare-page="home"] body main > :is(.home-hero, .home-studio) {
+  align-items: center;
+}
+
+/* Services and Portfolio have multiple children. Center their entire stack
+   vertically rather than stretching individual cards or changing their grids. */
+html[data-ideare-page="home"] body main > #services-overview[data-services-cards],
+html[data-ideare-page="home"] body main > #portfolio {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+html[data-ideare-page="home"] body main > #portfolio > .portfolio-exhibition-band {
+  width: 100%;
+}
+
+/* The project journey is injected by home-project-journey.js and does not
+   carry .home-section. Its shell and heading are centered independently;
+   the five-stage rail, markers, icons and text retain their layout. */
+html[data-ideare-page="home"] body main > #project-journey.pj-section {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  padding-block: clamp(28px, 5svh, 64px);
+}
+html[data-ideare-page="home"] body #project-journey .pj-shell.site-wrap {
+  margin-inline: auto;
+  margin-block: 0;
+  width: min(1560px, calc(100% - clamp(34px, 6vw, 104px)));
+  min-width: 0;
+}
+@media (min-width: 721px) {
+  html[data-ideare-page="home"] body #project-journey .pj-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+    gap: 14px;
+    margin-bottom: clamp(32px, 5svh, 58px);
+  }
+  html[data-ideare-page="home"] body #project-journey .pj-overline {
+    justify-content: center;
+  }
+  html[data-ideare-page="home"] body #project-journey .pj-intro {
+    justify-self: center;
+    max-width: 650px;
+  }
+}
+
+/* The rotating Inspiration carousel renders a nested landing panel. Both
+   the outer chapter and the actual background must fill the same viewport. */
+html[data-ideare-page="home"] body main > #inspiration.ci-home-section > .ci-landing {
+  box-sizing: border-box;
+  min-height: var(--ideare-chapter-height);
+  align-items: center;
+}
+
+/* Cabinet Designer introduction: center its existing two-column (or mobile
+   stacked) layout without touching the separate interactive designer page. */
+html[data-ideare-page="home"] body main > #cabinet-designer.home-designer {
+  display: flex;
+  align-items: center;
+}
+html[data-ideare-page="home"] body main > #cabinet-designer > .home-designer-grid {
+  margin-inline: auto;
+}

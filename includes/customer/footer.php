@@ -41,7 +41,7 @@ $pageScripts = $pageScripts ?? [];
   window.__ideareSectionWheelReady = true;
   const desktop = () => innerWidth >= 900;
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const exclusions = '.ci-orbit-frame,.ci-orbit-area,[role="dialog"],dialog,.portfolio-modal,.portfolio-image-viewer,input,textarea,select,[contenteditable],[data-scroll-native],.modal';
+  const exclusions = '.ci-orbit-frame,.ci-orbit-area,.portfolio-viewport,[role="dialog"],dialog,.portfolio-modal,.portfolio-image-viewer,input,textarea,select,[contenteditable],[data-scroll-native],.modal';
   const header = () => document.querySelector('.site-header')?.getBoundingClientRect().height || 70;
   const maxY = () => Math.max(0, document.documentElement.scrollHeight - innerHeight);
   const topY = el => el.getBoundingClientRect().top + window.scrollY;
@@ -124,4 +124,46 @@ $pageScripts = $pageScripts ?? [];
 <?php endif; ?>
 <!-- This loader uses matchMedia, not user-agent strings or a paid detection API. -->
 <script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/responsive/shared.js"></script>
+<style id="ideare-whatsapp-style">
+html body a.ideare-whatsapp-float {
+  position: fixed; right: max(24px, env(safe-area-inset-right, 0px));
+  bottom: max(24px, env(safe-area-inset-bottom, 0px));
+  z-index: 10000; display: grid; place-items: center;
+  width: 72px; height: 72px; padding: 0; margin: 0;
+  border: 0; border-radius: 50%; background: #25d366 !important;
+  color: #fff !important; text-decoration: none;
+  box-shadow: 0 8px 24px rgba(14, 100, 49, .23);
+  transition: transform .2s ease, box-shadow .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.ideare-whatsapp-float svg { width: 61%; height: 61%; display: block; fill: #fff; pointer-events: none; }
+@media (hover: hover) { html body a.ideare-whatsapp-float:hover { transform: translateY(-3px) scale(1.06); box-shadow: 0 12px 28px rgba(14,100,49,.3); } }
+html body a.ideare-whatsapp-float:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px #146b36; }
+@media (max-width: 767px) { html body a.ideare-whatsapp-float { width: 58px; height: 58px; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); } }
+@media (prefers-reduced-motion: reduce) { html body a.ideare-whatsapp-float { transition: none; } }
+</style>
+<a class="ideare-whatsapp-float" href="https://wa.me/60122267004?text=Hi%20IDEARE%21%20I%20have%20a%20project%20in%20mind%20and%20would%20love%20to%20discuss%20it%20with%20your%20team." target="_blank" rel="noopener noreferrer" aria-label="Chat with IDEARE on WhatsApp (opens in a new tab)" title="Chat with us on WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.149-.67.149-.197.297-.767.966-.94 1.164-.174.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.496.1-.198.05-.372-.025-.521-.074-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479s1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.693.625.712.226 1.36.194 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.377l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.248c.002-5.446 4.433-9.878 9.888-9.878 2.64.001 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.993c-.003 5.446-4.434 9.878-9.885 9.878M20.465 3.45A11.82 11.82 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.587 5.945L.057 24l6.305-1.654a11.9 11.9 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 0 0-3.478-8.451"/></svg>
+</a>
+<?php if (($idearePage ?? '') === 'home'): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/home-gallery-navigation.css?v=20261124">
+<!-- Full-viewport homepage chapters: after compact and device-specific rules. -->
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/homepage-viewport.css?v=20261124">
+<script>
+(() => {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  const update = () => document.documentElement.style.setProperty(
+    '--ideare-measured-header', `${header.getBoundingClientRect().height}px`
+  );
+  update();
+  window.addEventListener('resize', update, {passive:true});
+  if ('ResizeObserver' in window) {
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    window.addEventListener('pagehide', () => observer.disconnect(), {once:true});
+  }
+})();
+</script>
+<?php endif; ?>
 </body></html>

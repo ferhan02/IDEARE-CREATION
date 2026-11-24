@@ -1,0 +1,26 @@
+/* Homepage only: preserve carousel internals while removing redundant controls. */
+html[data-ideare-page="home"] #inspiration .ci-orbit-controls,
+html[data-ideare-page="home"] #portfolio :is(.portfolio-gallery-counter,.portfolio-project-count,.portfolio-placeholder-index,.portfolio-photo-count-static,.portfolio-photo-counter,.portfolio-gallery-footer,.portfolio-exhibition-status,.portfolio-exhibition-progress),
+html[data-ideare-page="home"] :is(.portfolio-modal-index,.portfolio-photo-counter,.portfolio-image-viewer-counter,.portfolio-photo-count-static) {display:none!important;}
+html[data-ideare-page="home"] #portfolio .portfolio-viewport {touch-action:pan-y;cursor:grab;}
+html[data-ideare-page="home"] #portfolio .portfolio-viewport.is-gallery-dragging,
+html[data-ideare-page="home"] #portfolio .portfolio-viewport.is-gallery-dragging * {cursor:grabbing!important;user-select:none!important;}
+html[data-ideare-page="home"] #portfolio .portfolio-viewport img {-webkit-user-drag:none;user-select:none;}
+
+/* Independent scale property preserves the existing orbit and card transforms.
+   Quick compression followed by a soft elastic release, without layout shifts. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ideare-page="home"] #portfolio .portfolio-project {
+    scale: 1;
+    transition: scale .46s cubic-bezier(.2,1.65,.4,1), transform .55s cubic-bezier(.2,.75,.25,1), border-color .35s ease, box-shadow .35s ease;
+  }
+  html[data-ideare-page="home"] #inspiration .ci-orbit-card .ci-orbit-face {
+    scale: 1;
+    transition: scale .46s cubic-bezier(.2,1.65,.4,1), transform .42s cubic-bezier(.2,.8,.2,1), border-color .35s, box-shadow .4s;
+  }
+  html[data-ideare-page="home"] #portfolio .portfolio-viewport:not(.is-gallery-dragging) .portfolio-project:active,
+  html[data-ideare-page="home"] #inspiration .ci-orbit-frame:not(.ci-dragging):not(.ci-pointer-dragging) .ci-orbit-card:active .ci-orbit-face {
+    scale: .96 .93;
+    transition: scale .13s cubic-bezier(.2,.8,.2,1);
+  }
+}
