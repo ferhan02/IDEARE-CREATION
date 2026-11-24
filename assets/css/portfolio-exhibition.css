@@ -471,3 +471,200 @@ html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-openin
 @media (max-width:599px) {
   html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-wordmark { display:none; }
 }
+
+/* 2026-11-24 / exhibition refinement: a quieter inset gallery, compact
+   editorial spreads, single motion layer and centred directional icon.
+   Deliberately scoped to the enhanced project modal only. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition {
+  --ex-edge: clamp(12px, 1.25vw, 24px);
+  --ex-radius: clamp(14px, 1.2vw, 22px);
+  --ex-inset: clamp(24px, 3.5vw, 68px);
+  --ex-top: calc(96px + env(safe-area-inset-top,0px));
+  --ex-max-h: min(68svh, 680px);
+  box-sizing: border-box;
+  padding: max(var(--ex-edge),env(safe-area-inset-top,0px)) max(var(--ex-edge),env(safe-area-inset-right,0px)) max(var(--ex-edge),env(safe-area-inset-bottom,0px)) max(var(--ex-edge),env(safe-area-inset-left,0px)) !important;
+  place-items: stretch !important;
+  transition: opacity .32s ease, visibility 0s linear .38s !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.is-open {
+  transition: opacity .32s ease, visibility 0s !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-backdrop {
+  background: rgba(12,10,8,.33) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html[data-theme="light"][data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-backdrop {
+  background: rgba(45,35,25,.20) !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-panel {
+  box-sizing: border-box;
+  width: 100% !important; height: 100% !important;
+  min-width: 0; min-height: 0;
+  max-width: 100% !important; max-height: 100% !important;
+  border: 1px solid var(--ex-line) !important;
+  border-radius: var(--ex-radius) !important;
+  box-shadow: 0 16px 60px var(--ex-shadow) !important;
+  overflow: hidden auto;
+  transform: translate3d(0,26px,0) !important;
+  transition: transform .38s cubic-bezier(.22,.72,.25,1) !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ex-line) transparent;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.is-open .portfolio-modal-panel {
+  transform: translate3d(0,0,0) !important;
+}
+/* Fade over the content only at the top; the outer portfolio stays visible. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-panel::before {
+  flex: 0 0 var(--ex-top);
+  height: var(--ex-top);
+  margin: 0 0 calc(-1 * var(--ex-top));
+  background: linear-gradient(180deg,rgba(var(--ex-bg-rgb),1) 0%,rgba(var(--ex-bg-rgb),.96) 23%,rgba(var(--ex-bg-rgb),.74) 49%,rgba(var(--ex-bg-rgb),.28) 76%,rgba(var(--ex-bg-rgb),0) 100%);
+  border-radius: var(--ex-radius) var(--ex-radius) 0 0;
+  pointer-events: none;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close {
+  width: 44px !important; height: 44px !important;
+  min-width: 44px; max-width: 44px; min-height: 44px;
+  flex: 0 0 44px;
+  margin: 12px 0 10px var(--ex-inset) !important;
+  top: 12px !important;
+  display: grid !important; place-items: center;
+  background: rgba(var(--ex-bg-rgb),.68) !important;
+  border: 1px solid var(--ex-line) !important;
+  scale: 1 !important;
+  transition: background-color .2s ease,border-color .2s ease !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close::before { content: none !important; }
+/* Symmetric 24px SVG mask, with the shaft and arrowhead optically centred.
+   Existing accessible button and its single click handler remain unchanged. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close::after {
+  content: '';
+  display: block;
+  width: 23px; height: 23px;
+  margin: 0;
+  border: 0 !important; border-radius: 0;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.55' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5m0 0 6-6m-6 6 6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.55' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 12H5m0 0 6-6m-6 6 6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+  transform: none !important;
+  transition: opacity .2s ease !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close:hover::after { transform: none !important; opacity: .78; }
+/* Keep one monotonic panel transition. No competing opening translate, scale,
+   or scroll-dependent photo drift that makes the panel appear to bounce. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-opening {
+  animation: none !important;
+  transform: none !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-figure { translate: none !important; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-figure.ex-awaiting:not(:focus-within) { opacity: .72; clip-path: inset(2% -8% 4% -8%); }
+
+/* Fit more of the project in the opening and shorten the space between
+   spreads. Width remains proportional to each original image. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-gallery {
+  max-width: 1920px;
+  padding: 4px var(--ex-inset) clamp(26px,3.5vw,60px) !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition:not(.ex-compact) .ex-opening {
+  gap: clamp(20px,3vw,54px);
+  padding-block: clamp(8px,1.5vw,24px) clamp(22px,3vw,46px);
+  grid-template-columns: minmax(0,4fr) minmax(0,8fr);
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition[data-ex-opening="left"]:not(.ex-compact) .ex-opening { grid-template-columns: minmax(0,8fr) minmax(0,4fr); }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-title { font-size: clamp(31px,3.7vw,65px); }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-meta { margin-bottom: 12px; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-title::after { margin: 16px 0 17px; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-description { max-width: 62ch; line-height: 1.58; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-brief-label {
+  display: block; color: var(--ex-accent); font-size: 10px; line-height: 1.4;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin: 0 0 6px;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-featured-views { margin: 18px 0 0; max-width: 48ch; color: var(--ex-muted); line-height: 1.5; font-size: clamp(11px,.9vw,14px); }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-views-copy { display: block; overflow-wrap: anywhere; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-opening-photos { gap: clamp(10px,1.5vw,24px); }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter {
+  grid-template-columns: var(--ex-spread-columns,minmax(0,1fr));
+  align-items: center;
+  column-gap: clamp(12px,2vw,30px);
+  row-gap: clamp(14px,2vw,28px);
+  padding-block: clamp(16px,2.4vw,40px) clamp(20px,3vw,48px);
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter > .ex-figure:nth-child(n) {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  margin-top: 0 !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter[data-rhythm="left"] > .ex-figure:nth-child(even),
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter[data-rhythm="right"] > .ex-figure:nth-child(odd) {
+  margin-top: clamp(6px,1.35vw,22px) !important;
+}
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter-1 { max-width: 84%; width: 100%; align-self: center; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-photo.ex-figure figcaption { padding-top: 7px !important; }
+/* Compact project spreads share the panel's actual remaining height. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .portfolio-modal-gallery { padding: 2px var(--ex-inset) 15px !important; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .ex-opening { gap: 10px; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .portfolio-modal-title { font-size: clamp(27px,3vw,52px); }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .portfolio-modal-title::after { margin: 10px 0; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .portfolio-modal-meta { margin-bottom: 8px; }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .ex-opening-photos { --ex-max-h: min(620px,max(80px,calc(100cqh - 28px))); }
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .ex-opening-photos > :nth-child(2) { --ex-max-h: min(620px,max(80px,calc(100cqh - 28px))); }
+@media (min-width:900px) and (orientation:landscape) {
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .portfolio-modal-info {
+    display: grid !important;
+    grid-template-columns: minmax(0,1.12fr) minmax(0,1fr);
+    grid-template-rows: auto auto auto;
+    column-gap: clamp(18px,3vw,52px);
+    align-items: start;
+  }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .portfolio-modal-meta { grid-column: 1; grid-row: 1; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .portfolio-modal-title { grid-column: 1; grid-row: 2 / 4; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .ex-brief-label { grid-column: 2; grid-row: 1; margin-bottom: 6px; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .portfolio-modal-description { grid-column: 2; grid-row: 2 / 4; }
+}
+@media (orientation:portrait), (max-width:899px) {
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition { --ex-inset: clamp(14px,3.8vw,36px); --ex-max-h: min(58svh,560px); }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition:not(.ex-compact) .ex-opening { grid-template-columns: minmax(0,1fr) !important; gap: 18px; padding-block: 7px 24px; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-title { font-size: clamp(30px,6.5vw,55px); }
+}
+@media (max-width:599px) {
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition { --ex-edge: 7px; --ex-radius: 14px; --ex-inset: 15px; --ex-top: 82px; --ex-max-h: min(53svh,440px); }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close { margin-top: 8px !important; top: 8px !important; margin-bottom: 8px !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-title { font-size: clamp(28px,7.5vw,43px); }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-compact .portfolio-modal-title { font-size: clamp(25px,6.4vw,36px); }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter { grid-template-columns: repeat(8,minmax(0,1fr)); row-gap: 18px; column-gap: 9px; padding-block: 16px 22px; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter > .ex-figure:nth-child(n) { grid-column: 1 / 9 !important; margin-top: 0 !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter[data-rhythm="left"] > .ex-figure:nth-child(even) { grid-column: 2 / 9 !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter[data-rhythm="right"] > .ex-figure:nth-child(odd) { grid-column: 1 / 8 !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter > .ex-figure[data-orientation="cinematic"] { grid-column: 1 / 9 !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .ex-opening-photos { gap: 8px; min-height: 216px; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.ex-double .ex-opening-photos > .ex-figure:nth-child(n) { --ex-max-h: min(330px,max(64px,calc((100cqh - 8px) / 2 - 26px))); }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-featured-views { margin-top: 10px; }
+}
+@media (min-width:420px) and (max-width:599px) {
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter-2.ex-portrait-pair > .ex-figure:nth-child(1) { grid-column: 1 / 5 !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .ex-chapter-2.ex-portrait-pair > .ex-figure:nth-child(2) { grid-column: 5 / 9 !important; margin-top: 10px !important; }
+}
+@media (prefers-reduced-motion:reduce) {
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition,
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition.is-open,
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-panel,
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close,
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close::after { transition:none !important; }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-panel { transform:none !important; }
+}
+
+/* Centre the icon independently of the original button's zero-size text node. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition .portfolio-modal-close::after {
+  position: absolute;
+  top: 50%; left: 50%;
+  margin: -11.5px 0 0 -11.5px;
+}
+/* Keep a statement cover, but show more of the next spread in the first view. */
+html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition:not(.ex-compact) .ex-opening-photos {
+  --ex-max-h: min(48svh,480px);
+}
+@media (min-width:900px) and (orientation:landscape) {
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition:not(.ex-compact) .ex-opening { grid-template-columns: minmax(0,5fr) minmax(0,7fr); }
+  html[data-ideare-page="home"] body .portfolio-modal.ideare-exhibition[data-ex-opening="left"]:not(.ex-compact) .ex-opening { grid-template-columns: minmax(0,7fr) minmax(0,5fr); }
+}

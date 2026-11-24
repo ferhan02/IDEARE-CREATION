@@ -55,6 +55,11 @@
     const photos = [...chapter.querySelectorAll('.ex-figure')];
     if (!photos.length) return;
     const ratios = photos.map(ratioOf);
+    // Allocate wall space by source proportions, with a small editorial accent.
+    // No empty grid tracks: the photographs share the entire available width.
+    const lead = ratios.indexOf(Math.max(...ratios));
+    const weights = ratios.map((r,i) => Math.max(.62,Math.min(2.25,Math.pow(r,.7))) * (i===lead ? 1.15 : 1));
+    chapter.style.setProperty('--ex-spread-columns',weights.map(w=>`minmax(0,${w.toFixed(3)}fr)`).join(' '));
     chapter.classList.toggle('ex-portrait-pair', photos.length === 2 && ratios.every(r=>r<1.25));
     if (photos.length === 2) {
       // A wide image receives more wall area; portrait pairs use a calmer split.
@@ -74,6 +79,30 @@
     s.figures = photos;
     const seed = hash(info.querySelector('.portfolio-modal-title')?.textContent || 'IDEARE');
     const count = photos.length;
+    // Present the existing API description as the project brief; do not infer
+    // contract scope, materials, dates or works from the photographs.
+    info.querySelectorAll('.ex-brief-label,.ex-featured-views').forEach(el=>el.remove());
+    const description = info.querySelector('.portfolio-modal-description');
+    if (description?.textContent.trim()) {
+      const brief = make('span','ex-brief-label');
+      brief.textContent = 'Project overview';
+      description.before(brief);
+    }
+    // Only meaningful, existing photograph captions are used as editorial context.
+    const projectName = (info.querySelector('.portfolio-modal-title')?.textContent || '').trim().toLowerCase();
+    const labels = [...new Set(photos.map(f=>f.querySelector('figcaption')?.textContent.trim()||'').filter(label=>
+      label.length>=4 && label.length<=48 && label.toLowerCase()!==projectName &&
+      !/^(?:project photograph|photo|image|img|dsc|pxl|whatsapp|screenshot|architectural view)\b/i.test(label) &&
+      !/^[\d\s_\-]+$/.test(label)))].slice(0,4);
+    if(count>=3 && labels.length>=2) {
+      const detail = make('p','ex-featured-views');
+      const label = make('span','ex-brief-label');
+      label.textContent = 'Featured views';
+      const value = make('span','ex-views-copy');
+      value.textContent = labels.join(' · ');
+      detail.append(label,value);
+      info.append(detail);
+    }
     modal.dataset.exCount = String(count);
     modal.classList.toggle('ex-compact', count <= 2);
     modal.classList.toggle('ex-single', count === 1);
@@ -99,7 +128,7 @@
     }
     photos.forEach((figure,index) => {
       figure.classList.add('ex-figure');
-      figure.style.setProperty('--ex-delay',`${(index%3)*70}ms`);
+      figure.style.setProperty('--ex-delay',`${(index%3)*40}ms`);
       setPhotoRatio(figure);
       const img = figure.querySelector('img');
       if (img && !img.complete) {
@@ -107,7 +136,7 @@
           setPhotoRatio(figure);
           const chapter=figure.closest('.ex-chapter');
           if(chapter) layoutChapter(chapter);
-          requestDrift(s);
+
         },{once:true,signal:s.abort.signal});
       }
     });
@@ -137,21 +166,6 @@
     }
     gallery.replaceChildren(...nodes);
   }
-  function requestDrift(s) {
-    if (s.frame || reduced.matches || s.modal.classList.contains('ex-compact') || active!==s) return;
-    s.frame = requestAnimationFrame(() => {
-      s.frame=0;
-      const box = s.panel.getBoundingClientRect();
-      const middle = box.top+box.height/2;
-      for (const figure of s.figures) {
-        const b=figure.getBoundingClientRect();
-        if (b.bottom<box.top-80 || b.top>box.bottom+80) continue;
-        // The complete image+caption drifts by at most 7px; no cropping.
-        const drift=Math.max(-7,Math.min(7,(b.top+b.height/2-middle)*.013));
-        figure.style.setProperty('--ex-drift',`${drift.toFixed(2)}px`);
-      }
-    });
-  }
   function stopMotion(s) {
     s.observer?.disconnect();s.observer=null;
     cancelAnimationFrame(s.frame);s.frame=0;
@@ -165,7 +179,6 @@
       },{root:s.panel,threshold:.06,rootMargin:'0px 0px 8% 0px'});
       for(const fig of s.figures.slice(1)){fig.classList.add('ex-awaiting');s.observer.observe(fig);}
     }
-    requestDrift(s);
   }
   function open() {
     prepare();
@@ -183,7 +196,6 @@
       if(child===modal||child.matches('script,style,link,template')||child.inert)continue;
       child.inert=true;s.inert.push(child);
     }
-    s.panel.addEventListener('scroll',()=>requestDrift(s),{passive:true,signal:s.abort.signal});
     s.panel.addEventListener('focusin',e=>e.target.closest('.ex-figure')?.classList.remove('ex-awaiting'),{signal:s.abort.signal});
     startMotion(s);
   }
@@ -208,7 +220,7 @@
   reduced.addEventListener?.('change',()=>{
     if(!active)return;
     if(reduced.matches)stopMotion(active);
-    else requestDrift(active);
+    // Visible images stay still when motion preferences change.
   });
   document.addEventListener('portfolio:ready',prepare);
   document.addEventListener('portfolio:modal-open',open);

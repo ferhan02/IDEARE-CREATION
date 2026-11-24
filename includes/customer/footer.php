@@ -166,7 +166,7 @@ html body a.ideare-whatsapp-float:focus-visible { outline: 3px solid #fff; outli
 })();
 </script>
 <!-- Project exhibition: loaded after existing modal and theme styles; homepage carousel untouched. -->
-<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-exhibition.css?v=20261124-exhibition-1">
-<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-exhibition.js?v=20261124-exhibition-1"></script>
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-exhibition.css?v=20261124-exhibition-2">
+<script src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/portfolio-exhibition.js?v=20261124-exhibition-2"></script>
 <?php endif; ?>
 </body></html>
