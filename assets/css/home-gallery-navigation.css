@@ -195,42 +195,43 @@ html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project {
   max-height: none !important;
   margin: 0;
 }
-/* Three identical rows at every breakpoint. Explicit grid tracks prevent
-   aspect-ratio from fighting the old staggered card geometry. */
-html[data-ideare-page="home"] #portfolio.portfolio-showcase {
-  --portfolio-grid-gap: clamp(7px, 1.2vw, 16px);
-  --portfolio-card-height: clamp(75px, calc((100svh - var(--ideare-nav-height, 70px) - 185px - 2 * var(--portfolio-grid-gap)) / 3), 190px);
-  --portfolio-card-width: calc(var(--portfolio-card-height) * 16 / 9);
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] {
+  --portfolio-rows: 3;
+  --portfolio-grid-gap: clamp(8px, 1vh, 12px);
+  --portfolio-card-width: clamp(150px, calc((100vh - var(--ideare-nav-height, 70px) - 210px) * 16 / 27), 290px);
 }
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-viewport {
-  height: auto !important; max-height: none !important;
-  padding: 8px 0 !important; overflow: hidden !important;
+@supports (height: 100svh) {
+  html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] {
+    --portfolio-card-width: clamp(150px, calc((100svh - var(--ideare-nav-height, 70px) - 210px) * 16 / 27), 290px);
+  }
 }
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-track {
-  display: flex !important; width: max-content !important; height: auto !important;
-  gap: 0 !important; align-items: start !important; animation: none !important;
+@media (min-width: 1200px) and (min-height: 1000px) {
+  html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] {
+    --portfolio-rows: 4;
+    --portfolio-card-width: clamp(150px, calc((100svh - var(--ideare-nav-height, 70px) - 225px) * 4 / 9), 290px);
+  }
 }
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-track-group {
-  position: relative !important; display: grid !important; grid-auto-flow: column !important;
-  grid-template-rows: repeat(3, var(--portfolio-card-height)) !important;
-  grid-template-columns: none !important; grid-auto-columns: var(--portfolio-card-width) !important;
-  gap: var(--portfolio-grid-gap) !important; width: max-content !important;
-  height: auto !important; max-height: none !important;
-  padding: 0 var(--portfolio-grid-gap) 0 0 !important; margin: 0 !important;
-  flex: 0 0 auto !important; align-items: start !important; transform: none !important;
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] .portfolio-track-group {
+  display: grid !important;
+  grid-auto-flow: column;
+  grid-template-rows: repeat(var(--portfolio-rows), auto);
+  grid-auto-columns: var(--portfolio-card-width);
+  align-items: center;
+  align-content: center;
+  gap: var(--portfolio-grid-gap);
+  width: max-content !important;
+  padding: 0 var(--portfolio-grid-gap) 0 0 !important;
+  flex: 0 0 auto;
 }
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-track-group .portfolio-project {
-  position: relative !important; inset: auto !important; grid-area: auto !important;
-  width: var(--portfolio-card-width) !important; min-width: 0 !important; max-width: none !important;
-  height: var(--portfolio-card-height) !important; min-height: 0 !important; max-height: none !important;
-  margin: 0 !important; align-self: start !important; justify-self: start !important;
-  transform: none !important; translate: none !important; rotate: none !important;
-  flex: none !important; aspect-ratio: 16 / 9 !important;
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] .portfolio-project {
+  width: var(--portfolio-card-width) !important;
+  max-width: none !important;
+  align-self: center;
 }
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project-copy {padding: clamp(7px, 1vw, 14px);}
-html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project-title {font-size: clamp(11px, 1.15vw, 18px);}
-@media (max-width: 767px) {
-  html[data-ideare-page="home"] #portfolio.portfolio-showcase {--portfolio-card-height: min(31vw, 145px);}
+/* Keep the original single-slide geometry on narrow screens. */
+html[data-ideare-page="home"] #portfolio:is([data-portfolio-layout="tablet"],[data-portfolio-layout="phone"]) .portfolio-project {
+  width: 100% !important;
+  flex: 0 0 100% !important;
 }
 html[data-ideare-page="home"] #portfolio .portfolio-project-image { width:100%;height:100%;object-fit:cover; }
 /* Bare photographs: no surrounding cards, contrasting backgrounds or rules.
@@ -275,4 +276,101 @@ html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo figcaption
   color: var(--project-caption);
   text-align: center;
   font-size: clamp(10px, .8vw, 13px);
+}
+
+/* Reduce only the lead photograph in each expanded project. Preserve the
+   original aspect ratio, caption and full-resolution image viewer. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo.is-cover-photo .portfolio-modal-photo-trigger img {
+  max-width: min(100%, 960px, 68vw) !important;
+  max-height: min(46vh, 440px) !important;
+  max-height: min(46svh, 440px) !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain;
+}
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-photo.is-cover-photo .portfolio-modal-photo-trigger img {
+    max-width: min(100%, 88vw) !important;
+    max-height: 42vh !important;
+    max-height: 42svh !important;
+  }
+}
+
+
+/* One-screen project detail for exactly one or two photographs. The live
+   gallery determines its own layout on every project open; no JS changes. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) {
+  --project-top-fade: 64px;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-close {
+  flex-basis: 42px;
+  width: 42px !important; min-width: 42px; max-width: 42px;
+  height: 42px !important; min-height: 42px;
+  margin-bottom: 0 !important;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-info {
+  padding: clamp(8px, 1.8vh, 20px) var(--project-inset) clamp(12px, 2vh, 24px) !important;
+  gap: 8px clamp(16px, 4vw, 64px);
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-title {
+  font-size: clamp(24px, 3vw, 44px);
+  line-height: 1.08;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-description {
+  font-size: clamp(12px, 1.05vw, 16px);
+  line-height: 1.55;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-gallery {
+  flex: 1 1 0;
+  min-height: 140px;
+  container-type: size;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  align-items: center;
+  align-content: stretch;
+  gap: clamp(12px, 2vw, 32px);
+  padding: 8px var(--project-inset) 20px;
+  overflow: visible;
+  box-sizing: border-box;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-gallery:not(:has(> .portfolio-modal-photo:nth-child(2))) {
+  grid-template-columns: minmax(0, 1fr);
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-gallery > .portfolio-modal-photo {
+  grid-column: auto !important;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  justify-content: center;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-photo .portfolio-modal-photo-trigger img {
+  width: auto !important;
+  height: auto !important;
+  max-width: min(100%, 960px) !important;
+  max-height: min(52vh, 440px) !important;
+  max-height: min(440px, max(1px, calc(100cqh - 32px))) !important;
+  object-fit: contain;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-photo figcaption {
+  line-height: 1.3;
+  padding-top: 6px !important;
+}
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-info {
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: 8px 12px !important;
+    gap: 6px;
+  }
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-title {font-size: clamp(23px, 6vw, 32px);}
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-gallery:has(> .portfolio-modal-photo:nth-child(2)) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    min-height: 240px;
+  }
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel:has(.portfolio-modal-gallery > .portfolio-modal-photo):not(:has(.portfolio-modal-gallery > .portfolio-modal-photo:nth-child(3))) .portfolio-modal-gallery:has(> .portfolio-modal-photo:nth-child(2)) .portfolio-modal-photo .portfolio-modal-photo-trigger img {
+    max-height: 26vh !important;
+    max-height: max(1px, calc((100cqh - 10px) / 2 - 32px)) !important;
+  }
 }
