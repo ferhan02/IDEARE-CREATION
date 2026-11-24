@@ -24,3 +24,187 @@ html[data-ideare-page="home"] #portfolio .portfolio-viewport img {-webkit-user-d
     transition: scale .13s cubic-bezier(.2,.8,.2,1);
   }
 }
+
+/* Full-bleed project detail. Keep the homepage carousel and its gesture
+   controllers unchanged. All rules below target the existing detail modal. */
+html[data-ideare-page="home"] .portfolio-modal {
+  --project-surface: #171614;
+  --project-surface-rgb: 23, 22, 20;
+  --project-ink: #f8f0e6;
+  --project-caption: #c7b9a8;
+  --project-line: rgba(239,224,206,.12);
+  --project-inset: clamp(14px, 3vw, 56px);
+  --project-top-fade: calc(102px + env(safe-area-inset-top, 0px));
+  z-index: 10020;
+  padding: 0 !important;
+  place-items: stretch;
+}
+html[data-theme="light"][data-ideare-page="home"] .portfolio-modal {
+  --project-surface: #f7f4ee;
+  --project-surface-rgb: 247, 244, 238;
+  --project-ink: #211d18;
+  --project-caption: #71695e;
+  --project-line: rgba(33,29,24,.13);
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-backdrop {
+  background: var(--project-surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none !important;
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--project-surface) !important;
+  color: var(--project-ink);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: auto;
+  transform: none !important;
+}
+/* A single feathered overlay at the top of the scrolling detail view.
+   Negative margin keeps the decorative layer out of the content flow. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-panel::before {
+  content: '';
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  flex: 0 0 var(--project-top-fade);
+  height: var(--project-top-fade);
+  margin-bottom: calc(-1 * var(--project-top-fade));
+  width: 100%;
+  background: linear-gradient(to bottom,
+    rgba(var(--project-surface-rgb), .99) 0%,
+    rgba(var(--project-surface-rgb), .94) 30%,
+    rgba(var(--project-surface-rgb), .63) 62%,
+    rgba(var(--project-surface-rgb), 0) 100%);
+  pointer-events: none;
+}
+/* Retain the actual close button, click handler and accessible name. Replace
+   its visible text with a single slim chevron (no new JS or dependencies). */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close {
+  position: sticky !important;
+  top: calc(14px + env(safe-area-inset-top, 0px)) !important;
+  right: auto !important;
+  left: auto !important;
+  z-index: 6;
+  align-self: flex-start;
+  flex: 0 0 48px;
+  display: grid;
+  place-items: center;
+  width: 48px !important;
+  min-width: 48px;
+  max-width: 48px;
+  height: 48px !important;
+  min-height: 48px;
+  margin: calc(14px + env(safe-area-inset-top, 0px)) 0 12px var(--project-inset) !important;
+  padding: 0 !important;
+  border: 1px solid transparent !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: var(--project-ink) !important;
+  box-shadow: none !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  gap: 0 !important;
+  transform: none !important;
+  transition: background-color .2s ease, border-color .2s ease, scale .2s ease !important;
+  cursor: pointer;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close > * { display: none !important; }
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close::before { content: none !important; }
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close::after {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-left: 1.8px solid currentColor;
+  border-bottom: 1.8px solid currentColor;
+  transform: translateX(3px) rotate(45deg);
+  border-radius: 1px;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close:hover {
+  background: rgba(var(--project-surface-rgb), .88) !important;
+  border-color: var(--project-line) !important;
+  transform: none !important;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close:active { scale: .91; }
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close:focus-visible {
+  outline: 2px solid currentColor !important;
+  outline-offset: 3px;
+}
+/* The title and description retain their content and sit on one uninterrupted
+   surface. No gradient along the sides, bottom or inside the gallery. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-info {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px clamp(24px, 5vw, 96px);
+  align-items: start;
+  width: 100%;
+  padding: 22px var(--project-inset) clamp(28px, 4vw, 60px) !important;
+  background: transparent !important;
+  border: 0 !important;
+  overflow: visible;
+}
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-meta { grid-column: 1 / -1; padding-right: 0; max-width: none; }
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-title { grid-column: 1; max-width: none; }
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-description { grid-column: 2; max-width: none; }
+/* Leave the project's original photo layout alone: the cover spans both
+   columns, and subsequent photos keep their natural proportions. Only the
+   surrounding gallery surface is flattened to match the fullscreen panel. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-gallery {
+  background: transparent !important;
+}
+
+/* Uniform homepage carousel cards, not the photographs inside the popup.
+   Keep the existing desktop continuous track and single-slide mobile/tablet
+   controller geometry. All cards share the same 16:9 frame at each breakpoint. */
+html[data-ideare-page="home"] #portfolio.portfolio-showcase .portfolio-project {
+  box-sizing: border-box;
+  aspect-ratio: 16 / 9 !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  align-self: center;
+  margin-block: 0;
+}
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] .portfolio-project {
+  width: clamp(300px, 30vw, 510px) !important;
+  flex: 0 0 clamp(300px, 30vw, 510px) !important;
+}
+html[data-ideare-page="home"] #portfolio[data-portfolio-layout="desktop"] .portfolio-track-group {
+  align-items: center;
+  gap: clamp(14px, 1.4vw, 24px);
+  padding-right: clamp(14px, 1.4vw, 24px);
+}
+html[data-ideare-page="home"] #portfolio:is([data-portfolio-layout="tablet"], [data-portfolio-layout="phone"]) .portfolio-project {
+  width: 100% !important;
+  flex: 0 0 100% !important;
+}
+html[data-ideare-page="home"] #portfolio .portfolio-project-image {
+  width: 100%; height: 100%; object-fit: cover;
+}
+/* The nested photo viewer continues to show the original image uncropped. */
+html[data-ideare-page="home"] .portfolio-modal .portfolio-image-viewer-image { object-fit: contain; }
+@media (max-width: 767px) {
+  html[data-ideare-page="home"] .portfolio-modal { --project-top-fade: calc(86px + env(safe-area-inset-top, 0px)); }
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-info { grid-template-columns: minmax(0, 1fr); gap: 10px; padding-top: 12px !important; }
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-description { grid-column: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ideare-page="home"] .portfolio-modal .portfolio-modal-close { transition: none !important; }
+}
