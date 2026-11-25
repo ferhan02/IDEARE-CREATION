@@ -1,9 +1,10 @@
-/* IDEARE v8: independent wall finishes and persistent, screen-projected edge handles.
+/* IDEARE v9: camera cutaways, interactive wall picker and editable finishes.
+   Retains v8 independent wall panels and persistent resize handles.
    All persisted dimensions and wall offsets are millimetres. */
 (()=>{
 'use strict';
 const wrap=$('#canvas-wrap'),hud=$('#studio-hud');if(!wrap||!hud)return;
-const css=document.createElement('link');css.rel='stylesheet';css.href='../assets/css/designer-resize-v8.css?v=20261125-8';document.head.append(css);
+const css=document.createElement('link');css.rel='stylesheet';css.href='../assets/css/designer-resize-v8.css?v=20261125-9';document.head.append(css);
 const clamp8=(n,a,b)=>Math.max(a,Math.min(b,n)),num=(n,f=0)=>Number.isFinite(Number(n))?Number(n):f;
 const panels=()=>Array.isArray(model.room.backsplashes)?model.room.backsplashes:(model.room.backsplashes=[]);
 let splashId=null,mode=false,modeKey=null,drag=null,raf=0,latest=null,splashGroup=null;
@@ -19,6 +20,52 @@ function walls(){const v=roomVertices(),a=[];for(let i=0;i<v.length;i++){
  const sign=pointInsidePolygon(mx-tz*10,mz+tx*10,v)?1:-1;
  a.push({index:i,x:p.x,z:p.z,len,tx,tz,nx:-tz*sign,nz:tx*sign});
  }return a;}
+// Only cut away a wall when it intersects a sightline to visible room content.
+// Camera and target coordinates in millimetres; works for concave and angled rooms.
+function wallBlocks(w,eye,p,height){
+ const ex=(eye.x-w.x)*w.nx+(eye.z-w.z)*w.nz;
+ const px=(p.x-w.x)*w.nx+(p.z-w.z)*w.nz;
+ const delta=ex-px;if(Math.abs(delta)<.0001)return false;
+ const t=ex/delta;if(t<=.0001||t>=.9999)return false;
+ const x=eye.x+(p.x-eye.x)*t,z=eye.z+(p.z-eye.z)*t;
+ const u=(x-w.x)*w.tx+(z-w.z)*w.tz,y=eye.y+(p.y-eye.y)*t;
+ return u>1&&u<w.len-1&&y>=0&&y<height-1;
+}
+const wallToggle=$('#wall-toggle');let wallWorld=null,wallMeshes=[],wallSamples=[],wallStamp='';
+function rebuildCutaway(){
+ wallWorld=worldGroup;wallMeshes=[];wallSamples=[];wallStamp='';
+ const ws=walls(),poly=roomVertices(),meshes=[];
+ worldGroup?.traverse(o=>{if(o.name==='room_wall'&&o.isMesh)meshes.push(o);});
+ // addRoom emits solid wall meshes in the same polygon order, excluding open edges.
+ wallMeshes=meshes.map((mesh,i)=>({mesh,w:ws[i]}));
+ const push=(x,y,z)=>{if(pointInsidePolygon(x,z,poly))wallSamples.push({x,y,z});};
+ // Sample the room's working area and the centres of its actual objects.
+ for(const x of [.18,.35,.5,.65,.82])for(const z of [.18,.35,.5,.65,.82])push(model.room.width*x,Math.min(850,model.room.height*.4),model.room.depth*z);
+ for(const c of model.cabinets)push(c.x,(c.category==='wall-cabinets'?1350:0)+c.height/2,c.z);
+ for(const c of model.extras)push(c.x,Math.min(model.room.height-10,Math.max(100,c.height/2)),c.z);
+}
+function syncCutaway(force=false){
+ if(!worldGroup||!wallToggle)return;
+ if(wallWorld!==worldGroup)rebuildCutaway();
+ const show=wallToggle.getAttribute('aria-pressed')==='true';
+ const stamp=show&&camera?[show,...camera.position.toArray(),...camera.quaternion.toArray(),camera.aspect,camera.fov].join('|'):String(show);
+ if(!force&&stamp===wallStamp)return;wallStamp=stamp;
+ let blockers=new Set();
+ if(show&&camera){
+  camera.updateMatrixWorld();const eye={x:camera.position.x*1000,y:camera.position.y*1000,z:camera.position.z*1000};
+  const samples=wallSamples.slice(),target=controls?.target;
+  if(target&&pointInsidePolygon(target.x*1000,target.z*1000,roomVertices())&&target.y>=0&&target.y<model.room.height/1000)samples.push({x:target.x*1000,y:target.y*1000,z:target.z*1000});
+  const v=new THREE.Vector3();
+  for(const p of samples){v.set(p.x/1000,p.y/1000,p.z/1000).project(camera);
+   if(v.z<-1||v.z>1||Math.abs(v.x)>1||Math.abs(v.y)>1)continue;
+   for(const {w} of wallMeshes)if(w&&!blockers.has(w.index)&&wallBlocks(w,eye,p,model.room.height))blockers.add(w.index);
+  }
+ }
+ for(const {mesh,w} of wallMeshes){mesh.visible=show&&(!w||!blockers.has(w.index));mesh.castShadow=false;
+  const m=mesh.material;if(m){m.opacity=1;if(m.transparent||!m.depthWrite){m.transparent=false;m.depthWrite=true;m.needsUpdate=true;}}
+ }
+}
+if(wallToggle){const originalWallToggle=wallToggle.onclick;wallToggle.onclick=e=>{originalWallToggle?.call(wallToggle,e);syncCutaway(true);};}
 const wall=p=>walls().find(w=>w.index===p.wallIndex);
 const wallPoint=(w,u,y,offset=43)=>new THREE.Vector3((w.x+w.tx*u+w.nx*offset)/1000,y/1000,(w.z+w.tz*u+w.nz*offset)/1000);
 function panelValid(p){const w=wall(p);if(!w||![p.offset,p.bottom,p.width,p.height].every(Number.isFinite)||p.width<50||p.height<50||p.offset<-.01||p.bottom<-.01||p.offset+p.width>w.len+.01||p.bottom+p.height>model.room.height+.01)return false;
@@ -40,19 +87,45 @@ function meshPanel(p){const w=wall(p);if(!w||p.width<1||p.height<1)return null;
  const g=new THREE.Group();g.userData.splashId=p.id;g.position.copy(wallPoint(w,p.offset+p.width/2,p.bottom+p.height/2,43));g.rotation.y=-Math.atan2(w.tz,w.tx);
  const mesh=addBox(g,p.width/1000,p.height/1000,.008,0,0,0,v7SplashMaterial(finish(p)),'wall_backsplash');mesh.castShadow=false;
  const uv=mesh.geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*p.width/500,uv.getY(i)*p.height/500);uv.needsUpdate=true;return g;}
-const oldDraw=drawScene;drawScene=()=>{oldDraw();if(!scene||!renderer||!worldGroup)return;splashGroup=new THREE.Group();splashGroup.name='ideare_wall_backsplashes';worldGroup.add(splashGroup);for(const p of panels()){const w=wall(p);if(!w||p.offset<0||p.offset+p.width>w.len+.01||p.bottom<0||p.bottom+p.height>model.room.height+.01)continue;try{const g=meshPanel(p);if(g)splashGroup.add(g);}catch(e){console.error('IDEARE backsplash',e);}}};
+const oldDraw=drawScene;drawScene=()=>{oldDraw();if(!scene||!renderer||!worldGroup)return;splashGroup=new THREE.Group();splashGroup.name='ideare_wall_backsplashes';worldGroup.add(splashGroup);for(const p of panels()){const w=wall(p);if(!w||p.offset<0||p.offset+p.width>w.len+.01||p.bottom<0||p.bottom+p.height>model.room.height+.01)continue;try{const g=meshPanel(p);if(g)splashGroup.add(g);}catch(e){console.error('IDEARE backsplash',e);}}syncCutaway(true);};
 const oldSelect=select,oldSelectExtra=selectExtra;select=id=>{splashId=null;oldSelect(id);};selectExtra=id=>{splashId=null;oldSelectExtra(id);};
 const oldHistory=applyHistory;applyHistory=s=>{splashId=null;mode=false;modeKey=null;oldHistory(s);};
 function selectPanel(p){model.selected=null;model.selectedExtra=null;model.doorsOpen=false;splashId=p.id;mode=false;modeKey=null;renderInspector();renderList();drawScene();}
-function dialog(opts){if(window.IdeaREAlert?.fire)return window.IdeaREAlert.fire(opts);if(window.Swal?.fire)return window.Swal.fire({buttonsStyling:false,reverseButtons:true,heightAuto:false,focusCancel:false,showClass:{popup:'ideare-swal-in'},hideClass:{popup:'ideare-swal-out'},...opts,customClass:{popup:'ideare-swal ideare-swal-info ideare-swal-dialog v8-wall-dialog',title:'ideare-swal-title',htmlContainer:'ideare-swal-text',actions:'ideare-swal-actions',confirmButton:'ideare-swal-confirm',cancelButton:'ideare-swal-cancel',icon:'ideare-swal-icon',input:'v8-wall-select'}});notify('The styled dialog is unavailable. Refresh the designer and try again.',true);return Promise.resolve({isConfirmed:false});}
+function dialog(opts){
+ const classes={popup:'ideare-swal ideare-swal-info ideare-swal-dialog v8-wall-dialog',title:'ideare-swal-title',htmlContainer:'ideare-swal-text',actions:'ideare-swal-actions',confirmButton:'ideare-swal-confirm',cancelButton:'ideare-swal-cancel',icon:'ideare-swal-icon',input:'v8-wall-select'};
+ if(opts.customClass){const popup=opts.customClass.popup;Object.assign(classes,opts.customClass);if(popup)classes.popup='ideare-swal ideare-swal-info ideare-swal-dialog v8-wall-dialog '+popup;}
+ if(window.Swal?.fire)return window.Swal.fire({buttonsStyling:false,reverseButtons:true,heightAuto:false,focusCancel:false,showClass:{popup:'ideare-swal-in'},hideClass:{popup:'ideare-swal-out'},...opts,customClass:classes});
+ notify('The styled dialog is unavailable. Refresh the designer and try again.',true);return Promise.resolve({isConfirmed:false});
+}
+// All buttons are real HTML buttons, not tiny SVG labels. Confirmation is explicit.
+function wallPickerHtml(ws,style){
+ const vertices=roomVertices(),W=400,H=300,sc=Math.min(280/model.room.width,200/model.room.depth),ox=(W-model.room.width*sc)/2,oy=(H-model.room.depth*sc)/2;
+ const xy=(x,z)=>[ox+x*sc,oy+z*sc];const pts=vertices.map(v=>xy(v.x,v.z).join(',')).join(' ');
+ const lines=ws.map(w=>{const a=xy(w.x,w.z),b=xy(w.x+w.tx*w.len,w.z+w.tz*w.len);return `<line data-v9-wall-line="${w.index}" x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}"/>`;}).join('');
+ const positions=ws.map(w=>{const [x,y]=xy(w.x+w.tx*w.len/2,w.z+w.tz*w.len/2);return {w,x,y};});
+ // Small notches can have nearby midpoints; spread overlapping buttons along the wall normals.
+ for(let k=0;k<10;k++)for(let i=0;i<positions.length;i++)for(let j=i+1;j<positions.length;j++){const a=positions[i],b=positions[j],dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy);if(dist>=53)continue;const ux=dist>.01?dx/dist:1,uy=dist>.01?dy/dist:0,step=(53-dist)/2;a.x=clamp8(a.x-ux*step,28,W-28);a.y=clamp8(a.y-uy*step,28,H-28);b.x=clamp8(b.x+ux*step,28,W-28);b.y=clamp8(b.y+uy*step,28,H-28);}
+ const buttons=positions.map(({w,x,y})=>`<button type="button" class="v9-wall-number" style="left:${x/W*100}%;top:${y/H*100}%" data-v9-wall="${w.index}" aria-pressed="false" aria-label="Wall ${w.index+1}, ${Math.round(w.len)} millimetres" title="Wall ${w.index+1} · ${Math.round(w.len)} mm">${w.index+1}</button>`).join('');
+ const p=v7Splash.find(f=>f.id===style)||v7Splash[0];
+ return `<div class="v9-dialog-intro"><span class="v9-kicker">WALL FINISH</span><p>Choose a numbered wall on the plan.</p></div><div class="v9-wall-plan"><svg viewBox="0 0 ${W} ${H}" aria-hidden="true"><polygon points="${pts}"/>${lines}</svg>${buttons}</div><div class="v9-wall-selection"><span class="v9-choice-dot"></span><span data-v9-wall-status aria-live="polite">No wall selected</span></div><div class="v9-finish-current"><img src="${v7Swatch(p).toDataURL('image/png')}" alt=""><div><small>Selected finish</small><strong>${safe(p.name)}</strong></div></div>`;
+}
+async function chooseWall(ws,style){let chosen=null;
+ return dialog({title:'Choose a wall',html:wallPickerHtml(ws,style),customClass:{popup:'v9-picker v9-wall-picker'},showCancelButton:true,confirmButtonText:'Add backsplash',cancelButtonText:'Cancel',focusConfirm:false,
+  didOpen:()=>{const popup=window.Swal.getPopup();const confirm=window.Swal.getConfirmButton();confirm.disabled=true;const buttons=[...popup.querySelectorAll('[data-v9-wall]')];for(const button of buttons)button.addEventListener('click',()=>{chosen=Number(button.dataset.v9Wall);const w=ws.find(w=>w.index===chosen);if(!w)return;for(const b of buttons)b.setAttribute('aria-pressed',String(b===button));for(const line of popup.querySelectorAll('[data-v9-wall-line]'))line.classList.toggle('is-selected',Number(line.dataset.v9WallLine)===chosen);popup.querySelector('[data-v9-wall-status]').textContent=`Wall ${chosen+1} · ${Math.round(w.len)} mm`;confirm.disabled=false;});buttons[0]?.focus();},
+  preConfirm:()=>{if(chosen===null){window.Swal.showValidationMessage('Choose a numbered wall first.');return false;}return chosen;}});
+}
 $('#catalog-menu')?.addEventListener('click',async e=>{const b=e.target.closest('[data-v7-splash]');if(!b)return;e.preventDefault();e.stopImmediatePropagation();const style=b.dataset.v7Splash;if(!v7Splash.some(f=>f.id===style))return;closeMenu();const ws=walls();if(!ws.length){notify('There is no solid wall in this room.',true);return;}
- const vertices=roomVertices(),w0=model.room.width,d0=model.room.depth,sc=180/Math.max(w0,d0),pts=vertices.map(v=>`${15+v.x*sc},${15+v.z*sc}`).join(' ');
- const svg=`<svg viewBox="0 0 ${w0*sc+30} ${d0*sc+30}" style="width:100%;max-height:185px" aria-label="Room wall numbers"><polygon points="${pts}" fill="#c6ad8a" fill-opacity=".18" stroke="#a3927b"/>${ws.map(w=>`<line x1="${15+w.x*sc}" y1="${15+w.z*sc}" x2="${15+(w.x+w.tx*w.len)*sc}" y2="${15+(w.z+w.tz*w.len)*sc}" stroke="#b3905c" stroke-width="3"/><text x="${15+(w.x+w.tx*w.len/2+w.nx*100)*sc}" y="${15+(w.z+w.tz*w.len/2+w.nz*100)*sc}" fill="currentColor" font-size="10" text-anchor="middle" dominant-baseline="middle">${w.index+1}</text>`).join('')}</svg>`;
- const result=await dialog({title:'Choose a wall',html:svg+'<p>Place this backsplash on one of the numbered walls.</p>',input:'select',inputOptions:Object.fromEntries(ws.map(w=>[String(w.index),`Wall ${w.index+1} · ${Math.round(w.len)} mm`])),inputPlaceholder:'Select a wall',showCancelButton:true,confirmButtonText:'Add backsplash',inputValidator:v=>v===''?'Choose a wall first.':undefined});
- if(!result.isConfirmed)return;const w=walls().find(w=>w.index===Number(result.value));if(!w)return;const p=initialPanel(w,style);if(!p){notify('No clear 1000 × 450 mm area on that wall. Try another wall or move existing panels.',true);return;}history();panels().push(p);selectPanel(p);mode=true;modeKey=p.id;changed(false);notify('Backsplash added. Drag its edges to resize.');},true);
+ const result=await chooseWall(ws,style);if(!result.isConfirmed)return;const w=walls().find(w=>w.index===Number(result.value));if(!w)return;const p=initialPanel(w,style);if(!p){notify('No clear 1000 × 450 mm area on that wall. Try another wall or move existing panels.',true);return;}history();panels().push(p);selectPanel(p);mode=true;modeKey=p.id;changed(false);notify('Backsplash added. Drag its edges to resize.');},true);
+// Edit only the finish of an existing panel. No new panel or wall prompt.
+async function changePanelFinish(p){
+ const id=p.id;let chosen=finish(p).id;const categories=[...new Set(v7Splash.map(f=>f.category))];
+ const html=`<div class="v9-dialog-intro"><span class="v9-kicker">BACKSPLASH FINISH</span><p>Choose a new finish. Your panel size and position stay the same.</p></div><div class="v9-finish-status" aria-live="polite">Selected · ${safe(finish(p).name)}</div><div class="v9-finish-list">${categories.map(category=>`<section><h3>${safe(category)}</h3><div class="v9-finish-grid">${v7Splash.filter(f=>f.category===category).map(f=>`<button type="button" class="v9-finish-tile" data-v9-finish="${safe(f.id)}" aria-pressed="${f.id===chosen}"><img src="${v7Swatch(f).toDataURL('image/png')}" alt=""><span>${safe(f.name)}</span></button>`).join('')}</div></section>`).join('')}</div>`;
+ const result=await dialog({title:'Change backsplash finish',html,customClass:{popup:'v9-picker v9-finish-picker'},showCancelButton:true,confirmButtonText:'Apply finish',cancelButtonText:'Cancel',focusConfirm:false,didOpen:()=>{const popup=window.Swal.getPopup(),buttons=[...popup.querySelectorAll('[data-v9-finish]')];for(const b of buttons)b.addEventListener('click',()=>{const f=v7Splash.find(f=>f.id===b.dataset.v9Finish);if(!f)return;chosen=f.id;for(const btn of buttons)btn.setAttribute('aria-pressed',String(btn===b));popup.querySelector('.v9-finish-status').textContent='Selected · '+f.name;});},preConfirm:()=>chosen});
+ if(!result.isConfirmed||!v7Splash.some(f=>f.id===result.value))return;const current=panels().find(p=>p.id===id);if(!current||current.style===result.value)return;history();current.style=result.value;renderAll();changed(false);notify('Backsplash finish updated.');
+}
 // List and floating panel controls; no changes to the old cabinet/extra database model.
-const tools=document.createElement('div');tools.className='v8-panel-tools';tools.hidden=true;tools.innerHTML='<strong></strong><span></span><button type="button" data-v8-panel-action="resize">Resize</button><button type="button" data-v8-panel-action="remove">Remove</button><button type="button" data-v8-panel-action="close" aria-label="Deselect backsplash">×</button>';wrap.append(tools);
-tools.addEventListener('click',async e=>{const act=e.target.closest('[data-v8-panel-action]')?.dataset.v8PanelAction,p=panelSelected();if(!p)return;if(act==='resize'){toggleMode();}else if(act==='close'){splashId=null;mode=false;renderAll();}else if(act==='remove'){const r=await dialog({title:'Remove backsplash?',text:finish(p).name,showCancelButton:true,confirmButtonText:'Remove'});if(r.isConfirmed){history();model.room.backsplashes=panels().filter(x=>x.id!==p.id);splashId=null;mode=false;renderAll();changed(false);}}});
+const tools=document.createElement('div');tools.className='v8-panel-tools';tools.hidden=true;tools.innerHTML='<strong></strong><span></span><button type="button" data-v8-panel-action="finish">Change finish</button><button type="button" data-v8-panel-action="resize">Resize</button><button type="button" data-v8-panel-action="remove">Remove</button><button type="button" data-v8-panel-action="close" aria-label="Deselect backsplash">×</button>';wrap.append(tools);
+tools.addEventListener('click',async e=>{const act=e.target.closest('[data-v8-panel-action]')?.dataset.v8PanelAction,p=panelSelected();if(!p)return;if(act==='finish'){await changePanelFinish(p);}else if(act==='resize'){toggleMode();}else if(act==='close'){splashId=null;mode=false;renderAll();}else if(act==='remove'){const r=await dialog({title:'Remove backsplash?',text:finish(p).name,showCancelButton:true,confirmButtonText:'Remove'});if(r.isConfirmed){history();model.room.backsplashes=panels().filter(x=>x.id!==p.id);splashId=null;mode=false;renderAll();changed(false);}}});
 const oldList=renderList;renderList=()=>{migrate();oldList();const list=$('#cabinet-list');if(list)for(const p of panels()){const b=document.createElement('button');b.type='button';b.className=p.id===splashId?'selected':'';b.innerHTML=`<b>Backsplash · ${safe(finish(p).name)}</b><small>Wall ${p.wallIndex+1} · ${Math.round(p.width)} × ${Math.round(p.height)} mm</small>`;b.onclick=()=>selectPanel(p);list.append(b);}if(panelSelected())$('#selection-badge').textContent='Backsplash · '+finish(panelSelected()).name;};
 // Raycast actual scene surfaces; cabinet or appliance in front wins the click.
 function pointerDown(e){if(e.target!==canvas||e.button!==0||model.step!==3||!camera||!raycaster||!splashGroup||drag)return false;
@@ -78,7 +151,7 @@ function frame(c){if(isSplash(c)){const w=wall(c);if(!w)return null;return{width
  return{width:c.width,height:c.height,depth:c.depth,front,wall:wallCab||mountedExtra,axis:{u:ax,y:new THREE.Vector3(0,1,0),z:az},point:(u,y,z)=>new THREE.Vector3((c.x+u*co-z*si)/1000,(bottom+y)/1000,(c.z+u*si+z*co)/1000)};}
 function project(p){const r=wrap.getBoundingClientRect(),v=p.clone().project(camera);return{x:(v.x+1)*r.width/2,y:(1-v.y)*r.height/2,visible:v.z>=-1&&v.z<=1};}
 function place(h,info){h.info=info;h.b.hidden=!info;if(!info)return;const p=project(info.point);h.b.hidden=!p.visible;h.b.style.left=p.x+'px';h.b.style.top=p.y+'px';}
-function tick(){requestAnimationFrame(tick);const c=target(),p=panelSelected(),wallCab=selected()?.category==='wall-cabinets';for(const id of ['rotate','object-rotate']){const b=$('#'+id);if(b)b.classList.toggle('v8-no-rotate',wallCab);}resizeButton.hidden=!c||isSplash(c);if(!drag&&modeKey!==key(c))mode=false;const active=!!(c&&camera&&model.step===3&&mode);resizeButton.setAttribute('aria-pressed',String(active));tools.hidden=!(p&&model.step===3);if(p){const content=[['strong',finish(p).name],['span',`Wall ${p.wallIndex+1} · ${Math.round(p.width)} × ${Math.round(p.height)} mm`],['[data-v8-panel-action="resize"]',active?'Done':'Resize']];for(const [sel,value] of content){const node=tools.querySelector(sel);if(node.textContent!==value)node.textContent=value;}}
+function tick(){requestAnimationFrame(tick);if(model.step===3)syncCutaway();const c=target(),p=panelSelected(),wallCab=selected()?.category==='wall-cabinets';for(const id of ['rotate','object-rotate']){const b=$('#'+id);if(b)b.classList.toggle('v8-no-rotate',wallCab);}resizeButton.hidden=!c||isSplash(c);if(!drag&&modeKey!==key(c))mode=false;const active=!!(c&&camera&&model.step===3&&mode);resizeButton.setAttribute('aria-pressed',String(active));tools.hidden=!(p&&model.step===3);if(p){const content=[['strong',finish(p).name],['span',`Wall ${p.wallIndex+1} · ${Math.round(p.width)} × ${Math.round(p.height)} mm`],['[data-v8-panel-action="resize"]',active?'Done':'Resize']];for(const [sel,value] of content){const node=tools.querySelector(sel);if(node.textContent!==value)node.textContent=value;}}
  overlay.hidden=!active;wrap.classList.toggle('v8-resize-mode',active&&!isSplash(c));if(!active)return;const f=frame(c);if(!f){overlay.hidden=true;return;}const z=f.front*f.depth/2,pts=[[-f.width/2,0],[f.width/2,0],[f.width/2,f.height],[-f.width/2,f.height]].map(([u,y])=>project(f.point(u,y,z)));polygon.setAttribute('points',pts.map(p=>`${p.x},${p.y}`).join(' '));
  for(const h of handles){if(h.id.startsWith('depth')){const sign=h.id==='depth-front'?1:-1;if(!f.depth||f.wall&&sign<0){place(h,null);continue;}place(h,{point:f.point(f.width*.23,f.height,sign*f.depth/2),axes:['z'],sz:sign});continue;}if(h.y<0&&!isSplash(c)){place(h,null);continue;}place(h,{point:f.point(h.x*f.width/2,(h.y+1)*f.height/2,z),axes:[...(h.x?['u']:[]),...(h.y?['y']:[])],sx:h.x,sy:h.y});}
  if(f.depth){const a=project(f.point(f.width*.23,f.height,-f.depth/2)),b=project(f.point(f.width*.23,f.height,f.depth/2));depthGuide.setAttribute('d',`M${a.x},${a.y}L${b.x},${b.y}`);}else depthGuide.setAttribute('d','');
@@ -111,5 +184,5 @@ window.addEventListener('pointerup',e=>{if(drag&&e.pointerId===drag.id){e.stopIm
 window.addEventListener('pointercancel',e=>{if(drag&&e.pointerId===drag.id){e.stopImmediatePropagation();finishDrag(e,true);}},true);
 window.addEventListener('blur',()=>{if(drag)finishDrag(null,true);});window.addEventListener('keydown',e=>{if(e.key==='Escape'&&(drag||mode)){e.preventDefault();e.stopImmediatePropagation();if(drag)finishDrag(null,true);mode=false;modeKey=null;}},true);
 // Also expose the pure geometry math for local regression tests.
-window.IDEAREV8.test={solve,panelCandidate,panelValid,cabCandidate,walls};
+window.IDEAREV8.test={solve,panelCandidate,panelValid,cabCandidate,walls,wallBlocks};
 })();
