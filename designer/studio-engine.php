@@ -3,7 +3,7 @@
 // Files run in the same ES-module scope so the extensions can reuse the
 // repository's catalog, renderer, persistence and validation functions.
 header('Content-Type: application/javascript; charset=utf-8');
-header('Cache-Control: no-cache, must-revalidate');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
 $files=[
  __DIR__.'/../assets/js/designer-3d.js',
@@ -97,5 +97,5 @@ JS;
 $parts[0]=preg_replace('/(^import[^\r\n]*;\r?\nimport[^\r\n]*;\r?\n)/', '$1'.$report."\n", $parts[0], 1, $reportPatched);
 if($reportPatched!==1){http_response_code(500);echo 'throw new Error("IDEARE engine imports changed.");';exit;}
 echo $parts[0], "\n;\n", $geometry, "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\n";
-echo "try {\n", $space, "\n} catch(error){console.error('IDEARE Define Space startup:',error);const old=document.querySelector('.ideare-environment');if(old)old.hidden=false;try{notify('Define Space upgrade could not initialize. The main designer is still available. See browser console.',true);}catch(_){} }\n;\n";
+echo "try {\n", $space, "\n} catch(error){console.error('IDEARE Define Space startup:',error);const old=document.querySelector('.ideare-environment');if(old)old.hidden=false;const section=document.querySelector('[data-panel=\"2\"]');if(section){section.querySelector('.v10-finish-ui')?.remove();section.querySelector('.v10-preview')?.remove();const note=document.createElement('p');note.className='id3-note';note.textContent='Define Space upgrade failed: '+(error?.message||String(error));section.querySelector('.studio-room-tools')?.append(note);}try{notify('Define Space upgrade could not initialize. The main designer is still available. See browser console.',true);}catch(_){} }\n;\n";
 echo "Promise.resolve().then(()=>boot()).catch(ideareStartupError);\n";
