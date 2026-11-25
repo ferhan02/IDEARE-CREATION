@@ -123,35 +123,9 @@ drawScene=()=>{if(railRaf)cancelAnimationFrame(railRaf);redraw();if(!animateRail
 // Resize is a viewport action; preserve the anchored left/back edge and snap
 // the resized right/front sides to adjacent geometry and the room boundary.
 const hud=document.querySelector('#studio-hud');const moveBtn=document.querySelector('#object-move');
-const resizeBtn=document.createElement('button');resizeBtn.type='button';resizeBtn.id='ideare-resize-toggle';resizeBtn.title='Resize selected cabinet';resizeBtn.setAttribute('aria-label','Resize selected cabinet');resizeBtn.textContent='⤡';hud?.append(resizeBtn);
-const grip=document.createElement('button');grip.type='button';grip.id='ideare-resize-grip';grip.textContent='⤡';grip.title='Drag to resize. Snaps to adjacent cabinets and room walls.';grip.setAttribute('aria-label','Drag this handle to resize selected cabinet');grip.hidden=true;canvasWrap?.append(grip);
-let resizeMode=false,resizing=null,frame=0;
-function syncResizeUI(){const c=selected();resizeBtn.hidden=!c;grip.hidden=!resizeMode||!c||model.step!==3;resizeBtn.setAttribute('aria-pressed',String(resizeMode));canvasWrap?.classList.toggle('ideare-is-resizing',resizeMode);}
-resizeBtn.addEventListener('click',()=>{resizeMode=!resizeMode;syncResizeUI();});
-const footprint=c=>{const swap=Math.abs(Math.round(c.rotation/90))%2===1;const w=swap?c.depth:c.width,d=swap?c.width:c.depth;return {left:c.x-w/2,right:c.x+w/2,back:c.z-d/2,front:c.z+d/2,w,d};};
-const vertical=c=>[c.category==='wall-cabinets'?1350:0,(c.category==='wall-cabinets'?1350:0)+c.height];
-function fitsResized(c){if(window.IDEAREPlacementV4?.valid)return window.IDEAREPlacementV4.valid(c);if(!cabinetFitsPolygon(c))return false;if(vertical(c)[1]>model.room.height)return false;const av=vertical(c);return !model.cabinets.some(o=>{if(o.uid===c.uid)return false;const bv=vertical(o);return Math.min(av[1],bv[1])>Math.max(av[0],bv[0])+1&&v6Overlap(c,o,.01);});}
-function worldOnPlane(e,y){if(!camera||!raycaster)return null;const rect=canvas.getBoundingClientRect();const p=new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(p,camera);return raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-y),new THREE.Vector3());}
-function snapSide(value,axis,c){let best=Math.round(value/25)*25,dist=55;const targets=[axis==='x'?model.room.width:model.room.depth,0];for(const o of model.cabinets){if(o.uid===c.uid)continue;const p=footprint(o);targets.push(axis==='x'?p.left:p.back,axis==='x'?p.right:p.front);}for(const v of targets){const d=Math.abs(value-v);if(d<dist){best=v;dist=d;}}return best;}
-function relocateGeometry(c){const prev=meshById.get(c.uid);if(!prev)return;cabinetGroup.remove(prev);const next=makeCabinet(c);cabinetGroup.add(next);meshById.set(c.uid,next);disposeGroup(prev);}
+// v8 owns the persistent edge resize overlay. Keep this hook for the earlier render wrapper.
+function syncResizeUI(){}
 function hideShared(flag){worldGroup?.children.forEach(o=>{if(/^continuous_/.test(o.name))o.visible=!flag;});}
-function gripFrame(){frame=requestAnimationFrame(gripFrame);if(!resizeMode||!selected()||!camera||model.step!==3){grip.hidden=true;return;}const c=selected(),p=footprint(c),v=new THREE.Vector3(p.right/1000,vertical(c)[1]/1000,p.front/1000).project(camera),r=canvasWrap.getBoundingClientRect();if(v.z>1||v.z< -1){grip.hidden=true;return;}grip.hidden=false;grip.style.left=`${Math.max(24,Math.min(r.width-24,(v.x+1)*r.width/2))}px`;grip.style.top=`${Math.max(24,Math.min(r.height-24,(1-v.y)*r.height/2))}px`;}
-requestAnimationFrame(gripFrame);
-grip.addEventListener('pointerdown',e=>{const c=selected();if(!c||e.button!==0)return;e.preventDefault();e.stopPropagation();const p=worldOnPlane(e,vertical(c)[1]/1000);if(!p)return;const bounds=footprint(c);resizing={uid:c.uid,base:{...c},bounds,start:p,id:e.pointerId,recorded:false};grip.setPointerCapture(e.pointerId);if(controls)controls.enabled=false;canvasWrap.classList.add('ideare-resize-active');hideShared(true);});
-grip.addEventListener('pointermove',e=>{const m=resizing;if(!m||m.id!==e.pointerId)return;const c=model.cabinets.find(o=>o.uid===m.uid);if(!c)return;const p=worldOnPlane(e,vertical(c)[1]/1000);if(!p)return;
- const dx=(p.x-m.start.x)*1000,dz=(p.z-m.start.z)*1000;
- let newW=Math.max(150,snapSide(m.bounds.right+dx,'x',c)-m.bounds.left),newD=Math.max(150,snapSide(m.bounds.front+dz,'z',c)-m.bounds.back);
- const swap=Math.abs(Math.round(c.rotation/90))%2===1;
- const newDims=swap?{width:newD,depth:newW}:{width:newW,depth:newD};
- const candidate={...c,...newDims,x:m.bounds.left+newW/2,z:m.bounds.back+newD/2};
- const tpl=catalog.templates.find(t=>Number(t.id)===Number(c.templateId));
- if(tpl&&(['width','depth'].some(k=>candidate[k]<Math.max(100,Number(tpl['min_'+k])||100)||candidate[k]>Math.max(150,Number(tpl['max_'+k])||10000)))){grip.classList.add('ideare-invalid');return;}
- if(!fitsResized(candidate)){grip.classList.add('ideare-invalid');return;}grip.classList.remove('ideare-invalid');if(!m.recorded){history();m.recorded=true;}
- Object.assign(c,{...newDims,x:candidate.x,z:candidate.z});relocateGeometry(c);document.querySelector('#selected-size').textContent=`${Math.round(c.width)} × ${Math.round(c.height)} × ${Math.round(c.depth)} mm`;
-});
-function endResize(){const m=resizing;if(!m)return;resizing=null;grip.classList.remove('ideare-invalid');canvasWrap.classList.remove('ideare-resize-active');if(controls)controls.enabled=true;if(m.recorded){const c=model.cabinets.find(o=>o.uid===m.uid);if(c){model.shared=model.shared.filter(s=>!s.cabinetUids?.includes(c.uid));}renderAll();changed(false);}else hideShared(false);}
-grip.addEventListener('pointerup',endResize);grip.addEventListener('pointercancel',endResize);grip.addEventListener('lostpointercapture',endResize);
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&resizeMode){resizeMode=false;endResize();syncResizeUI();}});
 // While cabinets are moved using the existing handle, their shared surfaces
 // must not remain floating at their previous world coordinates.
 moveBtn?.addEventListener('pointerdown',()=>{hideShared(true);},false);

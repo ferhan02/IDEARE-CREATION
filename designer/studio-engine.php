@@ -13,6 +13,7 @@ $files=[
  __DIR__.'/../assets/js/designer-enhancements-v4.js',
  __DIR__.'/../assets/js/designer-catalog-v5.js',
  __DIR__.'/../assets/js/designer-finishes-v7.js',
+ __DIR__.'/../assets/js/designer-resize-v8.js',
 ];
 $parts=[];
 foreach ($files as $file) {
@@ -73,4 +74,6 @@ if($count!==1){http_response_code(500);echo 'throw new Error("IDEARE studio plac
 $parts[1]=str_replace('const originals=model.shared.filter(run=>!run.auto);','const originals=model.shared.filter(run=>!run.auto&&!model.cabinets.some(c=>v6Special(c)&&run.cabinetUids?.includes(c.uid)));',$parts[1]);
 // Backsplashes are now rendered per cabinet with their own finish.
 $parts[1]=str_replace("if(part.every(c=>c.backsplash)&&hasSameFinish('worktopMaterial'))","if(false)",$parts[1]);
+// Reject room changes that would orphan or crop a backsplash.
+$parts[1]=str_replace('const ok=allFit();','const ok=allFit()&&(!window.IDEAREV8||window.IDEAREV8.roomValid());',$parts[1]);
 echo $parts[0], "\n;\n", $geometry, "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\nboot().catch(error=>{ console.error(error); const loader=document.querySelector(\"#canvas-loader\"); if(loader){loader.hidden=false;loader.textContent=\"Unable to start designer: \"+error.message;} });\n";

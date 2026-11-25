@@ -194,6 +194,7 @@ function begin(e,c,hitY=null){if(e.button!==0||model.step!==3||!camera||!control
 }
 window.addEventListener('pointerdown',e=>{
  if(model.step!==3||action)return;
+ if(window.IDEAREV8?.pointerDown(e))return;
  if(e.target===canvas){const hit=locateHit(e);if(hit)begin(e,hit.c,hit.point.y);}
  else if(e.target.closest?.('#object-move')){const c=model.extras.find(x=>x.id===model.selectedExtra)||model.cabinets.find(x=>x.uid===model.selected);
   if(c&&(mountedCab(c)||!isCab(c)))begin(e,c);
@@ -265,12 +266,7 @@ window.addEventListener('click',e=>{
  const b=e.target.closest?.('#rotate,#object-rotate');if(!b)return;
  const c=model.cabinets.find(o=>o.uid===model.selected);if(!mountedCab(c))return;
  e.preventDefault();e.stopImmediatePropagation();
- // Keep the back flush with its wall even when the requested quarter-turn
- // requires a different wall or orientation.
- const desired={...c,rotation:(Number(c.rotation||0)+90)%360};
- const q=attachToWall(desired,c.x,c.z,Infinity);
- if(!q){notify('There is no free wall position for the rotated cabinet.',true);return;}
- history();Object.assign(c,{x:q.x,z:q.z,rotation:q.rotation});renderAll();changed(false);
+ // Wall units follow their wall orientation automatically; no manual rotation.
 },true);
 window.addEventListener('keydown',e=>{
  if(!e.target.closest?.('#object-move'))return;
