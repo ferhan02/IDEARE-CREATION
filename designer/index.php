@@ -1,7 +1,21 @@
 <?php
 $pageTitle='IDEARE | 3D Space & Cabinet Designer';
-$pageStyles=['assets/css/designer-3d.css','assets/css/designer-3d-compact-theme.css','assets/css/designer-studio.css?v=20261119-premium2'];
+$pageStyles=['assets/css/designer.css'];
+$ideareDesignerCssPath=__DIR__.'/../assets/css/designer.css';
+$ideareDesignerCss=is_readable($ideareDesignerCssPath)?file_get_contents($ideareDesignerCssPath):false;
+$ideareDesignerCssParts=is_string($ideareDesignerCss)?explode('/* === IDEARE: LATE DESIGNER STYLES (KEEP THIS MARKER) === */',$ideareDesignerCss,2):[];
+ob_start();
 require __DIR__.'/../includes/customer/header.php';
+$ideareDesignerHeader=ob_get_clean();
+if(count($ideareDesignerCssParts)===2 && stripos($ideareDesignerCss,'</style')===false){
+    $ideareDesignerHead=preg_replace_callback('~<link rel="stylesheet" href="[^"<>]*assets/css/designer\.css">~',static function()use($ideareDesignerCssParts){return '<style id="ideare-designer-base">'.$ideareDesignerCssParts[0].'</style>';},$ideareDesignerHeader,1,$ideareDesignerBaseCount);
+    if($ideareDesignerBaseCount===1){
+        $ideareDesignerHead=preg_replace_callback('~</head>~i',static function()use($ideareDesignerCssParts){return '<style id="ideare-designer-extensions">'.$ideareDesignerCssParts[1].'</style>' . "\n</head>";},$ideareDesignerHead,1,$ideareDesignerLateCount);
+        if($ideareDesignerLateCount===1)$ideareDesignerHeader=$ideareDesignerHead;
+    }
+}
+// Fallback: a standard link to the complete stylesheet if the shared header changes.
+echo $ideareDesignerHeader;
 ?>
 <main class="id3-app id3-studio" id="id3-app" data-studio-step="1">
   <div class="id3-topline">
@@ -66,6 +80,6 @@ require __DIR__.'/../includes/customer/header.php';
 </main>
 <script>window.IDEARE_DESIGNER3D={api:'../api/designer3d/',root:'../'};</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
-<script type="module" src="studio-engine.php?v=20261125-v5"></script>
+<script type="module" src="../assets/js/designer.js?v=<?= (int) @filemtime(__DIR__.'/../assets/js/designer.js') ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
 <?php require __DIR__.'/../includes/customer/footer.php'; ?>
