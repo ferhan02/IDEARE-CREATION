@@ -14,6 +14,7 @@ $files=[
  __DIR__.'/../assets/js/designer-catalog-v5.js',
  __DIR__.'/../assets/js/designer-finishes-v7.js',
  __DIR__.'/../assets/js/designer-resize-v8.js',
+ __DIR__.'/../assets/js/designer-space-v10.js',
 ];
 $parts=[];
 foreach ($files as $file) {
@@ -31,6 +32,11 @@ if (!preg_match('/\bboot\(\);\s*\z/', $parts[0])) {
  exit;
 }
 $parts[0]=preg_replace('/\bboot\(\);\s*\z/', '', $parts[0], 1);
+// Keep the base roomVertices constant. Read a valid saved custom outline directly.
+$roomStart='const roomVertices=()=>{let {shape,width:w,depth:d}=model.room;switch(shape){';
+$roomNew='const roomVertices=()=>{let {shape,width:w,depth:d}=model.room;const custom=model.room.customOutline;const expected=shape==="angled"?5:["notch","l_open"].includes(shape)?6:4;if(custom?.shape===shape&&Array.isArray(custom.points)&&custom.points.length===expected&&custom.points.every(p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.z)&&p.x>=0&&p.x<=1&&p.z>=0&&p.z<=1))return custom.points.map(p=>({x:p.x*w,z:p.z*d}));switch(shape){';
+$parts[0]=str_replace($roomStart,$roomNew,$parts[0],$roomPatched);
+if($roomPatched!==1){http_response_code(500);echo 'throw new Error("IDEARE room polygon source mismatch.");';exit;}
 // Attach cabinet groups before constructing meshes, and isolate individual
 // geometry errors so one cabinet cannot hide the entire room's contents.
 $oldDraw='addRoom();for(let c of model.cabinets){let g=makeCabinet(c);cabinetGroup.add(g);meshById.set(c.uid,g);}worldGroup.add(cabinetGroup);worldGroup.add(extraGroup);addSharedElements();addExtras();';
@@ -75,5 +81,21 @@ $parts[1]=str_replace('const originals=model.shared.filter(run=>!run.auto);','co
 // Backsplashes are now rendered per cabinet with their own finish.
 $parts[1]=str_replace("if(part.every(c=>c.backsplash)&&hasSameFinish('worktopMaterial'))","if(false)",$parts[1]);
 // Reject room changes that would orphan or crop a backsplash.
-$parts[1]=str_replace('const ok=allFit();','const ok=allFit()&&(!window.IDEAREV8||window.IDEAREV8.roomValid());',$parts[1]);
-echo $parts[0], "\n;\n", $geometry, "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\nboot().catch(error=>{ console.error(error); const loader=document.querySelector(\"#canvas-loader\"); if(loader){loader.hidden=false;loader.textContent=\"Unable to start designer: \"+error.message;} });\n";
+$parts[1]=str_replace('const ok=allFit();','const ok=allFit()&&(!window.IDEAREV8||window.IDEAREV8.roomValid())&&(!window.IDEARESpaceV10||window.IDEARESpaceV10.roomValid());',$parts[1]);
+// v10 is an optional UI extension. Its synchronous startup must not prevent the main viewer from booting.
+$space=array_pop($parts);
+$report=<<<'JS'
+function ideareStartupError(error){
+ console.error("IDEARE designer startup:",error);
+ const loader=document.querySelector("#canvas-loader");
+ if(loader&&!loader.hidden)loader.textContent="Unable to start designer: "+(error?.message||String(error));
+}
+window.addEventListener("error",event=>{if(event.error&&document.querySelector("#canvas-loader")&&!document.querySelector("#canvas-loader").hidden)ideareStartupError(event.error);});
+window.addEventListener("unhandledrejection",event=>{if(document.querySelector("#canvas-loader")&&!document.querySelector("#canvas-loader").hidden)ideareStartupError(event.reason);});
+JS;
+// Insert error listeners after the two static imports, before any extension runs.
+$parts[0]=preg_replace('/(^import[^\r\n]*;\r?\nimport[^\r\n]*;\r?\n)/', '$1'.$report."\n", $parts[0], 1, $reportPatched);
+if($reportPatched!==1){http_response_code(500);echo 'throw new Error("IDEARE engine imports changed.");';exit;}
+echo $parts[0], "\n;\n", $geometry, "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\n";
+echo "try {\n", $space, "\n} catch(error){console.error('IDEARE Define Space startup:',error);const old=document.querySelector('.ideare-environment');if(old)old.hidden=false;try{notify('Define Space upgrade could not initialize. The main designer is still available. See browser console.',true);}catch(_){} }\n;\n";
+echo "Promise.resolve().then(()=>boot()).catch(ideareStartupError);\n";
