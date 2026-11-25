@@ -328,9 +328,8 @@ function setContact(data){if(!data)return;for(let [k,v] of Object.entries(data))
 async function boot(){try{
   let sec=await request('csrf.php');csrf=sec.csrf;
   const cat=await request('catalog.php');catalog=cat;
-  const link=new URL(location.href),code=link.searchParams.get('code'),token=link.searchParams.get('token'),staffId=link.searchParams.get('staff_design');
-  if(staffId){$('#save-design').disabled=true;$('#submit-design').disabled=true;const data=await request(`staff-load.php?id=${encodeURIComponent(staffId)}`);applyHistory(JSON.stringify(data.scene));setContact(data.contact);model.designCode=data.design_code;model.revision=data.revision_no;showStep(3);notify('Staff preview is read-only. Review actions are handled in the staff portal.');}
-  else if(code&&token){const data=await request(`load.php?code=${encodeURIComponent(code)}&token=${encodeURIComponent(token)}`);applyHistory(JSON.stringify(data.scene));setContact(data.contact);model.designCode=code;model.editToken=token;model.revision=data.revision_no;showStep(3);notify(`Loaded ${code} · revision ${model.revision}.`);}
+  const link=new URL(location.href),code=link.searchParams.get('code'),token=link.searchParams.get('token');
+  if(code&&token){const data=await request(`load.php?code=${encodeURIComponent(code)}&token=${encodeURIComponent(token)}`);applyHistory(JSON.stringify(data.scene));setContact(data.contact);model.designCode=code;model.editToken=token;model.revision=data.revision_no;showStep(3);notify(`Loaded ${code} · revision ${model.revision}.`);}
   else{try{let local=localStorage.getItem('ideare3d_draft_v1');if(local&&confirm('Restore your locally saved unfinished 3D design?')){let draft=JSON.parse(local);applyHistory(JSON.stringify(draft.scene));notify('Local draft restored.');}}catch(e){}}
   renderAll();init3D();if(model.step===3)setTimeout(resize,60);
  }catch(e){console.error(e);$('#canvas-loader').textContent='Unable to start designer: '+e.message;notify(e.message,true);}

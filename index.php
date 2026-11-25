@@ -2,15 +2,14 @@
 $pageTitle = 'IDEARE | Architecture, Interior Design & Build';
 $pageStyles = ['assets/css/homepage.css', 'assets/css/home-services-story.css', 'assets/css/home-portfolio.css'];
 $pageScripts = ['assets/js/homepage.js']; // The responsive device controllers manage the five-stage story.
-require_once __DIR__ . '/includes/staff/feature-tools.php';
-$pdo = staff_db();
+require_once __DIR__ . '/includes/customer/public-tools.php';
 $featuredIdeas = [];
 // Project exhibition artwork is read from the named image folders below.
 // Staff demo gallery entries are intentionally not presented as client projects.
 
 try {
     $featuredIdeas = db_rows(
-        $pdo,
+        public_db(),
         'SELECT id,title,style_name,room_type,description,cover_image,base_design_id
          FROM inspiration_designs
          WHERE is_published=1

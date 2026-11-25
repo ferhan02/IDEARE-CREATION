@@ -1,5 +1,5 @@
 <?php
-/** Customer appointment helpers. Existing staff authentication / database helpers come from feature-tools.php. */
+/** Customer appointment helpers. Public database and CSRF helpers come from public-tools.php. */
 
 function booking_options(): array
 {

@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../../config/databases.php';
+require_once __DIR__ . '/../customer/public-tools.php';
 
 function catalogue_h(?string $value): string
 {

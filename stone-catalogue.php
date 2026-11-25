@@ -24,7 +24,7 @@ $perPage = 24;
 $totalPages = 1;
 
 try {
-    $pdo = staff_db();
+    $pdo = public_db();
     $baseSql = catalogue_build_stone_base($pdo);
 
     $totalProducts = catalogue_count_from_base($pdo, $baseSql);

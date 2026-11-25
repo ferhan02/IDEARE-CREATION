@@ -172,7 +172,7 @@ deleteAction('#remove',true);deleteAction('#clear-scene',false);
 // that single call and offer a themed restore dialog afterwards instead.
 const bootBefore=boot;
 boot=async function(...args){
- const isLoadedProject=new URL(location.href).searchParams.has('code')||new URL(location.href).searchParams.has('staff_design');
+ const isLoadedProject=new URL(location.href).searchParams.has('code');
  const stored=isLoadedProject?null:localStorage.getItem('ideare3d_draft_v1');
  const originalConfirm=window.confirm;
  if(stored)window.confirm=()=>false;

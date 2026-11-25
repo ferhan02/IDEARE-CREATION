@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../includes/staff/feature-tools.php';
+require_once __DIR__.'/../includes/customer/public-tools.php';
 require_once __DIR__.'/../includes/customer/appointment-functions.php';
 
 $pageTitle = 'Book a Consultation | IDEARE';
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$errors) {
         try {
-            $pdo = staff_db();
+            $pdo = public_db();
             if (!db_table_exists($pdo, 'customer_appointments') || !db_table_exists($pdo, 'customer_appointment_details') || !db_table_exists($pdo, 'customer_appointment_attachments')) {
                 throw new RuntimeException('Booking is temporarily unavailable. Please contact IdeaRE to arrange an appointment.');
             }

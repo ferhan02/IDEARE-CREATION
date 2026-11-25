@@ -10,7 +10,7 @@ $hplAvailable = false;
 $stoneAvailable = false;
 
 try {
-    $pdo = staff_db();
+    $pdo = public_db();
 
     try {
         $hplBase = catalogue_build_hpl_base($pdo);

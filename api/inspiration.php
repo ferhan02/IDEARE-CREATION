@@ -11,8 +11,8 @@ header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store, max-age=0');
 
 try {
-    require_once dirname(__DIR__) . '/includes/staff/feature-tools.php';
-    $pdo = staff_db();
+    require_once dirname(__DIR__) . '/includes/customer/public-tools.php';
+    $pdo = public_db();
     $rows = db_rows(
         $pdo,
         'SELECT id, title, style_name, room_type, description, cover_image,

@@ -66,6 +66,6 @@ require __DIR__.'/../includes/customer/header.php';
 </main>
 <script>window.IDEARE_DESIGNER3D={api:'../api/designer3d/',root:'../'};</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
-<script type="module" src="studio-engine.php?v=20261119-premium2-hotfix1"></script>
+<script type="module" src="studio-engine.php?v=20261125-v5"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
 <?php require __DIR__.'/../includes/customer/footer.php'; ?>
