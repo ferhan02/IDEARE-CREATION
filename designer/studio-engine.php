@@ -12,6 +12,7 @@ $files=[
  __DIR__.'/../assets/js/designer-catalog-v3.js',
  __DIR__.'/../assets/js/designer-enhancements-v4.js',
  __DIR__.'/../assets/js/designer-catalog-v5.js',
+ __DIR__.'/../assets/js/designer-finishes-v7.js',
 ];
 $parts=[];
 foreach ($files as $file) {
@@ -29,6 +30,12 @@ if (!preg_match('/\bboot\(\);\s*\z/', $parts[0])) {
  exit;
 }
 $parts[0]=preg_replace('/\bboot\(\);\s*\z/', '', $parts[0], 1);
+// Attach cabinet groups before constructing meshes, and isolate individual
+// geometry errors so one cabinet cannot hide the entire room's contents.
+$oldDraw='addRoom();for(let c of model.cabinets){let g=makeCabinet(c);cabinetGroup.add(g);meshById.set(c.uid,g);}worldGroup.add(cabinetGroup);worldGroup.add(extraGroup);addSharedElements();addExtras();';
+$newDraw='addRoom();worldGroup.add(cabinetGroup);worldGroup.add(extraGroup);const failed=[];for(let c of model.cabinets){try{let g=makeCabinet(c);cabinetGroup.add(g);meshById.set(c.uid,g);}catch(error){console.error("IDEARE cabinet geometry:",c.name,c.uid,error);failed.push(c.name||"Cabinet");}}addSharedElements();addExtras();if(failed.length)notify("Could not display: "+failed.join(", ")+". See browser console for details.",true);';
+$parts[0]=str_replace($oldDraw,$newDraw,$parts[0],$drawPatched);
+if($drawPatched!==1){http_response_code(500);echo 'throw new Error("IDEARE designer render source mismatch.");';exit;}
 // The original studio declares commitNew inside an IIFE. Promote only that
 // binding to the combined module so the v4 placement wrapper and existing
 // add, duplicate and drop handlers all use the same function.
@@ -64,4 +71,6 @@ if($count!==1){http_response_code(500);echo 'throw new Error("IDEARE studio plac
 // Remove shared runs containing corner-shaped units when rendering / saving.
 // The corner model always renders its own accurately shaped surface.
 $parts[1]=str_replace('const originals=model.shared.filter(run=>!run.auto);','const originals=model.shared.filter(run=>!run.auto&&!model.cabinets.some(c=>v6Special(c)&&run.cabinetUids?.includes(c.uid)));',$parts[1]);
+// Backsplashes are now rendered per cabinet with their own finish.
+$parts[1]=str_replace("if(part.every(c=>c.backsplash)&&hasSameFinish('worktopMaterial'))","if(false)",$parts[1]);
 echo $parts[0], "\n;\n", $geometry, "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\nboot().catch(error=>{ console.error(error); const loader=document.querySelector(\"#canvas-loader\"); if(loader){loader.hidden=false;loader.textContent=\"Unable to start designer: \"+error.message;} });\n";

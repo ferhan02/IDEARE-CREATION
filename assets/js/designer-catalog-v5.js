@@ -15,7 +15,8 @@
     ['wall-cabinets','Wall / Upper Cabinets','<rect x="3" y="4" width="18" height="13" rx="1"/><path d="M12 4v13m-2-7v3m4-3v3M3 20h18"/>'],
     ['tall-cabinets','Tall / Pantry Cabinets','<rect x="6" y="2" width="12" height="20" rx="1"/><path d="M6 14h12M15 7v4m0 6v2"/>'],
     ['special-cabinets','Specialty & Corner Cabinets','<path d="M3 4h10v7h8v9H3zM3 11h10v9m-6-5h2m7-1h2"/>'],
-    ['appliances','Appliances','<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 8h16m-11-2h.01M12 6h.01M15 6h.01"/><rect x="7" y="11" width="10" height="7" rx="1"/>']
+    ['appliances','Appliances','<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M4 8h16m-11-2h.01M12 6h.01M15 6h.01"/><rect x="7" y="11" width="10" height="7" rx="1"/>'],
+    ['backsplash','Backsplash','<rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18M3 14h18M9 4v5m6 0v5m-6 0v6"/>']
   ];
   const known = new Set(categoriesV5.map(x => x[0]));
   const slugFor = value => {
@@ -56,7 +57,7 @@
     if (!button || panel.hidden) return;
     const bounds = button.getBoundingClientRect();
     const viewportWidth = document.documentElement.clientWidth;
-    const requested = current === 'appliances' ? 785 : 420;
+    const requested = current === 'appliances' ? 785 : current === 'backsplash' ? 620 : 420;
     const width = Math.min(requested, Math.max(1,viewportWidth - 16));
     const left = Math.max(8,Math.min(bounds.left,viewportWidth - width - 8));
     // The popup touches the button's bottom edge, without a hover gap.
@@ -67,7 +68,7 @@
   }
   function clearActive() {
     current = null;
-    panel.classList.remove('ideare-category-only');
+    panel.classList.remove('ideare-category-only','ideare-backsplash-menu');
     for (const button of buttons.values()) {
       button.classList.remove('active');
       button.setAttribute('aria-expanded','false');
@@ -101,10 +102,10 @@
     // Reset the original engine's numeric active-menu state so switching
     // between two cabinet categories always regenerates the template menu.
     closeMenu();
-    openPrevious(key === 'appliances' ? 2 : 1, false);
+    if(key==='backsplash'){panel.hidden=false;model.activeMenu=6;panel.classList.add('ideare-backsplash-menu');v7RenderBacksplash(panel);}else openPrevious(key === 'appliances' ? 2 : 1, false);
     if (panel.hidden) return;
     current = key;
-    if (key !== 'appliances') filterCabinets(key);
+    if (key !== 'appliances' && key !== 'backsplash') filterCabinets(key);
     const button = activeButton();
     button.classList.add('active');
     button.setAttribute('aria-expanded','true');
@@ -119,6 +120,7 @@
   openMenu = (menu, hover = false) => {
     if (Number(menu) === 1) openCategory(slugFor(selected()?.category) || 'base-cabinets');
     else if (Number(menu) === 2) openCategory('appliances');
+    else if (Number(menu) === 6) openCategory('backsplash');
     else closeMenu();
   };
   function leavesActiveArea(event) {

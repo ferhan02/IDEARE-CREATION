@@ -244,7 +244,7 @@ const optionSections=[
 const optionIcon={door:'▥',handle:'⌇',worktop:'▭',frame:'◫',interior:'≡',size:'⤢',fittings:'✧'};
 function optionValue(key,c){
  if(key==='door')return c.front==='drawers'?`${Number(c.drawers)||3} equal-height drawers`:c.front==='open'?'Open shelving':`${c.doorCount||2} door${Number(c.doorCount)===1?'':'s'}`;
- if(key==='handle')return catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'Choose a handle';
+ if(key==='handle')return v7Handle(c)?.name||catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'Choose a handle';
  if(key==='worktop')return (c.worktop?`${c.worktopType||'Worktop'}`:'No worktop')+(c.plinth?' · Plinth':'');
  if(key==='frame')return `${String(c.carcass||'Plywood').replace(/\b\w/g,x=>x.toUpperCase())} · ${c.material?.product_name||'Standard finish'}`;
  if(key==='interior')return `${c.shelves||0} shelves · ${c.partitions||0} dividers${c.front==='drawers'?' · Equal drawers':''}`;
@@ -259,8 +259,9 @@ function renderOptions(){
  const c=selected();if(!c)return;
  if(c.uid!==previousUid){previousUid=c.uid;activeEditor=null;}
  const l=document.querySelector('#ideare-options-list');
- if(l){l.innerHTML=`<p class="ideare-modify-eyebrow">MODIFY CABINET</p><h4 class="ideare-modify-title">Options</h4><div class="ideare-option-rows">${optionSections.map(([title,key,index])=>`<button type="button" class="ideare-option-row" data-option-editor="${index}" data-option-title="${escV3(title)}" data-option-focus="${key}"><span class="ideare-option-glyph" aria-hidden="true">${optionIcon[key]}</span><span class="ideare-option-body"><strong>${escV3(title)}</strong><small>${escV3(optionValue(key,c))}</small></span><span class="ideare-option-chevron" aria-hidden="true">›</span></button>`).join('')}</div><p class="ideare-modify-footnote">Concept measurements and fittings are reviewed by IDEARE before manufacture.</p>`;}
+ if(l){l.innerHTML=`<p class="ideare-modify-eyebrow">MODIFY CABINET</p><h4 class="ideare-modify-title">Options</h4><div class="ideare-option-rows">${optionSections.filter(([,key])=>key!=='worktop'||c.category!=='wall-cabinets').filter(([,key])=>key!=='handle'||c.front!=='open').map(([title,key,index])=>`<button type="button" class="ideare-option-row" data-option-editor="${index}" data-option-title="${escV3(title)}" data-option-focus="${key}"><span class="ideare-option-glyph" aria-hidden="true">${optionIcon[key]}</span><span class="ideare-option-body"><strong>${escV3(title)}</strong><small>${escV3(optionValue(key,c))}</small></span><span class="ideare-option-chevron" aria-hidden="true">›</span></button>`).join('')}</div><p class="ideare-modify-footnote">Concept measurements and fittings are reviewed by IDEARE before manufacture.</p>`;}
  selectedInspector.classList.toggle('ideare-editor-open',activeEditor!==null);
+ selectedInspector.dataset.optionFocus=activeEditor?.focus||'';
  const t=document.querySelector('#ideare-option-toolbar');if(t){t.hidden=activeEditor===null;document.querySelector('#ideare-option-title').textContent=activeEditor?.title||'';}
  [...accordion.querySelectorAll(':scope > details')].forEach((d,i)=>{d.classList.toggle('ideare-active-detail',activeEditor?.index===String(i));if(activeEditor?.index===String(i))d.open=true;});
  const ratioLabel=document.querySelector('[data-property="drawerLayout"]')?.closest('label');if(ratioLabel)ratioLabel.hidden=true;
@@ -278,7 +279,7 @@ renderInspector=()=>{oldRenderInspectorV3();renderOptions();const extra=extraSel
  }
 }};
 selectedInspector?.addEventListener('click',e=>{
- const action=e.target.closest('[data-option-editor]');if(action){activeEditor={index:action.dataset.optionEditor,title:action.dataset.optionTitle};renderOptions();accordion?.scrollIntoView({block:'nearest',behavior:'smooth'});return;}
+ const action=e.target.closest('[data-option-editor]');if(action){activeEditor={index:action.dataset.optionEditor,title:action.dataset.optionTitle,focus:action.dataset.optionFocus};renderOptions();accordion?.scrollIntoView({block:'nearest',behavior:'smooth'});return;}
  if(e.target.closest('#ideare-option-back')){activeEditor=null;renderOptions();selectedInspector?.scrollTo?.({top:0,behavior:'smooth'});}
 });
 // The original extra editor has a 100 mm minimum, which is too high for

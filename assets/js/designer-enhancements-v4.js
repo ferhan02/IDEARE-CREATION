@@ -326,9 +326,9 @@ standardCab=t=>{const c=oldStandardCabV6(t);if(v6Special(c)||['island','peninsul
 const oldInspectorV6=renderInspector;
 renderInspector=()=>{oldInspectorV6();const c=selected(),field=$v('[data-property="front"]');if(!field)return;const drawer=field.querySelector('option[value="drawers"]');if(drawer)drawer.disabled=!!c&&v6Special(c);};
 const oldMakeCabinetV4=makeCabinet;
-makeCabinet=(c,skipHood=false)=>{
+makeCabinet=function buildCabinetV4(c,skipHood=false){
  if(v6Special(c))return v6CornerModel(c);
- if(!skipHood&&/hood|extractor/i.test(c.name)&&c.category==='wall-cabinets')return v6Hood(c,small=>makeCabinet(small,true));
+ if(!skipHood&&/hood|extractor/i.test(c.name)&&c.category==='wall-cabinets')return v6Hood(c,small=>buildCabinetV4(small,true));
  const g=oldMakeCabinetV4(c),w=c.width/1000,d=c.depth/1000,h=c.height/1000;
  const name=String(catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'Bar pull');
  const lower=name.toLowerCase(),handleless=/handleless|push.?open|no handle|finger pull/.test(lower),edge=/billsbro|edge|recess|flush|integrated|lip/.test(lower),isKnob=/eneryda|knob|button/.test(lower),long=/lansa|long|full height|tall/.test(lower),gold=/gold|brass|brushed bronze|champagne/.test(lower),blackFinish=/black|hackås|hackas|matte black/.test(lower);
@@ -345,7 +345,7 @@ makeCabinet=(c,skipHood=false)=>{
  };
  const makeKnob=(par,x,y,z)=>{const body=new THREE.Mesh(new THREE.CylinderGeometry(.017,.014,.024,20),metal);body.rotation.x=Math.PI/2;body.position.set(x,y,z);par.add(body);
   const face=new THREE.Mesh(new THREE.SphereGeometry(.018,16,10),metal);face.scale.set(1,1,.38);face.position.set(x,y,z+.014);par.add(face);};
- if(!handleless){
+ if(!handleless&&!v7ResolvedHandle(c)){
   if(c.front==='doors'){
    const pivots=g.children.filter(o=>o.isGroup&&o.children.some(k=>k.name==='door_panel'));
    const doors=pivots.length,plinth=c.plinth?clampV(Number(c.plinthHeight||100)/1000,.05,.2):0;

@@ -80,7 +80,7 @@ function v6CornerModel(c){
   const anchor=new THREE.Group();anchor.name='v6_corner_door_anchor';anchor.position.set(outer[0]+out[0]*.012,pl,outer[1]+out[1]*.012);anchor.rotation.y=angle;g.add(anchor);
   const pivot=new THREE.Group();pivot.name='v6_corner_door_pivot';anchor.add(pivot);pivot.rotation.y=opened?sign*1.25:0;
   addBox(pivot,len-.008,h-.008,.019,sign*len/2,h/2,0,front,'door_panel');
-  if(!/handleless|push.?open|no handle|finger pull/.test(materialName)){
+  if(!v7ResolvedHandle(c)&&!/handleless|push.?open|no handle|finger pull/.test(materialName)){
    const xx=sign*(len-.045),yy=Math.min(h-.06,h*.65);
    if(/knob|eneryda/.test(materialName)){const knob=new THREE.Mesh(new THREE.SphereGeometry(.016,16,10),metal);knob.position.set(xx,yy,-.026);pivot.add(knob);}
    else if(/edge|recess|billsbro/.test(materialName))addBox(pivot,.025,.115,.008,xx,yy,-.015,metal,'ideare_edge_pull');
