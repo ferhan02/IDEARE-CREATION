@@ -684,3 +684,12 @@ html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .v10-plan-panel{
 .id3-studio [data-panel="2"][data-space-editor="10.2"] .v10-finish-ui{flex:0 0 auto}
 .id3-studio [data-panel="2"][data-space-editor="10.2"] .v10-gallery{flex:0 0 auto}
 
+
+/* IDEARE interaction and integrated appliance update 2026-11-25 */
+.id3-studio .ideare-appliance-colour{margin:12px 0;padding:12px;border:1px solid var(--studio-line);border-radius:9px;display:grid;gap:8px;color:var(--studio-ink);background:var(--studio-paper)}
+.id3-studio .ideare-appliance-colour strong{font-size:13px}.id3-studio .ideare-appliance-colour small{font-size:11px;color:var(--studio-muted)}
+.id3-studio .ideare-appliance-swatches{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+.id3-studio .ideare-appliance-swatches button[data-appliance-colour]:not(.ideare-appliance-reset){width:30px;height:30px;min-width:30px;padding:0;border:1px solid var(--studio-line);border-radius:7px;background:var(--appliance-swatch)!important;cursor:pointer}
+.id3-studio .ideare-appliance-swatches button[aria-pressed="true"]{outline:2px solid var(--studio-accent);outline-offset:2px}
+.id3-studio .ideare-appliance-swatches input[type=color]{width:32px;height:32px;padding:2px;cursor:pointer;border:1px solid var(--studio-line);border-radius:7px}
+.id3-studio .ideare-appliance-reset{padding:5px 9px;border:1px solid var(--studio-line);border-radius:7px;color:var(--studio-ink);background:var(--studio-paper);cursor:pointer}

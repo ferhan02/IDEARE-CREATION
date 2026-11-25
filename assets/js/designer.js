@@ -261,8 +261,8 @@ function makeCabinet(c){let w=c.width/1000,d=c.depth/1000,t=clamp(c.thickness/10
  for(let j=0;j<bays;j++){let bx=-insideW/2+(j+.5)*bayWidth,sh=clamp(c.bayShelves?.[j]??c.shelves,0,8);for(let i=0;i<sh;i++){let Y=sh===c.shelves&&c.shelfPositions[i]!==undefined?n(c.shelfPositions[i])/1000:(i+1)*insideH/(sh+1);addBox(g,Math.max(.02,bayWidth-(j===0||j===bays-1?t/2:t)),t,insideD*.94,bx,y0+t+Y,0,carcass,'adjustable_shelf');}}
  const frontZ=d/2+.008;const doors=Math.max(1,n(c.doorCount,2));
  if(c.front==='doors'){
-  for(let i=0;i<doors;i++){let dw=w/doors-.005;let pivot=new THREE.Group();const hingesLeft=doors===1?c.hingeSide!=='right':i%2===0;const hingeX=-w/2+i*(w/doors)+(hingesLeft?0:w/doors);pivot.position.set(hingeX,y0,frontZ);const leaf=addBox(pivot,dw,h-.005,.019,(hingesLeft?1:-1)*dw/2,h/2,0,front,'door_panel');if(c.opening==='swing'&&model.selected===c.uid&&model.doorsOpen)pivot.rotation.y=hingesLeft?-.9:.9;else if(c.opening==='lift'&&model.selected===c.uid&&model.doorsOpen)pivot.rotation.x=-.6;
-   if(/shaker/i.test(catalog.doors.find(x=>Number(x.id)===Number(c.doorStyle))?.name||''))addBox(pivot,Math.max(.02,dw-.08),Math.max(.05,h-.10),.002,(hingesLeft?1:-1)*dw/2,h/2,.011,mat('#af9479'),'door_inset');
+  for(let i=0;i<doors;i++){let dw=Math.max(.01,w/doors-.002);let pivot=new THREE.Group();const hingesLeft=doors===1?c.hingeSide!=='right':i%2===0;const hingeX=-w/2+i*(w/doors)+(hingesLeft?0:w/doors);pivot.position.set(hingeX,y0,frontZ);const leaf=addBox(pivot,dw,h-.003,.019,(hingesLeft?1:-1)*(w/doors)/2,h/2,0,front,'door_panel');if(c.opening==='swing'&&model.selected===c.uid&&model.doorsOpen)pivot.rotation.y=hingesLeft?-.9:.9;else if(c.opening==='lift'&&model.selected===c.uid&&model.doorsOpen)pivot.rotation.x=-.6;
+   if(/shaker/i.test(catalog.doors.find(x=>Number(x.id)===Number(c.doorStyle))?.name||''))addBox(pivot,Math.max(.02,dw-.08),Math.max(.05,h-.10),.002,(hingesLeft?1:-1)*(w/doors)/2,h/2,.011,mat('#af9479'),'door_inset');
    if(!/handleless/i.test(catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'')){addBox(pivot,.012,Math.min(.14,h*.18),.017,(hingesLeft?1:-1)*(dw-.055),Math.min(h*.54,h-.06),.023,hardware,'handle');}
    g.add(pivot);
   }
@@ -428,7 +428,7 @@ function v6CornerModel(c){
   const outer=(i===3&&kind==='l')?b:a,sign=(i===3&&kind==='l')?-1:1;
   const anchor=new THREE.Group();anchor.name='v6_corner_door_anchor';anchor.position.set(outer[0]+out[0]*.012,pl,outer[1]+out[1]*.012);anchor.rotation.y=angle;g.add(anchor);
   const pivot=new THREE.Group();pivot.name='v6_corner_door_pivot';anchor.add(pivot);pivot.rotation.y=opened?sign*1.25:0;
-  addBox(pivot,len-.008,h-.008,.019,sign*len/2,h/2,0,front,'door_panel');
+  addBox(pivot,len-.003,h-.003,.019,sign*len/2,h/2,0,front,'door_panel');
   if(!v7ResolvedHandle(c)&&!/handleless|push.?open|no handle|finger pull/.test(materialName)){
    const xx=sign*(len-.045),yy=Math.min(h-.06,h*.65);
    if(/knob|eneryda/.test(materialName)){const knob=new THREE.Mesh(new THREE.SphereGeometry(.016,16,10),metal);knob.position.set(xx,yy,-.026);pivot.add(knob);}
@@ -454,8 +454,8 @@ function v6Hood(c,make){
  // Slim visible angled black glass front; slope stays inside declared depth.
  addBox(g,w*.94,lower*.10,d*.90,0,lower*.065,0,steel,'v6_hood_lower_trim');
  addBox(g,w*.90,lower*.11,d*.62,0,lower*.15,-d*.13,black,'v6_hood_filter_body');
- addBox(g,w*.42,lower*.76,d*.58,0,lower*.57,-d*.14,steel,'v6_hood_chimney');
- const dy=bodyH*.86,dz=frontTop-frontBottom,len=Math.hypot(dy,dz),tilt=Math.atan2(dz,dy);
+ addBox(g,w*.42,lower*.84,d*.58,0,lower*.58,-d*.14,steel,'v6_hood_chimney');
+ const dy=lower*.875,dz=frontTop-frontBottom,len=Math.hypot(dy,dz),tilt=Math.atan2(dz,dy);
  const face=new THREE.Group();face.name='v6_hood_angled_glass';face.position.set(0,lower*.12+dy/2,(frontBottom+frontTop)/2);face.rotation.x=tilt;g.add(face);
  for(let i=0;i<3;i++)addBox(face,w*.96,len/3-.003,.018,0,(i-1)*len/3,0,glass,'v6_hood_glass_panel');
  addBox(face,w*.96,.021,.024,0,-len/2+.009,.002,steel,'v6_hood_front_trim');
@@ -775,8 +775,8 @@ makeCabinet=c=>{const g=originalMakeCabinet(c),h=c.height/1000,w=c.width/1000,d=
  if(c.led&&model.cabinets.length<25){const light=new THREE.PointLight(0xffe5a5,.35,Math.max(.8,d*1.5),2);light.position.set(0,h-.06,d*.25);g.add(light);}
  return g;};
 // Automatic visually continuous surfaces whenever equal-height compatible base cabinets touch.
-function rebuildAutoRuns(){const originals=model.shared.filter(run=>!run.auto&&!model.cabinets.some(c=>v6Special(c)&&run.cabinetUids?.includes(c.uid)));
- const available=model.cabinets.filter(c=>!v6Special(c)&&c.category!=='wall-cabinets'&&c.category!=='tall-cabinets'&&c.rotation%360===0);
+function rebuildAutoRuns(){const originals=model.shared.filter(run=>!run.auto&&!model.cabinets.some(c=>(v6Special(c)||(run.type==='worktop'&&ideareSink(c)))&&run.cabinetUids?.includes(c.uid)));
+ const available=model.cabinets.filter(c=>!v6Special(c)&&!ideareSink(c)&&c.category!=='wall-cabinets'&&c.category!=='tall-cabinets'&&c.rotation%360===0);
  const groups=[];const visited=new Set();
  for(const seed of available){if(visited.has(seed.uid))continue;let part=[seed], work=true; visited.add(seed.uid);
   while(work){work=false;for(const c of available){if(visited.has(c.uid))continue;
@@ -1178,7 +1178,7 @@ function realizeItem(item){
  const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w+.012,h+.018,d+.014)),new THREE.LineBasicMaterial({color:0xb3905c}));
  outline.position.y=outlineHeight;outline.visible=item.id===model.selectedExtra;outline.name='ideare_extra_outline';g.add(outline);
  g.rotation.y=-Number(item.rotation||0)*Math.PI/180;
- g.position.set(item.x/1000,0,item.z/1000);
+ g.position.set(item.x/1000,0,item.z/1000);ideareTintAppliance(g,item);
  return g;
 }
 addExtras=()=>{for(const item of model.extras){if(!item.id)continue;const group=realizeItem(item);extraGroup.add(group);}};
@@ -1300,6 +1300,7 @@ const measure=c=>{const swapped=Math.round((Number(c.rotation)||0)/90)%2!==0;
  return {w,d,l:c.x-w/2,r:c.x+w/2,t:c.z-d/2,b:c.z+d/2};};
 function visibleHeight(c){
  if(isCab(c)){const base=mountedCab(c)?1350:0;return [base,base+Number(c.height)];}
+ const bounds=ideareExtraBounds(c);if(bounds)return [bounds.y0,bounds.y1];
  const p=itemProfile(c),s=p?.shape||'',h=Number(c.height)||500,roomH=model.room.height;
  const cy=clampV(roomH*.57,1100,2000);
  if(s==='hood'){const m=clampV(roomH-140,1400,1950);return [m-140,roomH];}
@@ -1316,17 +1317,18 @@ function actualWalls(){const vertices=roomVertices(),arr=[];for(let i=0;i<vertic
  if(Math.abs(a.x-b.x)<.01)arr.push({axis:'x',v:a.x,min:Math.min(a.z,b.z),max:Math.max(a.z,b.z)});
  else if(Math.abs(a.z-b.z)<.01)arr.push({axis:'z',v:a.z,min:Math.min(a.x,b.x),max:Math.max(a.x,b.x)});
  }return arr;}
+const ideareBoundsCache=new Map();
+function ideareExtraBounds(c){
+ const k=[c.catalogId||c.kind,c.width,c.height,c.depth,model.room.height].join('|');if(ideareBoundsCache.has(k))return ideareBoundsCache.get(k);
+ let g;try{g=api.realizeItem({...c,x:0,z:0,rotation:0,applianceColor:null});g.updateMatrixWorld(true);const box=new THREE.Box3();box.makeEmpty();g.traverse(o=>{if(!o.isMesh||!o.visible)return;o.geometry.computeBoundingBox();box.union(o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld));});if(box.isEmpty())return null;
+ const b={l:box.min.x*1000,r:box.max.x*1000,t:box.min.z*1000,b:box.max.z*1000,y0:box.min.y*1000,y1:box.max.y*1000};if(ideareBoundsCache.size>=256)ideareBoundsCache.clear();ideareBoundsCache.set(k,b);return b;
+ }catch(error){console.warn('IDEARE appliance envelope',error);return null;}finally{g?.traverse(o=>{if(o.geometry)o.geometry.dispose();});}
+}
+function ideareEnvelope(c){if(isCab(c))return c;const b=ideareExtraBounds(c);if(!b)return null;const angle=(Number(c.rotation)||0)*Math.PI/180,co=Math.cos(angle),si=Math.sin(angle),u=(b.l+b.r)/2,v=(b.t+b.b)/2;return {...c,width:b.r-b.l,depth:b.b-b.t,x:c.x+u*co-v*si,z:c.z+u*si+v*co};}
 function noCollision(c,ignoreId=c.uid||c.id){
- if(![c.x,c.z,c.width,c.depth,c.height].every(Number.isFinite))return false;
- if(c.width<10||c.depth<10||c.height<10)return false;
- if(visibleHeight(c)[1]>model.room.height+1)return false;
- if(!cabinetFitsPolygon(c))return false;
- const a=measure(c),ay=visibleHeight(c),others=[...model.cabinets,...model.extras];
- return !others.some(o=>{
-  if((o.uid||o.id)===ignoreId)return false;
-  const b=measure(o),by=visibleHeight(o);
-  return Math.min(ay[1],by[1])-Math.max(ay[0],by[0])>1&&v6Overlap(c,o,.01);
- });
+ if(![c.x,c.z,c.width,c.depth,c.height].every(Number.isFinite)||Math.min(c.width,c.depth,c.height)<10)return false;
+ const envelope=ideareEnvelope(c),ay=visibleHeight(c);if(!envelope||ay[0]<-1||ay[1]>model.room.height+1||!v6Fits(envelope))return false;
+ return ![...model.cabinets,...model.extras].some(o=>{if((o.uid||o.id)===ignoreId)return false;const by=visibleHeight(o),other=ideareEnvelope(o);return other&&Math.min(ay[1],by[1])-Math.max(ay[0],by[0])>1&&v6Overlap(envelope,other,.01);});
 }
 // A cabinet is wall-mounted only if the entire back is flush with a real,
 // solid wall segment (not an opening or an imaginary room boundary).
@@ -1335,10 +1337,12 @@ function backFace(c){const r=measure(c),rot=((Math.round((Number(c.rotation)||0)
 function hasWallSupport(c){if(!wallMounted(c))return true;
  const r=measure(c),back=backFace(c),eps=3;
  return actualWalls().some(w=>w.axis===back.axis&&Math.abs(back.v-w.v)<eps&&(w.axis==='z'?r.l>=w.min-eps&&r.r<=w.max+eps:r.t>=w.min-eps&&r.b<=w.max+eps));}
-function attachToWall(c,x,z,maxDistance=Infinity,drag=false){
+function attachToWall(c,x,z,maxDistance=Infinity,drag=false,lock=null){
  const placements=[],previous=backFace(c);
  for(const w of actualWalls()){
+  if(lock&&(w.axis!==lock.axis||Math.abs(w.v-lock.v)>3))continue;
   for(const rot of (w.axis==='z'?[0,180]:[90,270])){
+   if(lock&&rot!==lock.rotation)continue;
    const q={...c,rotation:rot},b=measure(q),half=w.axis==='z'?b.w/2:b.d/2,along=w.axis==='z'?'x':'z',normal=w.axis==='z'?'z':'x';
    if(w.max-w.min<half*2-.01)continue;
    const lo=w.min+half,hi=w.max-half,raw=along==='x'?x:z;
@@ -1351,7 +1355,7 @@ function attachToWall(c,x,z,maxDistance=Infinity,drag=false){
    if(drag&&!same&&normalDist>420)continue;
    if(!drag&&Math.hypot(q.x-x,q.z-z)>maxDistance)continue;
    const targets=[{v:q[along],bonus:0}];
-   const offer=(v,bonus)=>{if(v>=lo-.01&&v<=hi+.01&&Math.abs(v-raw)<=170)targets.push({v:clampV(v,lo,hi),bonus});};
+   const offer=(v,bonus)=>{if(v>=lo-.01&&v<=hi+.01&&Math.abs(v-raw)<=(drag?65:170))targets.push({v:clampV(v,lo,hi),bonus});};
    for(const o of model.cabinets){if(o.uid===c.uid)continue;
     const ob=backFace(o),r=measure(o),edge1=along==='x'?r.l:r.t,edge2=along==='x'?r.r:r.b;
     if(ob.axis!==w.axis||Math.abs(ob.v-w.v)>180)continue;
@@ -1377,12 +1381,13 @@ function snapNearby(c,x,z){
  const step=25,base={...c,x:clampV(x,0,model.room.width),z:clampV(z,0,model.room.depth)};
  if(wallMounted(c))return attachToWall(c,base.x,base.z,Infinity,true);
  const candidates=[base,{...base,x:Math.round(base.x/step)*step,z:Math.round(base.z/step)*step}];
- const m=measure(base);
+ const env=ideareEnvelope(base);if(!env)return null;const m=measure(env),dx0=env.x-base.x,dz0=env.z-base.z;
+ const edgeX=clampV(base.x,m.w/2-dx0,model.room.width-m.w/2-dx0),edgeZ=clampV(base.z,m.d/2-dz0,model.room.depth-m.d/2-dz0);candidates.push({...base,x:edgeX,z:edgeZ});
  for(const other of [...model.cabinets,...model.extras]){
   if((other.uid||other.id)===(c.uid||c.id))continue;
-  const r=measure(other),ox=Math.max(0,Math.min(m.b,r.b)-Math.max(m.t,r.t)),oz=Math.max(0,Math.min(m.r,r.r)-Math.max(m.l,r.l));
-  for(const goal of [r.l-m.w/2,r.r+m.w/2,r.l+m.w/2,r.r-m.w/2])if(Math.abs(base.x-goal)<62&&ox+m.d>0)candidates.push({...base,x:goal});
-  for(const goal of [r.t-m.d/2,r.b+m.d/2,r.t+m.d/2,r.b-m.d/2])if(Math.abs(base.z-goal)<62&&oz+m.w>0)candidates.push({...base,z:goal});
+  const otherEnv=ideareEnvelope(other);if(!otherEnv)continue;const r=measure(otherEnv),ox=Math.max(0,Math.min(m.b,r.b)-Math.max(m.t,r.t)),oz=Math.max(0,Math.min(m.r,r.r)-Math.max(m.l,r.l));
+  for(const goal of [r.l-m.w/2,r.r+m.w/2,r.l+m.w/2,r.r-m.w/2])if(Math.abs(base.x-(goal-dx0))<62&&ox+m.d>0)candidates.push({...base,x:goal-dx0});
+  for(const goal of [r.t-m.d/2,r.b+m.d/2,r.t+m.d/2,r.b-m.d/2])if(Math.abs(base.z-(goal-dz0))<62&&oz+m.w>0)candidates.push({...base,z:goal-dz0});
  }
  const valid=candidates.filter(q=>noCollision(q));
  if(valid.length)return valid.sort((a,b)=>Math.hypot(a.x-x,a.z-z)-Math.hypot(b.x-x,b.z-z))[0];
@@ -1429,12 +1434,12 @@ addExtra=id=>{
 // valid physical wall without losing their dimensions or materials.
 function repairLegacyMounts(){let fixed=0,notFixed=0;
  for(const c of [...model.cabinets,...model.extras]){
-  if(!wallMounted(c)||hasWallSupport(c)&&noCollision(c))continue;
+  if(isCab(c)&&!wallMounted(c)||noCollision(c)&&(!wallMounted(c)||hasWallSupport(c)))continue;
   const fit=findOpenSpot(c);
   if(fit){Object.assign(c,{x:fit.x,z:fit.z,rotation:fit.rotation});fixed++;}else notFixed++;
  }
  if(fixed)renderAll();
- if(notFixed)notify(`${notFixed} item(s) could not be attached to a free wall. Review their placement.`,true);
+ if(notFixed)notify(`${notFixed} item(s) could not be placed inside the room. Review their placement.`,true);
  return fixed;
 }
 const applyHistoryBeforeV4=applyHistory;
@@ -1453,29 +1458,31 @@ function locateHit(e){if(!camera||!raycaster||!extraGroup)return null;
  const hits=raycaster.intersectObjects([...extraGroup.children,...cabinetGroup.children],true);
  for(const h of hits){if(h.object.isLineSegments||h.object.isSprite)continue;
   let o=h.object;while(o){if(o.userData?.extraId){const c=model.extras.find(x=>x.id===o.userData.extraId);if(c)return {c,point:h.point};}
-   if(o.userData?.uid){const c=model.cabinets.find(x=>x.uid===o.userData.uid);if(mountedCab(c))return {c,point:h.point};if(c)return null;break;}
+   if(o.userData?.uid){const c=model.cabinets.find(x=>x.uid===o.userData.uid);if(c)return {c,point:h.point};break;}
    o=o.parent;
   }
  }return null;
 }
-function begin(e,c,hitY=null){if(e.button!==0||model.step!==3||!camera||!controls)return false;
+function begin(e,c,hit=null){if(e.button!==0||model.step!==3||!camera||!controls)return false;
  e.preventDefault();e.stopImmediatePropagation();
- const mounted=wallMounted(c),y=clampV(hitY??(visibleHeight(c)[0]+visibleHeight(c)[1])/2000,.05,model.room.height/1000-.05);
- const origin=rayFloor(e,y)||new THREE.Vector3(c.x/1000,y,c.z/1000);
- const isExtra=!isCab(c);
- if(isExtra)selectExtra(c.id);else select(c.uid);
- controls.enabled=false;action={id:c.id||c.uid,isExtra,pointer:e.pointerId,y,start:origin,origin:{x:c.x,z:c.z},last:{x:c.x,z:c.z},screen:{x:e.clientX,y:e.clientY},recorded:false};
+ const mounted=wallMounted(c),y=clampV(hit?.y??(visibleHeight(c)[0]+visibleHeight(c)[1])/2000,.05,model.room.height/1000-.05);
+ const origin=rayFloor(e,y)||new THREE.Vector3(c.x/1000,y,c.z/1000),anchor=hit?.clone()||new THREE.Vector3(c.x/1000,y,c.z/1000);
+ const lock=mounted?{...backFace(c),rotation:((Number(c.rotation)||0)%360+360)%360}:null;
+ const rect=canvas.getBoundingClientRect(), project=p=>{const v=p.clone().project(camera);return {x:v.x*rect.width/2,y:-v.y*rect.height/2};};
+ const wallPlane=lock?new THREE.Plane(new THREE.Vector3(lock.axis==='x'?1:0,0,lock.axis==='z'?1:0),-anchor[lock.axis]):null;
+ const wallStart=wallPlane?raycaster.ray.intersectPlane(wallPlane,new THREE.Vector3()):null;
+ const base=project(anchor),vectors={};for(const axis of ['x','z']){const p=anchor.clone();p[axis]+=.5;const v=project(p);vectors[axis]={x:(v.x-base.x)/500,y:(v.y-base.y)/500};}
+ const isExtra=!isCab(c);if(isExtra){if(model.selectedExtra!==c.id)selectExtra(c.id);}else if(model.selected!==c.uid)select(c.uid);
+ controls.enabled=false;action={id:c.id||c.uid,isExtra,pointer:e.pointerId,y,start:origin,origin:{x:c.x,z:c.z},last:{x:c.x,z:c.z},screen:{x:e.clientX,y:e.clientY},recorded:false,lock,vectors,wallPlane,wallStart};
  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
- canvas.classList.add('ideare-dragging-surface');selectedMove?.classList.add('ideare-direct-moving');
- $v('#studio-hover')?.setAttribute('hidden','');
- return true;
+ canvas.classList.add('ideare-dragging-surface');selectedMove?.classList.add('ideare-direct-moving');$v('#studio-hover')?.setAttribute('hidden','');return true;
 }
 window.addEventListener('pointerdown',e=>{
  if(model.step!==3||action)return;
  if(window.IDEAREV8?.pointerDown(e))return;
- if(e.target===canvas){const hit=locateHit(e);if(hit)begin(e,hit.c,hit.point.y);}
+ if(e.target===canvas){const hit=locateHit(e);if(hit)begin(e,hit.c,hit.point);}
  else if(e.target.closest?.('#object-move')){const c=model.extras.find(x=>x.id===model.selectedExtra)||model.cabinets.find(x=>x.uid===model.selected);
-  if(c&&(mountedCab(c)||!isCab(c)))begin(e,c);
+  if(c)begin(e,c);
  }
 },true);
 const oneFrame=e=>{
@@ -1483,23 +1490,31 @@ const oneFrame=e=>{
  if(!a.recorded&&Math.hypot(e.clientX-a.screen.x,e.clientY-a.screen.y)<3)return;
  const c=a.isExtra?model.extras.find(o=>o.id===a.id):model.cabinets.find(o=>o.uid===a.id);
  if(!c)return;
- const q=rayFloor(e,a.y);let x,z;
- if(q&&Math.hypot(q.x-a.start.x,q.z-a.start.z)<Math.max(model.room.width,model.room.depth)/1000*2){x=a.origin.x+(q.x-a.start.x)*1000;z=a.origin.z+(q.z-a.start.z)*1000;}
- else if(wallMounted(c)){
-  // At shallow viewing angles the horizontal ray plane becomes unstable.
-  // Project the wall tangent onto the screen instead of jumping or freezing.
-  const b=backFace(c),r=canvas.getBoundingClientRect(),along=b.axis==='z'?'x':'z',p0=new THREE.Vector3(a.origin.x/1000,a.y,a.origin.z/1000),p1=p0.clone();p1[along]+=.5;
-  p0.project(camera);p1.project(camera);const sx=(p1.x-p0.x)*r.width/2,sy=-(p1.y-p0.y)*r.height/2,den=sx*sx+sy*sy;if(den<4)return;
-  const mmDelta=((e.clientX-a.screen.x)*sx+(e.clientY-a.screen.y)*sy)/den*500;
+ const q=rayFloor(e,a.y);let x,z,valid;
+ const dx=e.clientX-a.screen.x,dy=e.clientY-a.screen.y;
+ if(a.lock){
+  const along=a.lock.axis==='z'?'x':'z',v=a.vectors[along],den=v.x*v.x+v.y*v.y;
+  if(den<.000004&&!a.wallStart)return;
+  let mmDelta=den>.000004?(dx*v.x+dy*v.y)/den:0;
+  if(a.wallStart&&a.wallPlane&&Math.abs(raycaster.ray.direction[a.lock.axis])>.075){const at=raycaster.ray.intersectPlane(a.wallPlane,new THREE.Vector3());if(at&&Math.abs(at[along]-a.wallStart[along])<Math.max(model.room.width,model.room.depth)/500)mmDelta=(at[along]-a.wallStart[along])*1000;}
   x=a.origin.x+(along==='x'?mmDelta:0);z=a.origin.z+(along==='z'?mmDelta:0);
- }else return;
- let valid=snapNearby(c,x,z);
- // If the desired point is occupied, slide along the unobstructed axis.
- if(!valid&&!wallMounted(c))valid=snapNearby(c,x,c.z)||snapNearby(c,c.x,z);
+  valid=attachToWall(c,x,z,Infinity,true,a.lock);
+  const seg=actualWalls().find(w=>w.axis===a.lock.axis&&Math.abs(w.v-a.lock.v)<3&&(along==='x'?a.origin.x:a.origin.z)>=w.min-3&&(along==='x'?a.origin.x:a.origin.z)<=w.max+3);
+  const raw=along==='x'?x:z;
+  // A deliberate pull past the end can transfer to a nearby perpendicular wall.
+  if(seg&&(raw<seg.min-160||raw>seg.max+160)&&q&&Math.hypot(q.x-a.start.x,q.z-a.start.z)<Math.max(model.room.width,model.room.depth)/1000*2){
+   const xx=a.origin.x+(q.x-a.start.x)*1000,zz=a.origin.z+(q.z-a.start.z)*1000;
+   const other=attachToWall(c,xx,zz,300,false);if(other&&other.rotation!==a.lock.rotation)valid=other;
+  }
+ }else{
+  if(q&&Math.hypot(q.x-a.start.x,q.z-a.start.z)<Math.max(model.room.width,model.room.depth)/1000*2){x=a.origin.x+(q.x-a.start.x)*1000;z=a.origin.z+(q.z-a.start.z)*1000;}
+  else{const u=a.vectors.x,v=a.vectors.z,det=u.x*v.y-u.y*v.x;if(Math.abs(det)<.000004)return;x=a.origin.x+(dx*v.y-dy*v.x)/det;z=a.origin.z+(u.x*dy-u.y*dx)/det;}
+  valid=snapNearby(c,x,z)||snapNearby(c,x,c.z)||snapNearby(c,c.x,z);
+ }
  if(!valid){canvas.classList.add('ideare-placement-blocked');return;}
  canvas.classList.remove('ideare-placement-blocked');
  if(valid.x===c.x&&valid.z===c.z&&valid.rotation===c.rotation)return;
- if(!a.recorded){history();a.recorded=true;worldGroup?.traverse(o=>{if(/^continuous_/.test(o.name))o.visible=false;});}
+ if(!a.recorded){history();a.recorded=true;if(c.uid){model.shared=model.shared.filter(s=>!s.cabinetUids?.includes(c.uid));drawScene();}}
  Object.assign(c,{x:valid.x,z:valid.z,rotation:valid.rotation});
  const g=a.isExtra?extraGroup.children.find(o=>o.userData.extraId===c.id):meshById.get(c.uid);
  if(g){g.position.x=c.x/1000;g.position.z=c.z/1000;g.rotation.y=-(Number(c.rotation)||0)*Math.PI/180;}
@@ -1528,7 +1543,8 @@ function endDrag(e,cancel=false){const a=action;if(!a||e&&e.pointerId!==a.pointe
 }
 window.addEventListener('pointerup',e=>{if(!action||e.pointerId!==action.pointer)return;e.stopImmediatePropagation();endDrag(e);},true);
 window.addEventListener('pointercancel',e=>{if(!action||e.pointerId!==action.pointer)return;e.stopImmediatePropagation();endDrag(e,true);},true);
-window.addEventListener('keydown',e=>{if(e.key==='Escape'&&action){e.preventDefault();endDrag(null,true);}},true);
+window.addEventListener('blur',()=>{if(action)endDrag(null,true);});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&action){e.preventDefault();e.stopImmediatePropagation();endDrag(null,true);}},true);
 // Changing X/Z values or rotating wall cabinetry must not detach it from the wall.
 window.addEventListener('change',e=>{
  const prop=e.target.dataset?.property;
@@ -2351,4 +2367,72 @@ window.addEventListener('pagehide',()=>{observer?.disconnect();orbit?.dispose();
 
 } catch(error){console.error('IDEARE Define Space startup:',error);const old=document.querySelector('.ideare-environment');if(old)old.hidden=false;const section=document.querySelector('[data-panel="2"]');if(section){section.querySelector('.v10-finish-ui')?.remove();section.querySelector('.v10-preview')?.remove();const note=document.createElement('p');note.className='id3-note';note.textContent='Define Space upgrade failed: '+(error?.message||String(error));section.querySelector('.studio-room-tools')?.append(note);}try{notify('Define Space upgrade could not initialize. The main designer is still available. See browser console.',true);}catch(_){} }
 ;
+/* IDEARE interaction and integrated appliance update 2026-11-25 */
+function ideareApplianceLabel(c){return [c.uid?template(c.templateId)?.slug:'',c.name,c.kind].filter(Boolean).join(' ').replace(/[-_]/g,' ').toLowerCase();}
+function ideareSink(c){return !!c?.uid&&/\bsink\b/.test(ideareApplianceLabel(c))&&c.category!=='wall-cabinets';}
+function ideareIntegrated(c){return !!c?.uid&&/\b(sink|oven|microwave|fridge|freezer|refrigerator|dishwasher|hob|cooker|hood|extractor)\b/.test(ideareApplianceLabel(c));}
+function ideareTintAppliance(g,c){if(!/^#[0-9a-f]{6}$/i.test(c.applianceColor||''))return;
+ const materials=new Map();g.traverse(o=>{if(!o.isMesh||!o.material?.color||!(/^(appliance_body|oven_facade|microwave_body|freezer_door|fridge_door|dishwasher_door|hood_canopy|hood_chimney|ceramic_hob|hob_cooktop|v6_hood_glass_panel|v6_hood_chimney|v6_hood_lower_trim|v7_microwave_body|v7_microwave_face|ideare_appliance_finish)/.test(o.name)))return;
+  if(!materials.has(o.material)){const m=o.material.clone();m.color.set(c.applianceColor);m.map=null;materials.set(o.material,m);}o.material=materials.get(o.material);
+ });}
+(()=>{
+ const oldMake=makeCabinet;
+ const steel=()=>new THREE.MeshStandardMaterial({color:0xaeb5b8,metalness:.65,roughness:.31});
+ const dark=()=>new THREE.MeshStandardMaterial({color:0x24282b,roughness:.24,metalness:.25});
+ const glass=()=>new THREE.MeshStandardMaterial({color:0x141b21,roughness:.14,metalness:.25});
+ const remove=(g,o)=>{g.remove(o);o.traverse(m=>m.geometry?.dispose());};
+ function sink(g,c){
+  const w=c.width/1000,d=c.depth/1000,H=c.height/1000,t=Math.max(.012,Math.min(.05,(c.thickness||18)/1000));
+  const sw=Math.min(.72,w-.09),sd=Math.min(.43,d-.12);if(sw<.12||sd<.10)return;
+  const x=0,z=.005,topH=H+.028,st=steel(),inner=new THREE.MeshStandardMaterial({color:0x777f82,metalness:.68,roughness:.27});
+  const oldTop=g.getObjectByName('worktop'),oldPanel=g.getObjectByName('top_panel');
+  const topMat=oldTop?.material||(fetchTexture(c.worktopMaterial)?new THREE.MeshStandardMaterial({map:fetchTexture(c.worktopMaterial),color:0xffffff,roughness:.32}):mat(c.worktopType==='laminate'?'#947655':c.worktopType==='quartz'?'#dddcd9':'#707478',.38));
+  const frameMat=oldPanel?.material||mat('#dfd4c6');
+  for(const o of [...g.children])if(['worktop','top_panel','adjustable_shelf','partition'].includes(o.name))remove(g,o);
+  function surround(W,D,th,y,m,name){const l=-W/2,r=W/2,b=-D/2,f=D/2,L=x-sw/2,R=x+sw/2,B=z-sd/2,F=z+sd/2;
+   const piece=(ww,dd,xx,zz)=>{if(ww>.001&&dd>.001)addBox(g,ww,th,dd,xx,y,zz,m,name);};
+   piece(L-l,D,(l+L)/2,0);piece(r-R,D,(r+R)/2,0);piece(sw,B-b,x,(b+B)/2);piece(sw,f-F,x,(F+f)/2);
+  }
+  surround(w,d,t,H-t/2,frameMat,'sink_cutout_carcass');surround(w+.035,d+.04,.028,H+.014,topMat,'sink_cutout_worktop');
+  const rim=.017,bh=Math.min(.19,H*.23);for(const sign of [-1,1]){addBox(g,sw+rim*2,.008,rim,0,topH+.004,z+sign*(sd+rim)/2,st,'ideare_appliance_finish_sink_rim');addBox(g,rim,.008,sd,sign*(sw+rim)/2,topH+.004,z,st,'ideare_appliance_finish_sink_rim');addBox(g,.007,bh,sd,sign*(sw-.007)/2,topH-bh/2,z,inner,'ideare_appliance_finish_sink_bowl_side');addBox(g,sw-.014,bh,.007,0,topH-bh/2,z+sign*(sd-.007)/2,inner,'ideare_appliance_finish_sink_bowl_side');}
+  addBox(g,sw-.014,.009,sd-.014,0,topH-bh,z,inner,'ideare_appliance_finish_sink_bowl_bottom');const drain=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.006,24),dark());drain.position.set(0,topH-bh+.009,z);g.add(drain);
+  const fz=-d/2+.043,fx=Math.min(sw*.25,.13),fh=topH+.24;
+  const pipe=new THREE.CatmullRomCurve3([new THREE.Vector3(fx,topH,fz),new THREE.Vector3(fx,fh-.035,fz),new THREE.Vector3(fx,fh,fz+.065),new THREE.Vector3(fx,fh-.04,fz+.145),new THREE.Vector3(fx,fh-.085,fz+.17)]);
+  const tap=new THREE.Mesh(new THREE.TubeGeometry(pipe,28,.011,12,false),st);tap.name='sink_tap';g.add(tap);
+ }
+ function storageFront(g,c,lo,hi){const h=hi-lo,w=c.width/1000,d=c.depth/1000;if(h<.065||c.front==='open')return;const count=Math.max(1,Math.min(2,Number(c.doorCount)||2)),cell=w/count,front=finishMat(c);for(let i=0;i<count;i++){const left=count===1?c.hingeSide!=='right':i%2===0,sign=left?1:-1,p=new THREE.Group();p.position.set(-w/2+i*cell+(left?0:cell),lo,d/2+.008);addBox(p,Math.max(.01,cell-.002),h-.003,.019,sign*cell/2,h/2,0,front,'door_panel');if(model.selected===c.uid&&model.doorsOpen)p.rotation.y=left?-1.2:1.2;const profile=v7ResolvedHandle(c)||v7Handles.find(p=>p.id==='bar-steel')||v7Handles[0];if(profile&&profile.kind!=='none'&&!/handleless|push/i.test(catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'')){const hw=v7Hardware(profile,Math.min(.16,h*.55,cell*.7));hw.position.set(sign*(cell-.045),h/2,.012);hw.rotation.z=Math.PI/2;p.add(hw);}g.add(p);}}
+ function ovenFace(g,c,lo,hi,kind){const w=c.width/1000,d=c.depth/1000,h=hi-lo,cy=(lo+hi)/2,W=Math.min(.60,w-.024),D=Math.min(.55,d-.03),z=d/2-.012;
+  if(h<.08||W<.08||D<.03)return;const s=steel(),b=dark(),v=glass();
+  addBox(g,W,h-.007,D,0,cy,z-D/2,s,'ideare_appliance_finish_body');addBox(g,W,h-.006,.021,0,cy,z+.012,s,'ideare_appliance_finish_face');
+  if(kind==='fridge'){const gap=.004,free=Math.min(h*.32,.6);addBox(g,W-.003,free-gap,.024,0,lo+free/2,z+.025,s,'ideare_appliance_finish_fridge');addBox(g,W-.003,h-free-gap,.024,0,lo+free+(h-free)/2,z+.025,s,'ideare_appliance_finish_fridge');for(const y of [lo+free*.65,lo+free+(h-free)*.43])addBox(g,.015,Math.min(.27,h*.22),.035,W*.38,y,z+.051,b,'fridge_pull');return;}
+  if(kind==='dishwasher'){addBox(g,W*.93,h*.81,.019,0,cy-h*.055,z+.025,s,'ideare_appliance_finish_dishwasher');addBox(g,W*.92,h*.10,.020,0,hi-h*.065,z+.028,b,'dishwasher_controls');addBox(g,W*.53,.015,.038,0,hi-h*.16,z+.045,s,'dishwasher_pull');return;}
+  const micro=kind==='microwave',wh=h*(micro?.69:.66),ww=W*(micro?.67:.86),wx=micro?-W*.12:0,wy=cy-(micro?0:h*.075);
+  addBox(g,ww,wh,.014,wx,wy,z+.029,v,'built_in_glass_window');
+  if(micro){addBox(g,W*.15,h*.74,.013,W*.36,cy,z+.031,b,'microwave_controls');for(let i=0;i<3;i++)addBox(g,W*.07,h*.045,.007,W*.36,cy-h*.10*i,z+.043,s,'microwave_button');}
+  else{addBox(g,W*.96,h*.15,.013,0,hi-h*.09,z+.025,b,'oven_control_panel');for(const k of [-1,1]){const knob=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.012,20),s);knob.rotation.x=Math.PI/2;knob.position.set(k*W*.35,hi-h*.09,z+.039);g.add(knob);}addBox(g,W*.63,.015,.04,0,hi-h*.22,z+.048,s,'oven_pull');}
+  const display=new THREE.MeshStandardMaterial({color:0x75bdb2,emissive:0x28584c,emissiveIntensity:.55});addBox(g,micro?W*.09:W*.19,h*.046,.004,micro?W*.36:0,hi-h*.09,z+.043,display,'appliance_display');
+ }
+ function integrated(g,c){const label=ideareApplianceLabel(c),H=c.height/1000,pl=c.plinth?Math.max(.05,Math.min(.2,(c.plinthHeight||100)/1000)):0;
+  if(ideareSink(c)){sink(g,c);return;}
+  if(c.category==='wall-cabinets')return; // v6 hood and v7 microwave already have dedicated models.
+  const fridge=/fridge|freezer|refrigerator/.test(label),oven=/\boven\b/.test(label),micro=/microwave/.test(label),dish=/dishwasher/.test(label);if(!fridge&&!oven&&!micro&&!dish)return;
+  const tall=c.category==='tall-cabinets',base=pl+.02,usable=H-base;if(usable<.19)return;
+  let bays=[];if(fridge)bays=[[base,Math.min(H-.025,base+Math.min(1.88,usable*.89)),'fridge']];else if(dish)bays=[[base,H-.024,'dishwasher']];else if(tall){const lo=base+usable*.31,oh=Math.min(.60,usable*(micro?.30:.35));if(oven)bays.push([lo,lo+oh,'oven']);if(micro){const mlo=oven?lo+oh+.018:lo;bays.push([mlo,Math.min(H-.025,mlo+Math.min(.36,usable*.24)),'microwave']);}}
+  else{const hi=H-.055,lo=Math.max(base,hi-Math.min(.60,usable*.91));bays=[[lo,hi,micro&&!oven?'microwave':'oven']];}
+  bays=bays.filter(b=>b[1]-b[0]>.08);if(!bays.length)return;
+  for(const o of [...g.children])if(o.name==='ideare_drawer_rail'||o.name==='partition'||o.name==='drawer_front'||o.name==='drawer_box'||o.name==='ideare_lpg_14kg_concept'||(o.isGroup&&o.children.some(k=>k.name==='door_panel'))||(o.name==='adjustable_shelf'&&bays.some(([lo,hi])=>o.position.y>=lo-.018&&o.position.y<=hi+.018)))remove(g,o);
+  let at=pl;for(const [lo,hi,k] of bays){storageFront(g,c,at,lo-.002);ovenFace(g,c,lo,hi,k);at=hi+.002;}storageFront(g,c,at,H);
+ }
+ makeCabinet=(c,...args)=>{const g=oldMake(c,...args);if(ideareIntegrated(c))integrated(g,c);ideareTintAppliance(g,c);return g;};
+ const oldDraw=drawScene;drawScene=()=>{model.shared=model.shared.filter(r=>r.type!=='worktop'||!model.cabinets.some(c=>ideareSink(c)&&r.cabinetUids?.includes(c.uid)));oldDraw();};
+ const oldInspector=renderInspector;renderInspector=()=>{oldInspector();const c=selected()||extraSelected();if(!c||c.uid&&!ideareIntegrated(c))return;const panel=c.uid?$('#selected-inspector'):$('#extra-inspector');if(!panel)return;
+  let el=panel.querySelector('.ideare-appliance-colour');if(!el){el=document.createElement('div');el.className='ideare-appliance-colour';const anchor=c.uid?panel.querySelector('#ideare-option-shell'):panel.querySelector('.id3-detail');if(anchor)anchor.before(el);else panel.append(el);}
+  const current=/^#[0-9a-f]{6}$/i.test(c.applianceColor||'')?c.applianceColor:'#aeb5b8';el.innerHTML=`<strong>Appliance finish</strong><div class="ideare-appliance-swatches">${[['#26292b','Black'],['#aeb5b8','Stainless steel'],['#f2f0eb','White'],['#8b8f8e','Graphite'],['#bdab8c','Champagne']].map(([v,n])=>`<button type="button" data-appliance-colour="${v}" style="--appliance-swatch:${v}" title="${n}" aria-label="${n}" aria-pressed="${c.applianceColor===v}"></button>`).join('')}<input type="color" data-appliance-custom aria-label="Custom appliance colour" value="${current}"><button type="button" data-appliance-colour="default" class="ideare-appliance-reset">Reset</button></div><small>Changes the appliance finish, not the cabinet doors.</small>`;
+ };
+ const originalInspector=renderInspector;renderInspector=()=>{const old=$('#selected-inspector .ideare-appliance-colour');old?.remove();originalInspector();};
+ function setColour(v){const c=selected()||extraSelected();if(!c||c.uid&&!ideareIntegrated(c)||v!=='default'&&!/^#[0-9a-f]{6}$/i.test(v))return;history();if(v==='default')delete c.applianceColor;else c.applianceColor=v;renderAll();changed(false);}
+ document.addEventListener('click',e=>{const b=e.target.closest?.('[data-appliance-colour]');if(b){e.preventDefault();setColour(b.dataset.applianceColour);}});
+ document.addEventListener('change',e=>{if(e.target.matches?.('[data-appliance-custom]'))setColour(e.target.value);});
+ const oldSave=save;save=mode=>{if(model.extras.some(c=>!window.IDEAREPlacementV4.valid(c))){notify('Move appliances fully inside the room before saving.',true);showStep(3);return;}return oldSave(mode);};
+})();
 Promise.resolve().then(()=>boot()).catch(ideareStartupError);
