@@ -100,13 +100,11 @@ function mountGrid() {
   window.addEventListener('pointerup',e=>finish(e));window.addEventListener('pointercancel',e=>finish(e,true));
   viewport.addEventListener('lostpointercapture',e=>finish(e,true));
   viewport.addEventListener('click',e=>{if(e.detail!==0&&performance.now()<suppressUntil){e.preventDefault();e.stopImmediatePropagation();suppressUntil=0;}},true);
-  viewport.addEventListener('wheel',e=>{
-    if(e.ctrlKey||e.metaKey||!e.cancelable)return;
-    const raw=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
-    const d=raw*(e.deltaMode===1?16:e.deltaMode===2?viewport.clientWidth:1);
-    if(!d||limit()<2)return;
-    e.preventDefault();e.stopPropagation();moveTo((raf?target:viewport.scrollLeft)+d);
-  },{passive:false});
+  // Leave wheel/trackpad scrolling to the browser. Vertical wheel gestures
+  // must scroll the page, not translate the portfolio horizontally.
+  // Drag, arrow buttons, and keyboard navigation remain explicit controls.
+  // A native wheel gesture cancels any outstanding drag/arrow momentum.
+  viewport.addEventListener('wheel',stop,{passive:true});
   const measure=()=>{target=clamp(target,0,limit());paint();};
   window.addEventListener('resize',measure);css.addEventListener('load',measure,{once:true});
   if('ResizeObserver'in window){const ro=new ResizeObserver(measure);ro.observe(viewport);ro.observe(group);}
