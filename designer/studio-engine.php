@@ -38,4 +38,30 @@ if ($promoted!==1) {
  echo 'document.querySelector("#canvas-loader").textContent="Studio source version mismatch. Restore designer-studio.js from the repository."; throw new Error("IDEARE: commitNew binding not found");';
  exit;
 }
-echo $parts[0], "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\nboot().catch(error=>{ console.error(error); const loader=document.querySelector(\"#canvas-loader\"); if(loader){loader.hidden=false;loader.textContent=\"Unable to start designer: \"+error.message;} });\n";
+// v6 footprint helpers execute before the studio IIFE. Patch only the exact
+// geometry hooks verified in the current repository; never move its private
+// bindings into the wrong scope.
+$geometryPath=__DIR__.'/../assets/js/designer-geometry-v6.js';
+$geometry=is_readable($geometryPath)?file_get_contents($geometryPath):false;
+if ($geometry===false) { http_response_code(500); echo 'throw new Error("IDEARE v6 geometry file missing.");'; exit; }
+$patches=[
+ '/^const overlaps=\(a,b\)=>[^\r\n]*;/m'=>'const overlaps=(a,b)=>verticallyOverlaps(a,b)&&v6Overlap(a,b);',
+ '/^function fits\(c,poly=roomVertices\(\)\)\{[^\r\n]*\}/m'=>'function fits(c,poly=roomVertices()){return v6Fits(c,poly);}',
+ '/^ const available=model\.cabinets\.filter\(c=>c\.category!==\x27wall-cabinets\x27[^\r\n]*;/m'=>" const available=model.cabinets.filter(c=>!v6Special(c)&&c.category!=='wall-cabinets'&&c.category!=='tall-cabinets'&&c.rotation%360===0);",
+];
+foreach($patches as $pattern=>$replacement){
+ $parts[1]=preg_replace($pattern,$replacement,$parts[1],1,$count);
+ if($count!==1){http_response_code(500);echo 'throw new Error("IDEARE studio geometry source mismatch. Use the matching v5 repository files.");';exit;}
+}
+// Reject base-cabinet placement into appliances too, without requiring
+// a wall-mounted cabinet to be attached before its wall search runs.
+$old="if(others.some(o=>o.uid!==ignore&&overlaps(c,o)))return 'Cabinet overlaps another cabinet.';return '';";
+$new="if(others.some(o=>o.uid!==ignore&&overlaps(c,o)))return 'Cabinet overlaps another cabinet.';if(window.IDEAREPlacementV4?.collisionFree&&!window.IDEAREPlacementV4.collisionFree(c))return 'Cabinet overlaps another object or leaves the room.';return '';";
+$parts[1]=str_replace($old,$new,$parts[1],$count);
+if($count!==1){http_response_code(500);echo 'throw new Error("IDEARE studio placement source mismatch.");';exit;}
+// Explicit manual shared runs can contain special cabinet geometry. Do not
+// flatten the shaped worktop/plinth into the missing corner.
+// Remove shared runs containing corner-shaped units when rendering / saving.
+// The corner model always renders its own accurately shaped surface.
+$parts[1]=str_replace('const originals=model.shared.filter(run=>!run.auto);','const originals=model.shared.filter(run=>!run.auto&&!model.cabinets.some(c=>v6Special(c)&&run.cabinetUids?.includes(c.uid)));',$parts[1]);
+echo $parts[0], "\n;\n", $geometry, "\n;\nlet commitNew;\n", implode("\n;\n",array_slice($parts,1)), "\n;\nboot().catch(error=>{ console.error(error); const loader=document.querySelector(\"#canvas-loader\"); if(loader){loader.hidden=false;loader.textContent=\"Unable to start designer: \"+error.message;} });\n";

@@ -130,7 +130,7 @@ function syncResizeUI(){const c=selected();resizeBtn.hidden=!c;grip.hidden=!resi
 resizeBtn.addEventListener('click',()=>{resizeMode=!resizeMode;syncResizeUI();});
 const footprint=c=>{const swap=Math.abs(Math.round(c.rotation/90))%2===1;const w=swap?c.depth:c.width,d=swap?c.width:c.depth;return {left:c.x-w/2,right:c.x+w/2,back:c.z-d/2,front:c.z+d/2,w,d};};
 const vertical=c=>[c.category==='wall-cabinets'?1350:0,(c.category==='wall-cabinets'?1350:0)+c.height];
-function fitsResized(c){if(window.IDEAREPlacementV4?.valid && !window.IDEAREPlacementV4.valid(c))return false;if(!cabinetFitsPolygon(c))return false;if(vertical(c)[1]>model.room.height)return false;const a=footprint(c),av=vertical(c);return !model.cabinets.some(o=>{if(o.uid===c.uid)return false;const b=footprint(o),bv=vertical(o);return Math.min(av[1],bv[1])>Math.max(av[0],bv[0])+1&&Math.min(a.right,b.right)>Math.max(a.left,b.left)+1&&Math.min(a.front,b.front)>Math.max(a.back,b.back)+1;});}
+function fitsResized(c){if(window.IDEAREPlacementV4?.valid)return window.IDEAREPlacementV4.valid(c);if(!cabinetFitsPolygon(c))return false;if(vertical(c)[1]>model.room.height)return false;const av=vertical(c);return !model.cabinets.some(o=>{if(o.uid===c.uid)return false;const bv=vertical(o);return Math.min(av[1],bv[1])>Math.max(av[0],bv[0])+1&&v6Overlap(c,o,.01);});}
 function worldOnPlane(e,y){if(!camera||!raycaster)return null;const rect=canvas.getBoundingClientRect();const p=new THREE.Vector2((e.clientX-rect.left)/rect.width*2-1,-(e.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(p,camera);return raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-y),new THREE.Vector3());}
 function snapSide(value,axis,c){let best=Math.round(value/25)*25,dist=55;const targets=[axis==='x'?model.room.width:model.room.depth,0];for(const o of model.cabinets){if(o.uid===c.uid)continue;const p=footprint(o);targets.push(axis==='x'?p.left:p.back,axis==='x'?p.right:p.front);}for(const v of targets){const d=Math.abs(value-v);if(d<dist){best=v;dist=d;}}return best;}
 function relocateGeometry(c){const prev=meshById.get(c.uid);if(!prev)return;cabinetGroup.remove(prev);const next=makeCabinet(c);cabinetGroup.add(next);meshById.set(c.uid,next);disposeGroup(prev);}
@@ -172,7 +172,7 @@ deleteAction('#remove',true);deleteAction('#clear-scene',false);
 // that single call and offer a themed restore dialog afterwards instead.
 const bootBefore=boot;
 boot=async function(...args){
- const isLoadedProject=new URL(location.href).searchParams.has('code');
+ const isLoadedProject=new URL(location.href).searchParams.has('code')||new URL(location.href).searchParams.has('staff_design');
  const stored=isLoadedProject?null:localStorage.getItem('ideare3d_draft_v1');
  const originalConfirm=window.confirm;
  if(stored)window.confirm=()=>false;

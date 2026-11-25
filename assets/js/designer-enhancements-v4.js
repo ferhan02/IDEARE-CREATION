@@ -47,45 +47,57 @@ function noCollision(c,ignoreId=c.uid||c.id){
  return !others.some(o=>{
   if((o.uid||o.id)===ignoreId)return false;
   const b=measure(o),by=visibleHeight(o);
-  return Math.min(ay[1],by[1])-Math.max(ay[0],by[0])>6&&
-   Math.min(a.r,b.r)-Math.max(a.l,b.l)>6&&
-   Math.min(a.b,b.b)-Math.max(a.t,b.t)>6;
+  return Math.min(ay[1],by[1])-Math.max(ay[0],by[0])>1&&v6Overlap(c,o,.01);
  });
 }
 // A cabinet is wall-mounted only if the entire back is flush with a real,
 // solid wall segment (not an opening or an imaginary room boundary).
-window.IDEAREPlacementV4={valid:c=>noCollision(c)&&(!wallMounted(c)||hasWallSupport(c))};
+window.IDEAREPlacementV4={valid:c=>noCollision(c)&&(!wallMounted(c)||hasWallSupport(c)),collisionFree:c=>noCollision(c)};
+function backFace(c){const r=measure(c),rot=((Math.round((Number(c.rotation)||0)/90)%4)+4)%4;return rot===0?{axis:'z',v:r.t}:rot===1?{axis:'x',v:r.r}:rot===2?{axis:'z',v:r.b}:{axis:'x',v:r.l};}
 function hasWallSupport(c){if(!wallMounted(c))return true;
- const r=measure(c),eps=3;
- return actualWalls().some(w=>w.axis==='x'?(
-  (Math.abs(r.l-w.v)<eps||Math.abs(r.r-w.v)<eps)&&r.t>=w.min-eps&&r.b<=w.max+eps):(
-  (Math.abs(r.t-w.v)<eps||Math.abs(r.b-w.v)<eps)&&r.l>=w.min-eps&&r.r<=w.max+eps));}
-function attachToWall(c,x,z,maxDistance=Infinity){
- const placements=[];
+ const r=measure(c),back=backFace(c),eps=3;
+ return actualWalls().some(w=>w.axis===back.axis&&Math.abs(back.v-w.v)<eps&&(w.axis==='z'?r.l>=w.min-eps&&r.r<=w.max+eps:r.t>=w.min-eps&&r.b<=w.max+eps));}
+function attachToWall(c,x,z,maxDistance=Infinity,drag=false){
+ const placements=[],previous=backFace(c);
  for(const w of actualWalls()){
-  // The model's -Z face is its back. Rotating 90°/180°/270° puts it against other walls.
   for(const rot of (w.axis==='z'?[0,180]:[90,270])){
-   const q={...c,rotation:rot},b=measure(q),half=w.axis==='z'?b.w/2:b.d/2;
-   if(w.max-w.min<half*2-1)continue;
-   if(w.axis==='z'){
-    q.x=clampV(x,w.min+half,w.max-half);
-    q.z=w.v+(rot===0?b.d/2:-b.d/2);
-   }else{
-    q.z=clampV(z,w.min+half,w.max-half);
-    q.x=w.v+(rot===270?b.w/2:-b.w/2);
+   const q={...c,rotation:rot},b=measure(q),half=w.axis==='z'?b.w/2:b.d/2,along=w.axis==='z'?'x':'z',normal=w.axis==='z'?'z':'x';
+   if(w.max-w.min<half*2-.01)continue;
+   const lo=w.min+half,hi=w.max-half,raw=along==='x'?x:z;
+   q[normal]=w.v+(rot===0||rot===270?1:-1)*(w.axis==='z'?b.d:b.w)/2;
+   q[along]=clampV(raw,lo,hi);
+   const same=rot===((Number(c.rotation)||0)%360+360)%360&&previous.axis===w.axis&&Math.abs(previous.v-w.v)<3;
+   const normalDist=Math.abs(q[normal]-(normal==='x'?x:z));
+   // Keep dragging on the current wall even when the pointer drifts away.
+   // Another wall can take over only when the pointer approaches its face.
+   if(drag&&!same&&normalDist>420)continue;
+   if(!drag&&Math.hypot(q.x-x,q.z-z)>maxDistance)continue;
+   const targets=[{v:q[along],bonus:0}];
+   const offer=(v,bonus)=>{if(v>=lo-.01&&v<=hi+.01&&Math.abs(v-raw)<=170)targets.push({v:clampV(v,lo,hi),bonus});};
+   for(const o of model.cabinets){if(o.uid===c.uid)continue;
+    const ob=backFace(o),r=measure(o),edge1=along==='x'?r.l:r.t,edge2=along==='x'?r.r:r.b;
+    if(ob.axis!==w.axis||Math.abs(ob.v-w.v)>180)continue;
+    const isUpper=mountedCab(o),isBase=o.category==='base-cabinets'||o.category==='special-cabinets';
+    if(!isUpper&&!isBase)continue;
+    if(isUpper){offer(edge1-half,115);offer(edge2+half,115);}
+    else if(mountedCab(c)){
+     // Align centre or either edge above the lower run; the upper unit's
+     // back stays flush with the wall rather than matching the base depth.
+     offer((edge1+edge2)/2,145);offer(edge1+half,155);offer(edge2-half,155);
+     offer(edge1-half,65);offer(edge2+half,65);
+    }
    }
-   const delta=Math.hypot(q.x-x,q.z-z);
-   if(delta>maxDistance||!noCollision(q)||!hasWallSupport(q))continue;
-   // Preserve current wall orientation when choosing between similar positions.
-   placements.push({q,dist:delta+(q.rotation===c.rotation?-15:0)});
+   for(const candidate of targets){const v={...q,[along]:candidate.v};if(!noCollision(v)||!hasWallSupport(v))continue;
+    const dist=Math.abs(candidate.v-raw)+(drag&&same?Math.min(normalDist,120):normalDist)+(same?-110:0)-candidate.bonus;
+    placements.push({q:v,dist});
+   }
   }
  }
- placements.sort((a,b)=>a.dist-b.dist);
- return placements[0]?.q||null;
+ placements.sort((a,b)=>a.dist-b.dist);return placements[0]?.q||null;
 }
 function snapNearby(c,x,z){
  const step=25,base={...c,x:clampV(x,0,model.room.width),z:clampV(z,0,model.room.depth)};
- if(wallMounted(c))return attachToWall(base,base.x,base.z,430);
+ if(wallMounted(c))return attachToWall(c,base.x,base.z,Infinity,true);
  const candidates=[base,{...base,x:Math.round(base.x/step)*step,z:Math.round(base.z/step)*step}];
  const m=measure(base);
  for(const other of [...model.cabinets,...model.extras]){
@@ -120,7 +132,7 @@ const addCabinetBeforeV4=commitNew;
 commitNew=c=>{
  if(mountedCab(c)){
   const replacement=window.__ideareReplaceSelected;
-  if(!replacement){const fitted=findOpenSpot(c);if(!fitted){notify('No free solid wall can support this cabinet. Move nearby items or change the room.',true);return;}c=fitted;}
+  if(!replacement){const last=model.cabinets.at(-1);const base=last&&!mountedCab(last)&&last.category!=='tall-cabinets'&&actualWalls().some(w=>{const b=backFace(last);return w.axis===b.axis&&Math.abs(w.v-b.v)<180;})?last:null;const fitted=(base&&attachToWall({...c,rotation:base.rotation},base.x,base.z,500))||findOpenSpot(c);if(!fitted){notify('No free solid wall can support this cabinet. Move nearby items or change the room.',true);return;}c=fitted;}
  }
  return addCabinetBeforeV4(c);
 };
@@ -163,7 +175,7 @@ function locateHit(e){if(!camera||!raycaster||!extraGroup)return null;
  const hits=raycaster.intersectObjects([...extraGroup.children,...cabinetGroup.children],true);
  for(const h of hits){if(h.object.isLineSegments||h.object.isSprite)continue;
   let o=h.object;while(o){if(o.userData?.extraId){const c=model.extras.find(x=>x.id===o.userData.extraId);if(c)return {c,point:h.point};}
-   if(o.userData?.uid){const c=model.cabinets.find(x=>x.uid===o.userData.uid);if(mountedCab(c))return {c,point:h.point};break;}
+   if(o.userData?.uid){const c=model.cabinets.find(x=>x.uid===o.userData.uid);if(mountedCab(c))return {c,point:h.point};if(c)return null;break;}
    o=o.parent;
   }
  }return null;
@@ -171,10 +183,10 @@ function locateHit(e){if(!camera||!raycaster||!extraGroup)return null;
 function begin(e,c,hitY=null){if(e.button!==0||model.step!==3||!camera||!controls)return false;
  e.preventDefault();e.stopImmediatePropagation();
  const mounted=wallMounted(c),y=clampV(hitY??(visibleHeight(c)[0]+visibleHeight(c)[1])/2000,.05,model.room.height/1000-.05);
- const origin=rayFloor(e,y);if(!origin)return false;
+ const origin=rayFloor(e,y)||new THREE.Vector3(c.x/1000,y,c.z/1000);
  const isExtra=!isCab(c);
  if(isExtra)selectExtra(c.id);else select(c.uid);
- controls.enabled=false;action={id:c.id||c.uid,isExtra,pointer:e.pointerId,y,start:origin,origin:{x:c.x,z:c.z},last:{x:c.x,z:c.z},recorded:false};
+ controls.enabled=false;action={id:c.id||c.uid,isExtra,pointer:e.pointerId,y,start:origin,origin:{x:c.x,z:c.z},last:{x:c.x,z:c.z},screen:{x:e.clientX,y:e.clientY},recorded:false};
  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
  canvas.classList.add('ideare-dragging-surface');selectedMove?.classList.add('ideare-direct-moving');
  $v('#studio-hover')?.setAttribute('hidden','');
@@ -189,10 +201,19 @@ window.addEventListener('pointerdown',e=>{
 },true);
 const oneFrame=e=>{
  const a=action;if(!a)return;
+ if(!a.recorded&&Math.hypot(e.clientX-a.screen.x,e.clientY-a.screen.y)<3)return;
  const c=a.isExtra?model.extras.find(o=>o.id===a.id):model.cabinets.find(o=>o.uid===a.id);
  if(!c)return;
- const q=rayFloor(e,a.y);if(!q)return;
- const x=a.origin.x+(q.x-a.start.x)*1000,z=a.origin.z+(q.z-a.start.z)*1000;
+ const q=rayFloor(e,a.y);let x,z;
+ if(q&&Math.hypot(q.x-a.start.x,q.z-a.start.z)<Math.max(model.room.width,model.room.depth)/1000*2){x=a.origin.x+(q.x-a.start.x)*1000;z=a.origin.z+(q.z-a.start.z)*1000;}
+ else if(wallMounted(c)){
+  // At shallow viewing angles the horizontal ray plane becomes unstable.
+  // Project the wall tangent onto the screen instead of jumping or freezing.
+  const b=backFace(c),r=canvas.getBoundingClientRect(),along=b.axis==='z'?'x':'z',p0=new THREE.Vector3(a.origin.x/1000,a.y,a.origin.z/1000),p1=p0.clone();p1[along]+=.5;
+  p0.project(camera);p1.project(camera);const sx=(p1.x-p0.x)*r.width/2,sy=-(p1.y-p0.y)*r.height/2,den=sx*sx+sy*sy;if(den<4)return;
+  const mmDelta=((e.clientX-a.screen.x)*sx+(e.clientY-a.screen.y)*sy)/den*500;
+  x=a.origin.x+(along==='x'?mmDelta:0);z=a.origin.z+(along==='z'?mmDelta:0);
+ }else return;
  let valid=snapNearby(c,x,z);
  // If the desired point is occupied, slide along the unobstructed axis.
  if(!valid&&!wallMounted(c))valid=snapNearby(c,x,c.z)||snapNearby(c,c.x,z);
@@ -298,8 +319,16 @@ window.addEventListener('click',e=>{
 
 // Cabinet hardware — different physical forms, mounted on the front free edge
 // rather than the hinge. No generic center handles duplicated under the new set.
+// Specialty templates keep their own starting footprint, rather than inheriting
+// the depth of a previously added rectangular cabinet in the same category.
+const oldStandardCabV6=standardCab;
+standardCab=t=>{const c=oldStandardCabV6(t);if(v6Special(c)||['island','peninsula'].includes(v6Kind(c))){c.depth=Number(t.default_depth)||c.depth;c.width=Number(t.default_width)||c.width;}return c;};
+const oldInspectorV6=renderInspector;
+renderInspector=()=>{oldInspectorV6();const c=selected(),field=$v('[data-property="front"]');if(!field)return;const drawer=field.querySelector('option[value="drawers"]');if(drawer)drawer.disabled=!!c&&v6Special(c);};
 const oldMakeCabinetV4=makeCabinet;
-makeCabinet=c=>{
+makeCabinet=(c,skipHood=false)=>{
+ if(v6Special(c))return v6CornerModel(c);
+ if(!skipHood&&/hood|extractor/i.test(c.name)&&c.category==='wall-cabinets')return v6Hood(c,small=>makeCabinet(small,true));
  const g=oldMakeCabinetV4(c),w=c.width/1000,d=c.depth/1000,h=c.height/1000;
  const name=String(catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'Bar pull');
  const lower=name.toLowerCase(),handleless=/handleless|push.?open|no handle|finger pull/.test(lower),edge=/billsbro|edge|recess|flush|integrated|lip/.test(lower),isKnob=/eneryda|knob|button/.test(lower),long=/lansa|long|full height|tall/.test(lower),gold=/gold|brass|brushed bronze|champagne/.test(lower),blackFinish=/black|hackås|hackas|matte black/.test(lower);
@@ -339,17 +368,13 @@ makeCabinet=c=>{
    }
   }
  }
- const label=c.name.toLowerCase();
- const hoodCab=/hood|extractor/.test(label)&&c.category==='wall-cabinets';
- const hobCab=/\bhob\b|\bcooker\b/.test(label)&&c.category!=='wall-cabinets';
- if(hoodCab){
-  const silver=new THREE.MeshStandardMaterial({color:0xbcc0bf,metalness:.72,roughness:.28}),filter=new THREE.MeshStandardMaterial({color:0x3a4143,metalness:.65,roughness:.38});
-  const underside=Math.max(.025,(c.plinth?c.plinthHeight:0)/1000+.036);
-  addBox(g,w*.90,.082,d*.88,0,underside,-.005,silver,'integrated_hood_body');
-  addBox(g,w*.77,.008,d*.55,0,underside-.045,d*.08,filter,'hood_grease_filter');
-  for(let j=0;j<10;j++)addBox(g,w*.68,.003,.003,0,underside-.051,-d*.15+j*d*.053,silver,'hood_filter_slats');
-  for(const side of [-1,1])addBox(g,.07,.006,.05,side*w*.34,underside-.052,d*.22,new THREE.MeshStandardMaterial({color:0xffecc0,emissive:0xffdeb2,emissiveIntensity:.6}),'hood_lamp');
+ const kind=v6Kind(c);
+ if(kind==='island'||kind==='peninsula'){
+  // Finished backs are visible in freestanding cabinetry.
+  addBox(g,w-.006,Math.max(.10,h-(c.plinth?Number(c.plinthHeight||100)/1000:0)),.018,0,(h+(c.plinth?Number(c.plinthHeight||100)/1000:0))/2,-d/2+.009,finishMat(c),'finished_exposed_back');
  }
+ const label=c.name.toLowerCase();
+ const hobCab=/\bhob\b|\bcooker\b/.test(label)&&c.category!=='wall-cabinets';
  if(hobCab){
   const hobTop=h+.038;const dark=new THREE.MeshStandardMaterial({color:0x1c2428,metalness:.18,roughness:.16}),ringMat=new THREE.MeshStandardMaterial({color:0xb5b7b6,metalness:.77,roughness:.22});
   addBox(g,Math.min(w*.91,.75),.016,Math.min(d*.82,.54),0,hobTop,0,dark,'hob_cooktop');
