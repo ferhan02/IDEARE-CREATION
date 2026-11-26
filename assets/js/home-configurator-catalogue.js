@@ -1,0 +1,43 @@
+// Original IDEARE build-mode catalogue. All cards operate on the existing 3D editor.
+const categories = [
+ ['walls','Walls & rooms','Walls'], ['windows','Windows','Windows'], ['doors','Doors','Doors'],
+ ['floors','Floors & tiles','Floors'], ['roof','Roofs','Roofs'], ['foundation','Foundations','Platforms'],
+ ['stairs','Stairs & storeys','Stairs'], ['pools','Swimming pools','Pools'], ['outdoor','Outdoor & extensions','Outdoor']
+];
+const item=(id,name,tool,detail,color,extra={})=>({id,name,tool,detail,color,...extra});
+const catalogue={
+ walls:[item('wall','Full wall','Wall','2.8 m','#d5c9b9'),item('half-wall','Half wall','Wall','1.1 m','#d5c9b9',{height:1.1}),item('room','Enclosed room','Room','Drag to size','#d9c7ac'),item('partition','Timber wall','Wall','2.8 m','#a98d70'),item('break','Break wall','Break wall','1 m section','#d5c9b9'),item('erase','Remove element','Delete','Click to remove','#c2a48d')],
+ windows:[item('window','Standard window','Window','Drag along wall','#92c2d1'),item('dark-window','Dark frame','Window','Drag along wall','#92c2d1',{frameColor:'#44413d'}),item('wood-window','Timber frame','Window','Drag along wall','#92c2d1',{frameColor:'#a4825c'})],
+ doors:[item('door','Standard doorway','Door','Drag along wall','#ad8261'),item('dark-door','Dark frame','Door','Drag along wall','#47413a',{frameColor:'#47413a'}),item('light-door','Oak frame','Door','Drag along wall','#b59a73',{frameColor:'#b59a73'})],
+ floors:[item('tile','Porcelain tile','Tiles','Drag to cover','#e7e5df'),item('timber','Warm timber','Tiles','Drag to cover','#d9c7ac'),item('spc','SPC sage','Tiles','Drag to cover','#9ca9a1'),item('stone','Stone grey','Tiles','Drag to cover','#b9b5ae')],
+ roof:[item('flat','Flat roof','Roof','Drag to size','#a69c8b',{style:'flat'}),item('gable','Gable roof','Roof','Drag to size','#826e5b',{style:'gable'}),item('dark-roof','Charcoal gable','Roof','Drag to size','#55514d',{style:'gable'})],
+ foundation:[item('slab','Foundation slab','Foundation','Drag to size','#b7aa97',{height:.18}),item('platform','Raised platform','Foundation','Drag to size','#c3ad91',{height:.45})],
+ stairs:[item('stairs','Straight stairs','Stairs','Drag to size','#c6af90'),item('storey','Add storey','action','New upper floor','#c6af90',{action:'addFloor'})],
+ pools:[item('pool','Classic pool','Pool','Drag to size','#76b5c7'),item('deep-blue','Deep blue pool','Pool','Drag to size','#4b89a9')],
+ outdoor:[item('fence','Garden fence','Fence','Drag a line','#a98d70'),item('patio','Patio','Patio','Drag to size','#c0ac91'),item('porch','Car porch','Car porch','Drag to size','#b5b1a8'),item('wet-kitchen','Wet kitchen','Wet kitchen','Drag to size','#d9c7ac'),item('suite','Ground-floor suite','Ground-floor suite','Drag to size','#d9c7ac')]
+};
+function icon(item){const c=item.color||'#c6b49e',s='#63574a',base='<path d="M7 34 32 20 58 28 33 43Z" fill="#d9cbb8"/>';let shape='';switch(item.tool){
+ case 'Wall':case 'Break wall':shape=base+`<path d="M12 10 38 2 53 7 53 27 27 38 12 33Z" fill="${c}"/><path d="M12 10 27 15 53 7M27 15V38" fill="none"/>`;if(item.height)shape=base+`<path d="M13 22 38 13 53 18 53 28 28 38 13 33Z" fill="${c}"/><path d="M13 22 28 27 53 18M28 27V38" fill="none"/>`;if(item.tool==='Break wall')shape+='<path d="m33 11-5 8 7 3-6 13" fill="none" stroke="#9a443c" stroke-width="2"/>';break;
+ case 'Room':case 'Wet kitchen':case 'Ground-floor suite':shape=base+`<path d="M8 30V13L32 2 56 10V28L32 42Z" fill="${c}"/><path d="M8 13 32 21 56 10M32 21V42M12 30 32 37 51 26" fill="none"/><path d="M12 15 32 8 50 13 32 21Z" fill="#eee5d8"/>`;break;
+ case 'Door':shape=`<path d="M16 8 47 3V36L16 42Z" fill="${item.frameColor||c}"/><path d="M21 12 42 8V32L21 37Z" fill="#d7b994"/><circle cx="37" cy="24" r="1.8" fill="${s}"/>`;break;
+ case 'Window':shape=`<path d="M9 9 54 3V35L9 41Z" fill="${item.frameColor||'#876e55'}"/><path d="M14 13 49 8V31L14 36Z" fill="${c}"/><path d="M31 10V34M14 25 49 19" fill="none" stroke="#f4eee3" stroke-width="2"/>`;break;
+ case 'Tiles':case 'Patio':case 'Car porch':case 'Foundation':shape=`<path d="M5 26 32 9 59 22 32 39Z" fill="${c}"/><path d="M5 26V${item.height===.45?34:29}L32 43 59 26V22L32 39Z" fill="#a59785"/><path d="M14 20 42 33M23 15 50 27M14 30 42 14M23 35 50 18" fill="none" opacity=".65"/>`;break;
+ case 'Roof':shape=item.style==='flat'?base+`<path d="M7 20 32 6 58 14 33 29Z" fill="${c}"/><path d="M7 20V25L33 34 58 19V14L33 29Z" fill="#827565"/>`:`<path d="M6 29 20 7 46 1 59 24 33 41Z" fill="${c}"/><path d="M6 29 20 7 33 41Z" fill="#bead96"/><path d="M20 7 46 1 59 24 33 41Z" fill="${c}"/><path d="M25 15 50 8M29 24 54 16" fill="none"/>`;break;
+ case 'Stairs':shape=base+`<path d="M10 29H21V22H32V15H43V8H55V30L33 42Z" fill="${c}"/><path d="M21 22 43 11M32 15 54 4M21 29 43 18M32 22 54 11" fill="none"/>`;break;
+ case 'Pool':shape=`<path d="M4 22 32 7 60 21 32 38Z" fill="#d7cbb8"/><path d="M11 22 32 11 53 21 32 33Z" fill="${c}"/><path d="m17 22 10 5m5-11 12 6" stroke="#d9eaf0" fill="none"/>`;break;
+ case 'Fence':shape=`<path d="M8 16 56 5M8 32 56 21" fill="none" stroke="${c}" stroke-width="4"/><path d="M10 10V39M22 7V35M34 4V32M46 1V29M56 0V26" fill="none" stroke="${c}" stroke-width="4"/>`;break;
+ case 'action':shape=base+'<path d="M10 24 32 12 54 19 32 31Z M10 15 32 3 54 10 32 22Z" fill="#c6af90"/><path d="M32 14V32M24 23H40" stroke="#fff" stroke-width="3"/>';break;
+ default:shape='<path d="m16 12 32 28m0-28L16 40" stroke="#b15c4c" stroke-width="5" fill="none" stroke-linecap="round"/>';
+ }return `<svg viewBox="0 0 64 46" aria-hidden="true" stroke="${s}" stroke-width="1" stroke-linejoin="round">${shape}</svg>`;}
+export function mountBuildCatalogue({activate,onAction,available}){
+ const $=id=>document.getElementById(id), tabs=$('hc-category-tabs'), cards=$('hc-catalog-items'),search=$('hc-catalog-search'), hotspots=[...document.querySelectorAll('.hc-house-map [data-hc-category]')];
+ let current='walls',activeId=null;const tabMap=new Map();
+ const name=id=>categories.find(c=>c[0]===id)?.[1]||'Build catalogue';
+ function paintCards(){const q=search.value.trim().toLowerCase();const options=q?Object.entries(catalogue).flatMap(([category,items])=>items.map(i=>({...i,category}))).filter(i=>[i.name,i.detail,i.tool,name(i.category)].join(' ').toLowerCase().includes(q)):catalogue[current];cards.replaceChildren();$('hc-category-title').textContent=q?'Search results':name(current);$('hc-catalog-help').textContent=q?`${options.length} matching tools`:'Choose a tool, then drag on the 3D grid.';if(!options.length){const p=document.createElement('span');p.className='hc-no-items';p.textContent='No matching build tools.';cards.append(p);return;}for(const i of options){const b=document.createElement('button');b.type='button';b.className='hc-catalog-card';b.dataset.item=i.id;b.dataset.tool=i.tool;b.disabled=!available(i);b.setAttribute('aria-pressed',String(i.id===activeId));b.classList.toggle('active',i.id===activeId);b.innerHTML=icon(i);const label=document.createElement('strong');label.textContent=i.name;b.append(label);const detail=document.createElement('small');detail.textContent=i.detail;b.append(detail);b.title=i.name+' — '+i.detail;b.addEventListener('click',()=>{if(i.action){onAction(i.action);refresh();return}activeId=i.id;activate(i);refresh();});cards.append(b);}}
+ function setCategory(id){current=id;search.value='';tabs.querySelectorAll('button').forEach(b=>{const a=b.dataset.category===id;b.classList.toggle('active',a);b.setAttribute('aria-pressed',String(a))});hotspots.forEach(h=>{const a=h.dataset.hcCategory===id;h.classList.toggle('active',a);h.setAttribute('aria-pressed',String(a))});$('hc-house-caption').textContent=name(id);paintCards();cards.scrollLeft=0;}
+ function refresh(){cards.querySelectorAll('button').forEach(b=>{const i=Object.values(catalogue).flat().find(i=>i.id===b.dataset.item);b.disabled=!available(i);const a=i.id===activeId;b.classList.toggle('active',a);b.setAttribute('aria-pressed',String(a))});}
+ for(const [id,title,short] of categories){const b=document.createElement('button');b.type='button';b.textContent=short;b.title=title;b.dataset.category=id;b.onclick=()=>setCategory(id);tabs.append(b);tabMap.set(id,b);}
+ hotspots.forEach(h=>{const go=()=>setCategory(h.dataset.hcCategory);h.addEventListener('click',go);h.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}});h.addEventListener('pointerenter',()=>{$('hc-house-caption').textContent=name(h.dataset.hcCategory)});h.addEventListener('pointerleave',()=>{$('hc-house-caption').textContent=name(current)})});
+ search.addEventListener('input',paintCards);setCategory(current);
+ return {refresh,clear(){activeId=null;refresh()}};
+}
