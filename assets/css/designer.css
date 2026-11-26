@@ -708,8 +708,17 @@ html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .v10-plan-panel{
 .id3-studio .ideare-fridge-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
 .id3-studio .ideare-fridge-fields label{display:grid;gap:5px;min-width:0;font-size:11px;line-height:1.3;}
 .id3-studio .ideare-fridge-fields input,.id3-studio .ideare-fridge-fields select{min-width:0;width:100%;box-sizing:border-box;padding:8px!important;font-size:12px!important;}
-.id3-studio.ideare-fridge-active :is(#ideare-resize-toggle,#v8-inspector-resize,[data-dimension],[data-slider]){display:none!important;}
+.id3-studio.ideare-fridge-active :is([data-dimension],[data-slider]){display:none!important;}
 .ideare-fridge-catalog{display:grid;gap:6px;padding:10px;border-bottom:1px solid var(--studio-line);}
 .ideare-fridge-catalog button{text-align:left;padding:10px!important;border:1px solid var(--studio-line)!important;border-radius:8px!important;white-space:normal;}
 @media(max-width:760px){.id3-studio .studio-canvas-bottom #selection-badge{display:none!important;}.id3-studio .studio-canvas-bottom{gap:3px;max-width:calc(100% - 12px);}.id3-studio .studio-canvas-bottom button{padding:6px 5px!important;font-size:10px!important;}.id3-studio .studio-zoom{right:27px!important;bottom:90px!important;}}
 @media(max-width:380px){.id3-studio .studio-canvas-bottom button{padding:5px 3px!important;font-size:9px!important;}}
+
+/* Joined walls and universal snapping */
+.id3-studio .ideare-align-guides{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:31;overflow:hidden;}
+.id3-studio .ideare-align-guides[hidden]{display:none!important;}
+.id3-studio .ideare-align-guides line{stroke:#ae7941;stroke-width:1.65;stroke-dasharray:6 4;stroke-linecap:round;filter:drop-shadow(0 0 1px #fff);vector-effect:non-scaling-stroke;}
+.id3-studio [data-preview-theme="dark"] .ideare-align-guides line{stroke:#f0c47d;filter:drop-shadow(0 0 2px #16120e);}
+.id3-studio .ideare-fridge-part-tools{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--studio-line);}
+.id3-studio .ideare-fridge-part-tools label{display:grid;gap:5px;}
+.id3-studio .ideare-fridge-part-tools button{width:100%;}

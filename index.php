@@ -361,24 +361,7 @@ require __DIR__ . '/includes/customer/header.php';
     </section>
 
     <!-- Former top hero content moved to the Cabinet Designer position. -->
-    <section class="section home-section home-designer" id="cabinet-designer">
-        <div class="site-wrap home-designer-grid home-reveal">
-            <div class="home-designer-copy">
-                <p class="eyebrow">Cabinet Designer</p>
-                <h2>Plan your space before the consultation.</h2>
-                <p class="lead">Explore IdeaRE services, browse real projects and cabinet ideas, then use the Cabinet Designer to build a first draft before your consultation.</p>
-                <div class="actions">
-                    <a class="btn primary" href="designer/index.php">Try Cabinet Designer</a>
-                    <a class="btn" href="pages/book-appointment.php">Book Appointment</a>
-                </div>
-            </div>
-            <div class="hero-card home-designer-card">
-                <div class="mini-cabinet"><i></i><i></i></div>
-                <b>Interactive cabinet planning</b>
-                <span>Your design can continue into quotation, costing and production inside the IdeaRE system.</span>
-            </div>
-        </div>
-    </section>
+    <?php require __DIR__ . '/home-configurator/homepage-section.php'; ?>
 
     <section class="section home-section contact-section" id="contact">
         <div class="site-wrap contact-grid">
