@@ -176,3 +176,26 @@ html[data-theme=dark] #hc .hc-house-map{--hc-house-highlight:#e8b76a}
 @container (max-width:485px){#hc .hc-hud-btn{width:29px;height:29px}#hc .hc-hud-btn svg{width:18px;height:18px}#hc .hc-hud-center,#hc .hc-hud-storeys{padding:3px;gap:2px}#hc .hc-floor-stack .hc-hud-btn{height:14px}#hc .hc-live-3d{top:92px;font-size:9px}}
 @media(max-width:767px){#hc .hc-fullscreen-tip{display:none}}
 @media print{#hc .hc-hud,#hc .hc-fullscreen-tip{display:none!important}}
+
+/* Studio 5: real reference artwork and compact Sims-inspired action strip. */
+#hc .hc-photo-house{height:132px;overflow:hidden;--hc-house-highlight:#e4ad36}
+#hc .hc-photo-house .hc-house-photo{filter:grayscale(1) contrast(1.06);pointer-events:none}
+#hc .hc-photo-house [data-hc-category]{fill:transparent;stroke:transparent;stroke-width:4;filter:none;pointer-events:all;transition:fill .14s,stroke .14s}
+#hc .hc-photo-house [data-hc-category]:is(:hover,:focus-visible){fill:var(--hc-house-highlight);fill-opacity:.34;stroke:var(--hc-house-highlight);filter:none;stroke-width:3}
+#hc .hc-photo-house [data-hc-category].active{fill:var(--hc-house-highlight);fill-opacity:.65;stroke:var(--hc-house-highlight);filter:none;stroke-width:4}
+#hc .hc-hud{inset:0 8px auto;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+#hc .hc-hud-center{border-radius:0 0 17px 17px;padding:4px 7px;gap:2px;background:color-mix(in srgb,var(--hc-panel) 94%,transparent);backdrop-filter:blur(10px);box-shadow:0 4px 14px #0003}
+#hc .hc-hud-storeys{margin-top:7px}
+#hc .hc-hud-center .hc-hud-btn{width:32px;height:32px;padding:4px;border-radius:6px}
+#hc .hc-hud-center .hc-hud-btn svg{width:23px;height:23px}
+#hc .hc-hud-center .hc-hud-btn[aria-pressed=true]{background:transparent;color:var(--hc-accent);border-color:var(--hc-accent)}
+#hc:not([data-stage=build]) :is(#hc-library,#hc-move,#hc-bulldoze){display:none}
+#hc .hc-tool-dialog{width:min(410px,calc(100vw - 24px));max-height:80dvh;overflow:auto;background:var(--hc-panel);color:var(--hc-text);border:1px solid var(--hc-line);border-radius:15px;padding:18px;box-shadow:0 20px 60px #0006}
+#hc .hc-tool-dialog::backdrop{background:#0006}
+#hc .hc-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+#hc .hc-dialog-head h2{margin:0;font-size:17px}#hc #hc-dialog-content{display:grid;gap:9px}#hc #hc-dialog-content p{margin:0;font-size:12px;color:var(--muted)}
+#hc .hc-library-entry{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:5px;align-items:center}#hc .hc-library-entry span{font-size:12px;overflow-wrap:anywhere}
+@container (max-width:1000px){#hc .hc-hud{display:flex;justify-content:center;flex-wrap:wrap;gap:3px}#hc .hc-hud-storeys{margin-top:0}#hc .hc-live-3d{top:90px}}
+@container (max-width:485px){#hc .hc-hud-center{max-width:100%;gap:1px;padding:3px}#hc .hc-hud-center .hc-hud-btn{width:26px;height:28px;padding:3px}#hc .hc-hud-center .hc-hud-btn svg{width:19px;height:19px}#hc .hc-hud-center .hc-hud-separator{margin:0 1px}#hc .hc-live-3d{top:79px}}
+@media(max-width:600px){#hc .hc-photo-house{height:75px}}
+@media print{#hc .hc-tool-dialog{display:none!important}}
