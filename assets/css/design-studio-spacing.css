@@ -62,3 +62,21 @@ html[data-ideare-page="designer"] #id3-app:is([data-studio-step="1"],[data-studi
  max-width:none!important;
  margin:0 calc(-1 * var(--id3-page-gutter)) 12px!important;
 }
+
+/* IDEARE cabinet refinement: no customer header in any designer stage. */
+html[data-ideare-page="designer"] body > .site-header {display:none!important;}
+html[data-ideare-page="designer"] #id3-app .studio-controls {align-items:center!important;flex-wrap:wrap;justify-content:flex-end;}
+html[data-ideare-page="designer"] #id3-app .studio-controls .ideare-icon-control {
+ display:inline-flex!important;flex:0 0 auto;justify-content:center!important;align-items:center!important;gap:6px!important;
+ line-height:1.15!important;min-height:36px!important;vertical-align:middle;text-align:center;white-space:nowrap;
+}
+html[data-ideare-page="designer"] #id3-app .studio-controls .ideare-icon-control svg {flex:0 0 17px;display:block;width:17px;height:17px;pointer-events:none;}
+html[data-ideare-page="designer"] #id3-app .studio-controls .ideare-icon-control span {display:inline!important;line-height:1.15;pointer-events:none;}
+html[data-ideare-page="designer"] #id3-app .studio-controls [hidden] {display:none!important;}
+html[data-ideare-page="designer"] #id3-app #ideare-grid-colour-wrap {display:inline-flex;align-items:center;justify-content:center;gap:4px;margin:0;padding:4px 5px;font-size:11px;line-height:1;white-space:nowrap;cursor:pointer;}
+html[data-ideare-page="designer"] #id3-app #ideare-grid-colour {width:24px;height:24px;min-width:24px;margin:0;padding:2px;cursor:pointer;border:1px solid var(--studio-line);border-radius:5px;}
+html[data-ideare-page="designer"] #id3-app #ideare-grid-auto {min-width:0;padding-inline:5px!important;font-size:10px!important;}
+html[data-ideare-page="designer"] #id3-app #studio-items.ideare-anchored-items {position:fixed!important;right:auto!important;bottom:auto!important;z-index:90!important;margin:0!important;overflow:auto;overscroll-behavior:contain;}
+html[data-ideare-page="designer"] #id3-app #studio-items.ideare-anchored-items[hidden]{display:none!important;}
+@media(max-width:1100px){html[data-ideare-page="designer"] #id3-app .studio-controls {flex:1 1 auto;min-width:0;}}
+@media(max-width:700px){html[data-ideare-page="designer"] #id3-app .studio-controls {justify-content:center;}html[data-ideare-page="designer"] #id3-app .studio-controls .ideare-icon-control {gap:3px!important;min-height:30px!important;}}
