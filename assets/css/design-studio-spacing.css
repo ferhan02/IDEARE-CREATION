@@ -1,8 +1,9 @@
-/* Scoped to the two design studio routes, never to the homepage or staff. */
+/* Only the two design studios: remove footer presentation, retain shared footer scripts. */
 html[data-ideare-page="designer"] body > .site-footer,
 html[data-ideare-page="home-configurator"] body > .site-footer {
-  margin-top:0!important;
-  margin-block-start:0!important;
+  display:none!important;
+  margin:0!important;
+  padding:0!important;
 }
 html[data-ideare-page="designer"] body .id3-app {padding-bottom:12px!important;margin-bottom:0!important}
 html[data-ideare-page="home-configurator"] #hc {padding-bottom:10px;margin-bottom:0}
