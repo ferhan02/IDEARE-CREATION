@@ -10,8 +10,10 @@ function readSource(string $p): string { $s=@file_get_contents($p);if($s===false
 function exact(string &$s,string $a,string $b,string $name): void { $n=substr_count($s,$a);if($n!==1)throw new RuntimeException("Unexpected source for $name ($n matches). No changes written.");$s=str_replace($a,$b,$s); }
 try {
  $oldJs=readSource($jsPath);$oldCss=readSource($cssPath);$oldHeader=readSource($headerPath);$oldIndex=readSource($indexPath);
- if(str_contains($oldJs,'/* IDEARE cabinet refinement: shared 50 mm grid')){echo "Cabinet refinement is already installed.\n";exit(0);}
  $js=$oldJs;$css=$oldCss;$header=$oldHeader;$index=$oldIndex;
+ $alreadyRefined=str_contains($js,'/* IDEARE cabinet refinement: shared 50 mm grid');
+ $alreadyRepaired=str_contains($js,'/* IDEARE cabinet refinement v2: module-shared state */');
+ if (!$alreadyRefined) {
  exact($js,'let wallsVisible=false, gridVisible=true, hoverUid=null, move=null, dragTemplate=null, ghost=null;',"let wallsVisible=true, gridVisible=true, hoverUid=null, move=null, dragTemplate=null, ghost=null;\nlet ideareGridSnap=true,ideareGridCustom=null,ideareGridAuto='#292723';",'wall and grid defaults');
  exact($index,'id="wall-toggle" type="button" aria-pressed="false">Show walls','id="wall-toggle" type="button" aria-pressed="true">Hide walls','initial wall button');
  exact($js, <<<'JS'
@@ -50,8 +52,35 @@ JS
  $extension=readSource(__DIR__.'/floor-surfaces.js')."\n".readSource(__DIR__.'/refinement.js');
  exact($js,'Promise.resolve().then(()=>boot()).catch(ideareStartupError);',$extension."\nPromise.resolve().then(()=>boot()).catch(ideareStartupError);",'module entry');
  $css.="\n".readSource(__DIR__.'/refinement.css');
+ }
+ // The old Studio code is an IIFE; the new controls live at module scope.
+ // Move the existing bindings, do not make a second set of state variables.
+ if (!$alreadyRepaired) {
+  exact($js,'const STEP=50, EPS=.001, SNAP=115, WALL_PULL=150, RELEASE=260;','const EPS=.001, SNAP=115, WALL_PULL=150, RELEASE=260;','private grid constant');
+  exact($js,'let wallsVisible=true, gridVisible=true, hoverUid=null, move=null, dragTemplate=null, ghost=null;','let hoverUid=null, move=null, dragTemplate=null, ghost=null;','private visibility state');
+  exact($js,"let ideareGridSnap=true,ideareGridCustom=null,ideareGridAuto='#292723';",'','private grid preferences');
+  $import="import { OrbitControls } from 'three/addons/controls/OrbitControls.js';";
+  exact($js,$import,$import."\n/* IDEARE cabinet refinement v2: module-shared state */\nconst STEP=50;\nlet wallsVisible=true,gridVisible=true;\nlet ideareGridSnap=true,ideareGridCustom=null,ideareGridAuto='#292723';",'shared module state');
+  // Keep the icon on Details when the original inspector updates its label.
+  exact($js, <<<'JS'
+iconButton($('#details-toggle'),'details','Details');sync();
+JS
+, <<<'JS'
+const details=$('#details-toggle');iconButton(details,'details','Details');if(details)new MutationObserver(()=>{if(!details.querySelector('svg'))iconButton(details,'details',details.textContent.trim()||'Details');}).observe(details,{childList:true});sync();
+JS
+,'toolbar icon persistence');
+ }
+ // Verify all earlier feature hooks remain installed before committing the repair.
+ foreach (['ideareMakeGridLines(minor,major,group);','ideareGridCandidate(base)','ideareGridAxis(q,along,q[along])','ideareCabinetSupports(g,c,plinthH','ideareCornerSupports(g,c,p,pl)','ideareFloorSurface(p)','ideareSetFloorGrid(p.color)','ideare-anchored-items','ideare-grid-snap','function ideareNearest'] as $feature) {
+  if (!str_contains($js,$feature)) throw new RuntimeException('Missing refinement feature: '.$feature.'. No changes written.');
+ }
+ if (!str_contains($index,'id="wall-toggle" type="button" aria-pressed="true">Hide walls')||!str_contains($css,'#studio-items.ideare-anchored-items')) throw new RuntimeException('Previous toolbar changes incomplete. No changes written.');
+
  if(!preg_match('~assets/css/design-studio-spacing\.css\?v=[^"\s]+~',$header))throw new RuntimeException('Shared designer stylesheet link not found. No changes written.');
- $header=preg_replace('~assets/css/design-studio-spacing\.css\?v=[^"\s]+~','assets/css/design-studio-spacing.css?v=20261127-cabinet-refinement',$header,1);
+ $header=preg_replace('~assets/css/design-studio-spacing\.css\?v=[^"\s]+~','assets/css/design-studio-spacing.css?v=20261127-cabinet-repair2',$header,1);
+ // Explicit cache version in addition to filemtime avoids reusing a broken module.
+ $index=str_replace("filemtime(__DIR__.'/../assets/js/designer.js') ?>\"", "filemtime(__DIR__.'/../assets/js/designer.js') ?>-repair2\"",$index);
+ if($js===$oldJs&&$css===$oldCss&&$header===$oldHeader&&$index===$oldIndex){echo "Cabinet repair is already installed.\n";exit(0);}
  $files=[$jsPath=>[$oldJs,$js],$cssPath=>[$oldCss,$css],$headerPath=>[$oldHeader,$header],$indexPath=>[$oldIndex,$index]];
  $backup=rtrim(sys_get_temp_dir(),DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.'ideare-cabinet-'.date('Ymd-His').'-'.bin2hex(random_bytes(3));
  if(!mkdir($backup,0700))throw new RuntimeException('Could not create backup.');
@@ -59,5 +88,5 @@ JS
  $written=[];
  try{foreach($files as $path=>[$old,$new]){$written[]=$path;if(file_put_contents($path,$new,LOCK_EX)!==strlen($new))throw new RuntimeException('Could not write '.$path);}}
  catch(Throwable $e){foreach($written as $path)@file_put_contents($path,$files[$path][0],LOCK_EX);throw $e;}
- echo "Updated 4 existing files.\nBackup: $backup\nRefresh the cabinet designer with Ctrl+F5.\n";
+ echo "Cabinet startup repaired; all refinement features retained.\nBackup: $backup\nRefresh the cabinet designer with Ctrl+F5.\n";
 }catch(Throwable $e){fwrite(STDERR,$e->getMessage()."\n");exit(1);}

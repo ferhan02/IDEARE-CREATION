@@ -4,6 +4,10 @@
  */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+/* IDEARE cabinet refinement v2: module-shared state */
+const STEP=50;
+let wallsVisible=true,gridVisible=true;
+let ideareGridSnap=true,ideareGridCustom=null,ideareGridAuto='#292723';
 function ideareStartupError(error){
  console.error("IDEARE designer startup:",error);
  const loader=document.querySelector("#canvas-loader");
@@ -473,9 +477,9 @@ let commitNew;
 'use strict';
 const app=$('#id3-app'), wrap=$('#canvas-wrap'), inspector=$('#inspector');
 const hud=$('#studio-hud'), hoverTip=$('#studio-hover'), preview=$('#studio-library-preview');
-const STEP=50, EPS=.001, SNAP=115, WALL_PULL=150, RELEASE=260;
-let wallsVisible=true, gridVisible=true, hoverUid=null, move=null, dragTemplate=null, ghost=null;
-let ideareGridSnap=true,ideareGridCustom=null,ideareGridAuto='#292723';
+const EPS=.001, SNAP=115, WALL_PULL=150, RELEASE=260;
+let hoverUid=null, move=null, dragTemplate=null, ghost=null;
+
 let detailsCollapsed=false,lastSelection=null;
 let allFinishes=[], materialReady=false, finishFilter='all', finishQuery='', recentFinishes=[], defaultMaterial=null;
 const rememberedStyle=new Map();
@@ -2597,7 +2601,7 @@ function ideareCornerSupports(g,c,p,h){if(h<=0)return;const shape=p.map(([x,z])=
  const auto=document.createElement('button');auto.id='ideare-grid-auto';auto.type='button';auto.textContent='Auto';auto.title='Automatically contrast the floor colour';colour.after(auto);
  function sync(){iconButton(wall,wallsVisible?'wall':'cut',wallsVisible?'Hide walls':'Show walls');wall.setAttribute('aria-pressed',String(wallsVisible));iconButton(grid,'grid',gridVisible?'Grid on':'Grid off');grid.setAttribute('aria-pressed',String(gridVisible));iconButton(snapButton,'snap',ideareGridSnap?'Snap on':'Snap off');snapButton.setAttribute('aria-pressed',String(ideareGridSnap));snapButton.hidden=colour.hidden=auto.hidden=!gridVisible;ideareRefreshGridColour();}
  const wallClick=wall.onclick,gridClick=grid.onclick;wall.onclick=e=>{wallClick?.call(wall,e);sync();};grid.onclick=e=>{gridClick?.call(grid,e);sync();};snapButton.onclick=()=>{ideareGridSnap=!ideareGridSnap;sync();};colour.querySelector('input').addEventListener('input',e=>{ideareGridCustom=e.target.value;ideareRefreshGridColour();});auto.onclick=()=>{ideareGridCustom=null;ideareRefreshGridColour();};
- iconButton(itemButton,'items','Items');iconButton(bar.querySelector('.ideare-photo-v5'),'photo','Photo');iconButton(bar.querySelector('[data-next="4"]'),'next','Continue');iconButton($('#details-toggle'),'details','Details');sync();
+ iconButton(itemButton,'items','Items');iconButton(bar.querySelector('.ideare-photo-v5'),'photo','Photo');iconButton(bar.querySelector('[data-next="4"]'),'next','Continue');const details=$('#details-toggle');iconButton(details,'details','Details');if(details)new MutationObserver(()=>{if(!details.querySelector('svg'))iconButton(details,'details',details.textContent.trim()||'Details');}).observe(details,{childList:true});sync();
  // Keep the real list element and existing handlers, but anchor it to the actual trigger.
  bar.closest('.studio-toolrow').append(items);items.classList.add('ideare-anchored-items');itemButton.setAttribute('aria-controls',items.id);
  function position(){if(items.hidden||model.step!==3)return;const r=itemButton.getBoundingClientRect(),w=Math.min(310,window.innerWidth-16);items.style.width=w+'px';items.style.left=Math.max(8,Math.min(r.left,window.innerWidth-w-8))+'px';items.style.top=Math.round(r.bottom+5)+'px';items.style.maxHeight=Math.max(60,window.innerHeight-r.bottom-15)+'px';}

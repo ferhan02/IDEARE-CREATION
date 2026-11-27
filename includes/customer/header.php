@@ -51,7 +51,7 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/tablet.css" media="(min-width: 768px) and (max-width: 1199px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/phone.css" media="(max-width: 767px)">
 <?php if (in_array($idearePage, ['designer','home-configurator'], true)): ?>
-<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/design-studio-spacing.css?v=20261127-cabinet-refinement">
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/design-studio-spacing.css?v=20261127-cabinet-repair2">
 <?php endif; ?>
 <?php if ($idearePage === 'designer'): ?>
 <script defer src="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/js/design-studio-compact.js?v=20261127-fullbar"></script>

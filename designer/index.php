@@ -80,6 +80,6 @@ echo $ideareDesignerHeader;
 </main>
 <script>window.IDEARE_DESIGNER3D={api:'../api/designer3d/',root:'../'};</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}</script>
-<script type="module" src="../assets/js/designer.js?v=<?= (int) @filemtime(__DIR__.'/../assets/js/designer.js') ?>"></script>
+<script type="module" src="../assets/js/designer.js?v=<?= (int) @filemtime(__DIR__.'/../assets/js/designer.js') ?>-repair2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js" defer></script>
 <?php require __DIR__.'/../includes/customer/footer.php'; ?>
