@@ -199,3 +199,36 @@ html[data-theme=dark] #hc .hc-house-map{--hc-house-highlight:#e8b76a}
 @container (max-width:485px){#hc .hc-hud-center{max-width:100%;gap:1px;padding:3px}#hc .hc-hud-center .hc-hud-btn{width:26px;height:28px;padding:3px}#hc .hc-hud-center .hc-hud-btn svg{width:19px;height:19px}#hc .hc-hud-center .hc-hud-separator{margin:0 1px}#hc .hc-live-3d{top:79px}}
 @media(max-width:600px){#hc .hc-photo-house{height:75px}}
 @media print{#hc .hc-tool-dialog{display:none!important}}
+
+/* Immersive native Build Home: one slim navigation strip, full-width 3D and catalogue. */
+#hc:not(.hc-partner) .hc-studio-exit{display:none}
+html[data-ideare-page="home-configurator"] body:has(> #hc:not(.hc-partner)[data-stage=build]) > .site-header{display:none!important}
+#hc:not(.hc-partner)[data-stage=build]{height:100dvh;min-height:0;display:flex;flex-direction:column;padding:6px 8px 6px!important;gap:6px;overflow:hidden}
+#hc:not(.hc-partner)[data-stage=build] .hc-stagebar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 auto;min-width:0}
+#hc:not(.hc-partner)[data-stage=build] .hc-head{order:2;margin:0;flex:none;min-width:0}
+#hc:not(.hc-partner)[data-stage=build] .hc-head>div:first-child,#hc:not(.hc-partner)[data-stage=build] #stage-next{display:none!important}
+#hc:not(.hc-partner)[data-stage=build] .hc-head-actions{flex-wrap:nowrap;gap:5px}
+#hc:not(.hc-partner)[data-stage=build] .hc-studio-exit{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;font-size:20px;border:1px solid var(--hc-line);border-radius:7px;order:5}
+#hc:not(.hc-partner)[data-stage=build] .hc-steps{order:1;flex:1 1 auto;min-width:0;margin:0;padding:2px;gap:3px;border-radius:8px}
+#hc:not(.hc-partner)[data-stage=build] .hc-steps button{min-height:30px;padding:4px 7px;border-radius:6px}
+#hc:not(.hc-partner)[data-stage=build] .hc-layout{display:grid;flex:1 1 0;height:auto!important;min-height:0!important;grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"work" "catalog"!important;grid-template-rows:minmax(0,1fr) auto!important;gap:6px;overflow:hidden}
+#hc:not(.hc-partner)[data-stage=build] .hc-layout>.hc-land-panel,#hc:not(.hc-partner)[data-stage=build] .hc-layout>.hc-inspector{display:none!important}
+#hc:not(.hc-partner)[data-stage=build] .hc-work{grid-area:work;grid-column:1;grid-row:1;position:relative;top:auto;height:auto!important;min-height:0!important;padding:0;border:0;border-radius:8px;overflow:hidden}
+#hc:not(.hc-partner)[data-stage=build] .hc-stage{min-height:0!important;border-radius:8px}
+#hc:not(.hc-partner)[data-stage=build] #hint{min-height:0;padding:3px 6px;font-size:10px;line-height:1.3}
+#hc:not(.hc-partner)[data-stage=build] .hc-catalog{grid-area:catalog;grid-column:1;grid-row:2;position:static;min-height:0;box-shadow:none;padding-block:6px}
+#hc .hc-context{position:absolute;right:8px;bottom:8px;z-index:6;display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:min(310px,calc(100% - 16px));background:var(--hc-panel);border:1px solid var(--hc-line);border-radius:8px;padding:6px;color:var(--hc-text)}
+#hc .hc-context #roof-options{flex:1 0 100%;margin:0;padding:3px 5px;border:0}
+#hc .hc-context #roof-options label{margin:0;font-size:11px}
+#hc .hc-context #roof-options small{display:none}
+#hc:not(.hc-partner)[data-stage=build] .hc-stage:has(.hc-context:not([hidden])) .hc-view-help{bottom:55px}
+@media(max-width:760px){
+ #hc:not(.hc-partner)[data-stage=build] .hc-stagebar{flex-wrap:wrap;gap:4px}
+ #hc:not(.hc-partner)[data-stage=build] .hc-steps{flex:1 0 100%}
+ #hc:not(.hc-partner)[data-stage=build] .hc-head{width:100%;justify-content:flex-end}
+ #hc:not(.hc-partner)[data-stage=build] .hc-head-actions #status{max-width:110px}
+ #hc:not(.hc-partner)[data-stage=build] .hc-steps button{font-size:11px}
+}
+@media(max-height:520px){#hc:not(.hc-partner)[data-stage=build]{min-height:520px;height:auto;overflow:visible}#hc:not(.hc-partner)[data-stage=build] .hc-layout{flex:none;min-height:450px!important;grid-template-rows:minmax(250px,1fr) auto!important}}
+@media print{#hc .hc-stagebar,#hc .hc-context{display:none!important}}
+#hc:not(.hc-partner)[data-stage=build]{box-sizing:border-box}
