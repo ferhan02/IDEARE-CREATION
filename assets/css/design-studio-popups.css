@@ -31,3 +31,50 @@ html[data-ideare-page="designer"] #id3-app .ideare-item-copy b {font-size:12px;l
 html[data-ideare-page="designer"] #id3-app .ideare-item-copy small {font-size:10px;line-height:1.4;color:var(--ideare-theme-muted,var(--studio-muted));white-space:normal;}
 
 html[data-ideare-page="home-configurator"] #hc #hc-card-guide {pointer-events:none;}
+
+/* Cabinet inspector: content-sized, up to the entire 3D preview height.
+   Keep all existing controls and popup layering; leave the home studio alone. */
+html.studio-fullscreen[data-ideare-page="designer"] #id3-app[data-studio-step="3"] #inspector {
+  --ideare-inspector-gap: 8px;
+  top:var(--ideare-inspector-gap)!important;
+  bottom:auto!important;
+  right:var(--ideare-inspector-gap)!important;
+  left:auto!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:calc(100% - 2 * var(--ideare-inspector-gap))!important;
+  max-width:calc(100% - 2 * var(--ideare-inspector-gap))!important;
+  box-sizing:border-box;
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+}
+html[data-ideare-page="designer"] #id3-app #selected-inspector > .id3-inspector-title .id3-kicker {
+  display:none!important;
+}
+/* Keep the item name, dimensions and close action within reach while scrolling. */
+html[data-ideare-page="designer"] #id3-app #inspector .id3-inspector-title {
+  position:sticky;
+  top:0;
+  z-index:5;
+  background:var(--studio-paper,var(--id3-surface));
+}
+html[data-ideare-page="designer"] #id3-app #selected-inspector > .id3-inspector-title {
+  padding:12px 14px 10px;
+  align-items:flex-start;
+}
+html[data-ideare-page="designer"] #id3-app #selected-inspector > .id3-inspector-title h3 {
+  margin-top:0;
+}
+/* Grid contrast stays automatic. Keep underlying nodes and event handlers
+   intact so the existing designer module can initialize and toggle the grid. */
+html[data-ideare-page="designer"] #id3-app .studio-controls #ideare-grid-colour-wrap,
+html[data-ideare-page="designer"] #id3-app .studio-controls #ideare-grid-auto {
+  display:none!important;
+}
+@media(max-width:767px){
+  html.studio-fullscreen[data-ideare-page="designer"] #id3-app[data-studio-step="3"] #inspector {
+    --ideare-inspector-gap:6px;
+  }
+}
