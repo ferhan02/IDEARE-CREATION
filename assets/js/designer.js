@@ -2189,7 +2189,7 @@ async function changePanelFinish(p){
 // List and floating panel controls; no changes to the old cabinet/extra database model.
 const tools=document.createElement('div');tools.className='v8-panel-tools';tools.hidden=true;tools.innerHTML='<strong></strong><span></span><button type="button" data-v8-panel-action="finish">Change finish</button><button type="button" data-v8-panel-action="resize">Resize</button><button type="button" data-v8-panel-action="remove">Remove</button><button type="button" data-v8-panel-action="close" aria-label="Deselect backsplash">×</button>';wrap.append(tools);
 tools.addEventListener('click',async e=>{const act=e.target.closest('[data-v8-panel-action]')?.dataset.v8PanelAction,p=panelSelected();if(!p)return;if(act==='finish'){await changePanelFinish(p);}else if(act==='resize'){toggleMode();}else if(act==='close'){splashId=null;mode=false;renderAll();}else if(act==='remove'){const r=await dialog({title:'Remove backsplash?',text:finish(p).name,showCancelButton:true,confirmButtonText:'Remove'});if(r.isConfirmed){history();model.room.backsplashes=panels().filter(x=>x.id!==p.id);splashId=null;mode=false;renderAll();changed(false);}}});
-const oldList=renderList;renderList=()=>{migrate();oldList();const list=$('#cabinet-list');if(list)for(const p of panels()){const b=document.createElement('button');b.type='button';b.className=p.id===splashId?'selected':'';b.innerHTML=`<b>Backsplash · ${safe(finish(p).name)}</b><small>Wall ${p.wallIndex+1} · ${Math.round(p.width)} × ${Math.round(p.height)} mm</small>`;b.onclick=()=>selectPanel(p);list.append(b);}if(panelSelected())$('#selection-badge').textContent='Backsplash · '+finish(panelSelected()).name;};
+const oldList=renderList;renderList=()=>{migrate();oldList();const list=$('#cabinet-list');if(list)for(const p of panels()){const b=document.createElement('button');b.type='button';b.className=p.id===splashId?'selected':'';b.innerHTML=`<b>Backsplash · ${safe(finish(p).name)}</b><small>Wall ${p.wallIndex+1} · ${Math.round(p.width)} × ${Math.round(p.height)} mm</small>`;b.dataset.selectSplash=p.id;b.onclick=()=>selectPanel(p);list.append(b);}if(panelSelected())$('#selection-badge').textContent='Backsplash · '+finish(panelSelected()).name;};
 // Raycast actual scene surfaces; cabinet or appliance in front wins the click.
 function pointerDown(e){if(e.target!==canvas||e.button!==0||model.step!==3||!camera||!raycaster||!splashGroup||drag)return false;
  const r=canvas.getBoundingClientRect();raycaster.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);
@@ -2604,8 +2604,19 @@ function ideareCornerSupports(g,c,p,h){if(h<=0)return;const shape=p.map(([x,z])=
  iconButton(itemButton,'items','Items');iconButton(bar.querySelector('.ideare-photo-v5'),'photo','Photo');iconButton(bar.querySelector('[data-next="4"]'),'next','Continue');const details=$('#details-toggle');iconButton(details,'details','Details');if(details)new MutationObserver(()=>{if(!details.querySelector('svg'))iconButton(details,'details',details.textContent.trim()||'Details');}).observe(details,{childList:true});sync();
  // Keep the real list element and existing handlers, but anchor it to the actual trigger.
  bar.closest('.studio-toolrow').append(items);items.classList.add('ideare-anchored-items');itemButton.setAttribute('aria-controls',items.id);
- function position(){if(items.hidden||model.step!==3)return;const r=itemButton.getBoundingClientRect(),w=Math.min(310,window.innerWidth-16);items.style.width=w+'px';items.style.left=Math.max(8,Math.min(r.left,window.innerWidth-w-8))+'px';items.style.top=Math.round(r.bottom+5)+'px';items.style.maxHeight=Math.max(60,window.innerHeight-r.bottom-15)+'px';}
+ function position(){if(items.hidden||model.step!==3)return;const r=itemButton.getBoundingClientRect(),w=Math.min(350,window.innerWidth-16);items.style.width=w+'px';items.style.left=Math.max(8,Math.min(r.left,window.innerWidth-w-8))+'px';items.style.top=Math.round(r.bottom+5)+'px';items.style.maxHeight=Math.max(60,window.innerHeight-r.bottom-15)+'px';}
  new MutationObserver(position).observe(items,{attributes:true,attributeFilter:['hidden']});if(typeof ResizeObserver==='function')new ResizeObserver(position).observe(bar);window.addEventListener('resize',position);window.addEventListener('scroll',position,true);itemButton.addEventListener('click',()=>requestAnimationFrame(position));document.addEventListener('pointerdown',e=>{if(!items.hidden&&!items.contains(e.target)&&!itemButton.contains(e.target)){items.hidden=true;itemButton.setAttribute('aria-expanded','false');}});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!items.hidden){items.hidden=true;itemButton.setAttribute('aria-expanded','false');itemButton.focus();}});
 })();
+
+/* IDEARE item preview bridge v1: read the actual live scene; never modify it. */
+import {installItemPreviews} from './designer-item-previews.js?v=20261127-popup1';
+try {
+ const itemPreviews=installItemPreviews({THREE,
+  isBuild:()=>model.step===3,
+  getSource:(type,id)=>type==='cabinet'?meshById.get(id):type==='extra'?extraGroup?.children.find(o=>o.userData.extraId===id):worldGroup?.getObjectByName('ideare_wall_backsplashes')?.children.find(o=>o.userData.splashId===id),
+  getSpec:(type,id)=>{const item=type==='cabinet'?model.cabinets.find(o=>o.uid===id):type==='extra'?model.extras.find(o=>o.id===id):model.room.backsplashes?.find(o=>o.id===id);return {...item,doorsOpen:type==='cabinet'&&model.selected===id&&model.doorsOpen,fridgeOpen:type==='cabinet'&&!!item&&ideareFridgeDoorPreview(item)};}
+ });
+ const drawBeforeItemPreviews=drawScene;drawScene=(...args)=>{const result=drawBeforeItemPreviews(...args);itemPreviews.refresh();return result;};
+} catch(error) {console.warn('IDEARE item previews could not initialize',error);}
 
 Promise.resolve().then(()=>boot()).catch(ideareStartupError);
