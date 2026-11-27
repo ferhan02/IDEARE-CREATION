@@ -9,6 +9,7 @@ $pageStyles = $pageStyles ?? [];
 // Classify the customer route only; staff pages do not include this header.
 $currentRoute = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
 $idearePage = match (true) {
+    str_contains($currentRoute, '/home-configurator/') => 'home-configurator',
     str_contains($currentRoute, '/designer/') => 'designer',
     str_contains($currentRoute, '/public/pages/about.php') => 'about',
     str_contains($currentRoute, '/public/pages/services.php') => 'services',
@@ -25,7 +26,7 @@ $idearePage = match (true) {
 $currentScript = str_replace('\\', '/', $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '');
 $customerRoot = $customerRoot ?? (
     str_contains($currentScript, '/public/pages/') ? '../../' :
-    (str_contains($currentScript, '/designer/') || str_contains($currentScript, '/pages/') ? '../' : '')
+    (str_contains($currentScript, '/designer/') || str_contains($currentScript, '/home-configurator/') || str_contains($currentScript, '/pages/') ? '../' : '')
 );
 ?>
 <!doctype html>
@@ -49,6 +50,9 @@ $customerRoot = $customerRoot ?? (
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/desktop.css" media="(min-width: 1200px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/tablet.css" media="(min-width: 768px) and (max-width: 1199px)">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/phone.css" media="(max-width: 767px)">
+<?php if (in_array($idearePage, ['designer','home-configurator'], true)): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/design-studio-spacing.css?v=20261126">
+<?php endif; ?>
 <?php if ($idearePage === 'home'): ?>
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/portfolio-showcase.css">
 <link rel="stylesheet" href="<?= htmlspecialchars($customerRoot, ENT_QUOTES, 'UTF-8') ?>assets/css/responsive/portfolio-desktop.css" media="(min-width: 1200px)">

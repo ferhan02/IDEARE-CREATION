@@ -1,0 +1,13 @@
+(()=>{'use strict';
+ const $=id=>document.getElementById(id),main=$('hc'),layout=main.querySelector('.hc-layout'),ids=['lw','lh','side','end','shape','terrain','site','utilities'];
+ let stage='land';
+ function land(){return Object.fromEntries(ids.map(k=>[k,$(k).value]));}
+ function persist(){try{localStorage.setItem('ideare-p5d-land',JSON.stringify(land()));}catch{}}
+ try{const old=JSON.parse(localStorage.getItem('ideare-p5d-land')||'{}');ids.forEach(k=>{if(old[k]!=null)$(k).value=old[k]});}catch{}
+ ids.forEach(k=>$(k).addEventListener('change',persist));
+ function resize(){layout.style.setProperty('--hc-workspace-top',Math.ceil(layout.getBoundingClientRect().top+window.scrollY)+'px');layout.style.setProperty('--hc-footer-height',Math.ceil(document.querySelector('.site-footer')?.getBoundingClientRect().height||0)+'px');}
+ function go(next){if(!['land','build','finalize'].includes(next))return;stage=next;main.dataset.stage=next;$('p5d-land').hidden=next!=='land';$('p5d-final').hidden=next!=='finalize';main.querySelectorAll('[data-hc-stage]').forEach(b=>{if(b.dataset.hcStage===next)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});$('stage-next').textContent=next==='land'?'Build home →':next==='build'?'Finalize →':'← Keep designing';persist();resize();}
+ main.querySelectorAll('[data-hc-stage]').forEach(b=>b.onclick=()=>go(b.dataset.hcStage));$('stage-next').onclick=()=>go(stage==='land'?'build':stage==='build'?'finalize':'build');$('p5d-continue').onclick=()=>go('build');
+ $('p5d-lead').addEventListener('submit',async e=>{e.preventDefault();const form=e.currentTarget,button=form.querySelector('button[type=submit]'),data=Object.fromEntries(new FormData(form));button.disabled=true;$('p5d-result').textContent='Submitting…';try{const r=await fetch('submit.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contact:{name:data.name,phone:data.phone,location:data.location,consent:data.consent},plan:{version:2,provider:'planner5d',project_reference:data.project,settings:{...land(),budget:$('p5d-budget').value,tier:$('p5d-tier').value},floors:[]},estimate:null})});const j=await r.json();if(!r.ok)throw Error(j.error||'Submission failed');$('p5d-result').textContent='Concept received. Reference: '+j.reference;}catch(err){$('p5d-result').textContent=err.message;}finally{button.disabled=false;}});
+ const observer=new ResizeObserver(resize);observer.observe(main.querySelector('.hc-head'));observer.observe(main.querySelector('.hc-steps'));if(document.querySelector('.site-footer'))observer.observe(document.querySelector('.site-footer'));window.addEventListener('resize',resize);go('land');
+})();
