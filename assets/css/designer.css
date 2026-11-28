@@ -758,3 +758,29 @@ html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .v10-plan-panel{
 .id3-studio .ideare-door-wall-button strong{font-size:12px;min-width:0;overflow-wrap:anywhere;}
 .id3-studio .ideare-door-wall-button span{font-size:10px;font-weight:600;color:var(--studio-muted);white-space:nowrap;}
 .id3-studio .ideare-door-wall-button:hover,.id3-studio .ideare-door-wall-button:focus-visible{border-color:var(--studio-accent)!important;outline:2px solid var(--studio-accent);outline-offset:2px;}
+
+/* IDEARE room precision and finish grids */
+html[data-ideare-page="designer"] .id3-studio .ideare-edge-box{min-width:0;max-width:100%;height:28px;gap:3px;overflow:hidden;box-sizing:border-box;font-family:system-ui,sans-serif;}
+html[data-ideare-page="designer"] .id3-studio .ideare-edge-box input{flex:1 1 0;width:0!important;min-width:0!important;min-height:0!important;max-height:22px!important;height:22px!important;line-height:20px!important;padding:0 2px!important;border:0!important;box-shadow:none!important;border-radius:0!important;}
+html[data-ideare-page="designer"] .id3-studio .ideare-edge-box span{flex:0 0 auto;}
+html[data-ideare-page="designer"] .id3-studio .ideare-mount-field{display:grid;gap:5px;border-top:1px solid var(--studio-line);padding:10px 0;margin-top:8px;min-width:0;}
+html[data-ideare-page="designer"] .id3-studio .ideare-mount-field label{margin:0;font-size:12px;}
+html[data-ideare-page="designer"] .id3-studio .ideare-mount-field small{font-size:11px;color:var(--studio-muted);line-height:1.45;}
+html[data-ideare-page="designer"] .id3-studio #studio-finish-library,
+html[data-ideare-page="designer"] .id3-studio #studio-finish-recents,
+html[data-ideare-page="designer"] .id3-studio .v10-finish-ui{min-width:0!important;width:100%!important;max-width:100%!important;box-sizing:border-box;}
+html[data-ideare-page="designer"] .id3-studio #studio-finish-results,
+html[data-ideare-page="designer"] .id3-studio .studio-finish-grid,
+html[data-ideare-page="designer"] .id3-studio .v10-gallery{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-auto-columns:minmax(0,1fr);align-content:start;gap:8px!important;width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box;overflow-x:hidden!important;overflow-y:auto;scrollbar-gutter:stable;padding:3px!important;}
+html[data-ideare-page="designer"] .id3-studio :is(#studio-finish-results,.studio-finish-grid,.v10-gallery)>button{width:100%!important;max-width:100%!important;min-width:0!important;flex:initial!important;box-sizing:border-box;overflow:hidden;white-space:normal;align-items:stretch;}
+html[data-ideare-page="designer"] .id3-studio :is(.studio-finish-thumb,.v10-gallery img){width:100%!important;max-width:100%!important;min-width:0!important;height:auto!important;aspect-ratio:1.15;}
+html[data-ideare-page="designer"] .id3-studio .studio-finish-thumb img{display:block;width:100%!important;height:100%!important;max-width:100%!important;object-fit:cover;}
+html[data-ideare-page="designer"] .id3-studio .studio-finish-name{white-space:normal;overflow-wrap:anywhere;min-width:0;}
+html[data-ideare-page="designer"] .id3-studio .ideare-finish-expand{display:block;width:100%;min-width:0;padding:9px 10px!important;border:1px solid var(--studio-line)!important;background:var(--studio-paper)!important;color:var(--studio-ink)!important;border-radius:8px;font-size:12px;font-weight:650;text-align:center;cursor:pointer;}
+html[data-ideare-page="designer"] .id3-studio .ideare-finish-expand:hover{border-color:var(--studio-accent)!important;}
+html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .id3-inspector.ideare-finishes-expanded:has(#studio-finish-library){width:min(560px,calc(100% - 30px))!important;overflow-x:hidden!important;}
+html[data-ideare-page="designer"] .id3-studio .ideare-finishes-expanded #studio-finish-results{max-height:min(55dvh,620px)!important;}
+html[data-ideare-page="designer"] .id3-studio .v10-finish-ui.ideare-finishes-expanded .v10-gallery{max-height:min(65dvh,640px)!important;}
+html[data-ideare-page="designer"] .id3-studio #studio-finish-library{grid-template-columns:minmax(0,1fr);}
+html[data-ideare-page="designer"] .id3-studio #studio-finish-library>*{min-width:0;max-width:100%;}
+html[data-ideare-page="designer"] .id3-studio .studio-finish-thumb img{min-width:0!important;}

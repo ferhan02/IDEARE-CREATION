@@ -60,7 +60,7 @@ try {
    $fx=$a['x']+($b['x']-$a['x'])*$offset;$fz=$a['z']+($b['z']-$a['z'])*$offset;
    $f->execute([$roomId,id3_uuid(),$type,$wall,$fx,id3_num($feature['y']??0,0,8000,'feature y'),$fz,id3_num($feature['width']??150,10,5000,'feature width'),id3_num($feature['height']??100,10,5000,'feature height'),10,json_encode($feature)]);
  }
- $templateRows=$pdo->query('SELECT id,min_width,max_width,min_height,max_height,min_depth,max_depth FROM cabinet_templates WHERE is_active=1')->fetchAll();$validIds=[];foreach($templateRows as $row)$validIds[(int)$row['id']]=$row;
+ $templateRows=$pdo->query('SELECT t.id,t.min_width,t.max_width,t.min_height,t.max_height,t.min_depth,t.max_depth,cat.slug AS category_slug FROM cabinet_templates t JOIN cabinet_categories cat ON cat.id=t.category_id WHERE t.is_active=1')->fetchAll();$validIds=[];foreach($templateRows as $row)$validIds[(int)$row['id']]=$row;
  $savedItemMap=[];
  $finding=$pdo->prepare('INSERT INTO designer_validation_findings (design_id,design_item_id,finding_code,severity,message,state,details_json) VALUES (?,?,?,?,?,\'open\',?)');
  $si=$pdo->prepare('INSERT INTO design_items (design_id,object_uuid,cabinet_template_id,position_order,pos_x_mm,pos_y_mm,pos_z_mm,rotation_y_deg,width,height,depth,carcass_thickness_mm,config_json,validation_state,quantity,item_price) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,0)');
@@ -71,7 +71,10 @@ try {
    $cw=id3_num($c['width']??null,100,10000,'cabinet width');$ch=id3_num($c['height']??null,100,10000,'cabinet height');$cd=id3_num($c['depth']??null,100,10000,'cabinet depth');
    $th=id3_num($c['thickness']??18,10,50,'carcass thickness');$x=id3_num($c['x']??0,-20000,20000,'cabinet x');$z=id3_num($c['z']??0,-20000,20000,'cabinet z');
    $warning=(bool)($c['needsReview']??true);
-   $si->execute([$did,id3_uuid(),(int)$c['templateId'],$n+1,$x,0,$z,id3_num($c['rotation']??0,-360,360,'rotation'),$cw,$ch,$cd,$th,json_encode($c),$warning?'review':'unchecked']);
+   $isWall=$validIds[(int)$c['templateId']]['category_slug']==='wall-cabinets';
+   $mount=$isWall?id3_num($c['mountHeightMm']??1350,0,$height,'cabinet mounting height'):0;
+   if($mount+$ch>$height+.01)throw new DomainException('Cabinet exceeds ceiling height.');
+   $si->execute([$did,id3_uuid(),(int)$c['templateId'],$n+1,$x,$mount,$z,id3_num($c['rotation']??0,-360,360,'rotation'),$cw,$ch,$cd,$th,json_encode($c),$warning?'review':'unchecked']);
    $iid=(int)$pdo->lastInsertId();
    if(!empty($c['uid'])&&is_string($c['uid']))$savedItemMap[$c['uid']]=$iid;
    $limits=$validIds[(int)$c['templateId']];

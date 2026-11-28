@@ -86,7 +86,7 @@ function warningsFor(c){let res=[],t=template(c.templateId);if(!t)return [{type:
  if((c.shelfPositions||[]).some(v=>v<=0||v>=innerH))res.push({type:'error',text:'One or more shelves sit outside the usable internal height.'});
  if(c.x-c.width/2<0||c.z-c.depth/2<0||c.x+c.width/2>model.room.width||c.z+c.depth/2>model.room.depth)res.push({type:'review',text:'Cabinet footprint extends beyond the room bounding dimensions.'});
  if(!cabinetFitsPolygon(c))res.push({type:'review',text:'Part of the cabinet lies outside the actual room outline. Check the selected room shape and cabinet position.'});
- for(const other of model.cabinets){if(c===other)continue;const ax=c.rotation%180===0?c.width:c.depth,az=c.rotation%180===0?c.depth:c.width,bx=other.rotation%180===0?other.width:other.depth,bz=other.rotation%180===0?other.depth:other.width;const cY=c.category==='wall-cabinets'?1350:0,oY=other.category==='wall-cabinets'?1350:0;const verticalOverlap=Math.min(cY+c.height,oY+other.height)>Math.max(cY,oY)+5;if(Math.abs(c.x-other.x)<(ax+bx)/2-5&&Math.abs(c.z-other.z)<(az+bz)/2-5&&verticalOverlap){res.push({type:'error',text:'Cabinet overlaps another cabinet. Move it or adjust its size.'});break;}}
+ for(const other of model.cabinets){if(c===other)continue;const ax=c.rotation%180===0?c.width:c.depth,az=c.rotation%180===0?c.depth:c.width,bx=other.rotation%180===0?other.width:other.depth,bz=other.rotation%180===0?other.depth:other.width;const cY=ideareMountBase(c),oY=ideareMountBase(other);const verticalOverlap=Math.min(cY+c.height,oY+other.height)>Math.max(cY,oY)+5;if(Math.abs(c.x-other.x)<(ax+bx)/2-5&&Math.abs(c.z-other.z)<(az+bz)/2-5&&verticalOverlap){res.push({type:'error',text:'Cabinet overlaps another cabinet. Move it or adjust its size.'});break;}}
  return res;}
 function allWarnings(){return model.cabinets.flatMap(c=>warningsFor(c).filter(w=>w.type!=='info').map(w=>({...w,cabinet:c.name})));}
 function emitValidation(){for(const c of model.cabinets)c.needsReview=warningsFor(c).some(w=>w.type!=='info')||true;}
@@ -241,13 +241,13 @@ let floorTexture=null;function makeFloorTexture(){if(floorTexture){floorTexture.
 function disposeGroup(g){g.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){let a=Array.isArray(o.material)?o.material:[o.material];a.forEach(m=>m.dispose());}});}
 function worldPointFromPointer(evt){let rect=canvas.getBoundingClientRect();let mouse=new THREE.Vector2((evt.clientX-rect.left)/rect.width*2-1,-(evt.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(mouse,camera);let pos=new THREE.Vector3();return raycaster.ray.intersectPlane(ground,pos)?pos:null;}
 function onPointerDown(e){if(model.step!==3||!camera||!renderer)return;if(e.button!==0)return;const r=canvas.getBoundingClientRect();let mouse=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects([...cabinetGroup.children,...extraGroup.children],true);let hit=hits[0],uid=null,extraUid=null;if(hit){let o=hit.object;while(o){if(o.userData?.uid){uid=o.userData.uid;break;}if(o.userData?.extraId){extraUid=o.userData.extraId;break;}o=o.parent;}}if(uid){select(uid);draggingId=uid;controls.enabled=false;canvas.setPointerCapture?.(e.pointerId);}else if(extraUid){selectExtra(extraUid);draggingExtraId=extraUid;controls.enabled=false;canvas.setPointerCapture?.(e.pointerId);}else{if(model.selected||model.selectedExtra)select(null);}pointerStart={x:e.clientX,y:e.clientY,started:false,uid:uid||extraUid};}
-function onPointerMove(e){if((!draggingId&&!draggingExtraId)||!pointerStart||!camera)return;let dx=e.clientX-pointerStart.x,dy=e.clientY-pointerStart.y;if(Math.hypot(dx,dy)<4&&!pointerStart.started)return;if(!pointerStart.started){history();pointerStart.started=true;}let p=worldPointFromPointer(e);if(!p)return;let c=draggingId?model.cabinets.find(a=>a.uid===draggingId):model.extras.find(a=>a.id===draggingExtraId);if(!c)return;c.x=Math.round(p.x*1000/25)*25;c.z=Math.round(p.z*1000/25)*25;const g=draggingId?meshById.get(c.uid):extraGroup.children.find(x=>x.userData.extraId===c.id);if(g)g.position.set(c.x/1000,draggingId&&c.category==='wall-cabinets'?1.35:0,c.z/1000);$('#selection-badge').textContent=`Moved to ${mm(c.x)}, ${mm(c.z)}`;}
+function onPointerMove(e){if((!draggingId&&!draggingExtraId)||!pointerStart||!camera)return;let dx=e.clientX-pointerStart.x,dy=e.clientY-pointerStart.y;if(Math.hypot(dx,dy)<4&&!pointerStart.started)return;if(!pointerStart.started){history();pointerStart.started=true;}let p=worldPointFromPointer(e);if(!p)return;let c=draggingId?model.cabinets.find(a=>a.uid===draggingId):model.extras.find(a=>a.id===draggingExtraId);if(!c)return;c.x=Math.round(p.x*1000/25)*25;c.z=Math.round(p.z*1000/25)*25;const g=draggingId?meshById.get(c.uid):extraGroup.children.find(x=>x.userData.extraId===c.id);if(g)g.position.set(c.x/1000,draggingId?ideareMountBase(c)/1000:0,c.z/1000);$('#selection-badge').textContent=`Moved to ${mm(c.x)}, ${mm(c.z)}`;}
 function onPointerUp(){if(pointerStart?.started){renderAll();changed(false)}draggingId=null;draggingExtraId=null;pointerStart=null;if(controls)controls.enabled=true;}
 function fetchTexture(obj){let src=mediaPath(obj?.image);if(!src)return null;if(textureCache.has(src))return textureCache.get(src);let t=new THREE.TextureLoader().load(src,()=>{if(renderer)drawScene()},undefined,()=>{textureCache.set(src,null)});t.colorSpace=THREE.SRGBColorSpace;t.wrapS=t.wrapT=THREE.RepeatWrapping;textureCache.set(src,t);return t;}
 function finishMat(c){let texture=fetchTexture(c.material);return texture?new THREE.MeshStandardMaterial({color:'#fff',map:texture,roughness:.8}):mat(c.color||'#907053');}
 function addRoom(){let vertices=roomVertices();let floor=new THREE.Mesh(polygonFloor(vertices),new THREE.MeshStandardMaterial({map:makeFloorTexture(),roughness:.9,side:THREE.DoubleSide}));floor.rotation.x=-Math.PI/2;floor.position.y=-.011;floor.receiveShadow=true;worldGroup.add(floor);
  let walls=new THREE.Group(),h=model.room.height/1000;
- vertices.forEach((a,i)=>{let b=vertices[(i+1)%vertices.length];if((model.room.shape==='open'||model.room.shape==='u_open')&&i===2)return;if(model.room.shape==='l_open'&&i===3)return;let ax=a.x/1000,az=a.z/1000,bx=b.x/1000,bz=b.z/1000,len=Math.hypot(bx-ax,bz-az);let color=mat(i%2?'#dedbd5':'#f0efeb');color.transparent=true;color.opacity=.73;color.depthWrite=false;ideareJoinedWall(walls,vertices,i,model.room,h,color,'room_wall');});worldGroup.add(walls);
+ vertices.forEach((a,i)=>{let b=vertices[(i+1)%vertices.length];if((model.room.shape==='open'||model.room.shape==='u_open')&&i===2)return;let ax=a.x/1000,az=a.z/1000,bx=b.x/1000,bz=b.z/1000,len=Math.hypot(bx-ax,bz-az);let color=mat(i%2?'#dedbd5':'#f0efeb');color.transparent=true;color.opacity=.73;color.depthWrite=false;ideareJoinedWall(walls,vertices,i,model.room,h,color,'room_wall');});worldGroup.add(walls);
  for(const f of model.features){if(f.type==='door')continue;let a=vertices[f.wallIndex%vertices.length],b=vertices[(f.wallIndex+1)%vertices.length];if(!a||!b)continue;let portion=clamp(f.offset??.5,.05,.95),x=(a.x+(b.x-a.x)*portion)/1000,z=(a.z+(b.z-a.z)*portion)/1000;let feature=addBox(worldGroup,Math.max(.1,n(f.width,700)/1000),Math.max(.1,n(f.height,800)/1000),.028,x,(n(f.y,500)+n(f.height,800)/2)/1000,z,mat(f.type==='door'?'#b99070':f.type==='window'?'#7fa9bb':f.type==='plumbing'?'#417cb2':'#c4ac79'),'room_feature');feature.material.transparent=true;feature.material.opacity=.65;}
  // Simple ground grid helps navigation and measurement intuition.
  const grid=new THREE.GridHelper(Math.max(model.room.width,model.room.depth)/1000+2,Math.max(4,Math.round(Math.max(model.room.width,model.room.depth)/500)),0xbbb2a5,0xcfc8ba);grid.position.set(model.room.width/2000,.002,model.room.depth/2000);grid.material.transparent=true;grid.material.opacity=.18;worldGroup.add(grid);
@@ -290,7 +290,7 @@ function makeCabinet(c){let w=c.width/1000,d=c.depth/1000,t=clamp(c.thickness/10
  if(c.basket){let organizer=mat('#a4a8a9',.3);organizer.metalness=.8;addBox(g,insideW*.75,.018,insideD*.72,0,y0+.17,0,organizer,'basket_tray');}
  const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w+.01,h+y0+.03,d+.04)),new THREE.LineBasicMaterial({color:0xb3905c}));outline.position.y=(y0+h)/2;outline.visible=model.selected===c.uid;g.add(outline);
  // Select by group identity no matter which carcass part is clicked.
- g.position.set(c.x/1000,c.category==='wall-cabinets'?1.35:0,c.z/1000);g.rotation.y=-n(c.rotation)*Math.PI/180;return g;
+ g.position.set(c.x/1000,ideareMountBase(c)/1000,c.z/1000);g.rotation.y=-n(c.rotation)*Math.PI/180;return g;
 }
 
 function addSharedElements(){for(const element of model.shared){
@@ -443,7 +443,7 @@ function v6CornerModel(c){
  if(/carousel/.test(String(c.name).toLowerCase())){const r=Math.min(w,d)*.28,material=mat('#b4b6b4',.35);for(const y of [pl+.10,pl+h*.50]){const tray=new THREE.Mesh(new THREE.CylinderGeometry(r,r,.025,40),material);tray.position.set(-w*.13,y,-d*.13);tray.name='corner_carousel_tray';g.add(tray);}}
  const pts=[];for(let i=0;i<p.length;i++){const a=p[i],b=p[(i+1)%p.length];for(const y of [0,H+.03])pts.push(new THREE.Vector3(a[0],y,a[1]),new THREE.Vector3(b[0],y,b[1]));pts.push(new THREE.Vector3(a[0],0,a[1]),new THREE.Vector3(a[0],H+.03,a[1]));}
  const outline=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0xb3905c}));outline.visible=model.selected===c.uid;g.add(outline);
- g.position.set(c.x/1000,0,c.z/1000);g.rotation.y=-(Number(c.rotation)||0)*Math.PI/180;return g;
+ g.position.set(c.x/1000,ideareMountBase(c)/1000,c.z/1000);g.rotation.y=-(Number(c.rotation)||0)*Math.PI/180;return g;
 }
 function v6Hood(c,make){
  const H=c.height/1000,w=c.width/1000,d=c.depth/1000;
@@ -489,7 +489,7 @@ const baseShowStep=showStep, baseApplyHistory=applyHistory, baseWarnings=warning
 const roomKind=v=>/^(wet kitchen|dry kitchen|kitchen)$/i.test(v||'')?'Kitchen':/^(wardrobe|bedroom)$/i.test(v||'')?'Bedroom':/^living room$/i.test(v||'')?'Living room':'Other';
 model.roomType='Kitchen'; $('#room-kind').value='Kitchen';
 const rect=c=>{const q=((Math.round(n(c.rotation)/90)%4)+4)%4, w=q%2?c.depth:c.width, d=q%2?c.width:c.depth;return {l:c.x-w/2,r:c.x+w/2,t:c.z-d/2,b:c.z+d/2,w,d};};
-const low=c=>c.category==='wall-cabinets'?1350:0;
+const low=c=>ideareMountBase(c);
 const top=c=>low(c)+c.height;
 const verticallyOverlaps=(a,b)=>Math.min(top(a),top(b))-Math.max(low(a),low(b))>EPS;
 const overlaps=(a,b)=>verticallyOverlaps(a,b)&&v6Overlap(a,b);
@@ -1324,7 +1324,7 @@ const measure=c=>{const swapped=Math.round((Number(c.rotation)||0)/90)%2!==0;
  const w=swapped?Number(c.depth):Number(c.width),d=swapped?Number(c.width):Number(c.depth);
  return {w,d,l:c.x-w/2,r:c.x+w/2,t:c.z-d/2,b:c.z+d/2};};
 function visibleHeight(c){
- if(isCab(c)){const base=mountedCab(c)?1350:0;return [base,base+Number(c.height)];}
+ if(isCab(c)){const base=ideareMountBase(c);return [base,base+Number(c.height)];}
  const bounds=ideareExtraBounds(c);if(bounds)return [bounds.y0,bounds.y1];
  const p=itemProfile(c),s=p?.shape||'',h=Number(c.height)||500,roomH=model.room.height;
  const cy=clampV(roomH*.57,1100,2000);
@@ -1337,7 +1337,7 @@ function visibleHeight(c){
 }
 function actualWalls(){const vertices=roomVertices(),arr=[];for(let i=0;i<vertices.length;i++){
  if((model.room.shape==='open'||model.room.shape==='u_open')&&i===2)continue;
- if(model.room.shape==='l_open'&&i===3)continue;
+ 
  const a=vertices[i],b=vertices[(i+1)%vertices.length];
  if(Math.abs(a.x-b.x)<.01)arr.push({axis:'x',v:a.x,min:Math.min(a.z,b.z),max:Math.max(a.z,b.z)});
  else if(Math.abs(a.z-b.z)<.01)arr.push({axis:'z',v:a.z,min:Math.min(a.x,b.x),max:Math.max(a.x,b.x)});
@@ -2028,7 +2028,7 @@ function v7Swatch(p){if(v7SplashImages.has(p.id))return v7SplashImages.get(p.id)
 function v7SplashMaterial(p){if(!v7SplashTextures.has(p.id)){const tex=new THREE.CanvasTexture(v7Swatch(p));tex.colorSpace=THREE.SRGBColorSpace;tex.wrapS=tex.wrapT=THREE.RepeatWrapping;v7SplashTextures.set(p.id,tex);}return new THREE.MeshStandardMaterial({color:0xffffff,map:v7SplashTextures.get(p.id),roughness:p.style==='glass'?.18:p.style==='metal'?.36:.62,metalness:p.style==='metal'?.65:0});}
 function v7BacksplashMesh(g,c){if(!c.backsplash||!v7Base(c))return;const p=v7Splash.find(x=>x.id===c.backsplashStyle)||v7Splash[0],w=c.width/1000,d=c.depth/1000,H=c.height/1000,base=H+.028;let ht=Math.min(.45,Math.max(0,model.room.height/1000-base));
  // Limit height to the underside of any upper cabinet overlapping this run.
- for(const o of model.cabinets){if(o.category!=='wall-cabinets'||!v6Overlap(c,o,.01))continue;ht=Math.min(ht,Math.max(0,1.35-base-.006));}if(ht<.02)return;
+ for(const o of model.cabinets){if(o.category!=='wall-cabinets'||!v6Overlap(c,o,.01))continue;ht=Math.min(ht,Math.max(0,ideareMountBase(o)/1000-base-.006));}if(ht<.02)return;
  const material=v7SplashMaterial(p),th=.008;
  const add=(len,x,z,rotation=0)=>{const mesh=addBox(g,len,ht,th,x,base+ht/2,z,material,'v7_backsplash');mesh.rotation.y=rotation;const uv=mesh.geometry.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*Math.max(1,len/.5),uv.getY(i)*Math.max(1,ht/.5));uv.needsUpdate=true;};
  add(w,0,-d/2+th/2);if(v6Kind(c)==='l'||v6Kind(c)==='diagonal')add(d-th,-w/2+th/2,th/2,Math.PI/2);
@@ -2077,7 +2077,7 @@ const key=c=>c?.uid||c?.id||null;
 const isSplash=c=>!!c&&c.kind==='ideare-wall-backsplash';
 const finish=p=>v7Splash.find(f=>f.id===p.style)||v7Splash[0];
 function walls(){const v=roomVertices(),a=[];for(let i=0;i<v.length;i++){
- if((['open','u_open'].includes(model.room.shape)&&i===2)||(model.room.shape==='l_open'&&i===3))continue;
+ if((['open','u_open'].includes(model.room.shape)&&i===2))continue;
  const p=v[i],q=v[(i+1)%v.length],len=Math.hypot(q.x-p.x,q.z-p.z);if(len<1)continue;
  const tx=(q.x-p.x)/len,tz=(q.z-p.z)/len,mx=(p.x+q.x)/2,mz=(p.z+q.z)/2;
  const sign=pointInsidePolygon(mx-tz*10,mz+tx*10,v)?1:-1;
@@ -2104,7 +2104,7 @@ function rebuildCutaway(){
  const push=(x,y,z)=>{if(pointInsidePolygon(x,z,poly))wallSamples.push({x,y,z});};
  // Sample the room's working area and the centres of its actual objects.
  for(const x of [.18,.35,.5,.65,.82])for(const z of [.18,.35,.5,.65,.82])push(model.room.width*x,Math.min(850,model.room.height*.4),model.room.depth*z);
- for(const c of model.cabinets)push(c.x,(c.category==='wall-cabinets'?1350:0)+c.height/2,c.z);
+ for(const c of model.cabinets)push(c.x,(ideareMountBase(c))+c.height/2,c.z);
  for(const c of model.extras)push(c.x,Math.min(model.room.height-10,Math.max(100,c.height/2)),c.z);
 }
 function syncCutaway(force=false){
@@ -2214,7 +2214,7 @@ resizeButton.onclick=toggleMode;
 const inspector=$('#selected-inspector');const row=inspector?.querySelector('.id3-object-actions');if(row){const b=document.createElement('button');b.type='button';b.id='v8-inspector-resize';b.textContent='⤡ Resize';b.onclick=toggleMode;row.insertBefore(b,$('#rotate'));}
 function frame(c){if(isSplash(c)){const w=wall(c);if(!w)return null;return{width:c.width,height:c.height,depth:0,front:0,point:(u,y)=>wallPoint(w,c.offset+c.width/2+u,c.bottom+y,9),axis:{u:new THREE.Vector3(w.tx,0,w.tz),y:new THREE.Vector3(0,1,0)},wall:true};}
  const a=num(c.rotation)*Math.PI/180,co=Math.cos(a),si=Math.sin(a),g=c.uid?meshById.get(c.uid):extraGroup?.children.find(o=>o.userData.extraId===c.id);if(!g)return null;
- const wallCab=c.category==='wall-cabinets',mountedExtra=!c.uid&&['wall-shelf','rack','organiser','rail','lighting','safety','hood','wall-table'].includes(window.IDEAREDesignerCatalogV3?.findProfile(c)?.shape);let bottom=wallCab?1350:0;
+ const wallCab=c.category==='wall-cabinets',mountedExtra=!c.uid&&['wall-shelf','rack','organiser','rail','lighting','safety','hood','wall-table'].includes(window.IDEAREDesignerCatalogV3?.findProfile(c)?.shape);let bottom=ideareMountBase(c);
  if(mountedExtra){const outline=g.getObjectByName('ideare_extra_outline');bottom=Math.max(0,num(outline?.position.y)*1000-c.height/2);}
  if(ideareFridgeHousing(c)){const p=ideareFridgePart(c),ax=new THREE.Vector3(co,0,si),az=new THREE.Vector3(-si,0,co);return {width:p.w,height:p.h,depth:p.d,front:1,wall:true,axis:{u:ax,y:new THREE.Vector3(0,1,0),z:az},point:(u,y,z)=>new THREE.Vector3((c.x+(u+p.u)*co-(z+p.z)*si)/1000,(p.y+y)/1000,(c.z+(u+p.u)*si+(z+p.z)*co)/1000)};}
  const ax=new THREE.Vector3(co,0,si),az=new THREE.Vector3(-si,0,co),front=wallCab||mountedExtra||((camera.position.x-c.x/1000)*az.x+(camera.position.z-c.z/1000)*az.z)>=0?1:-1;
@@ -2243,7 +2243,7 @@ function cabCandidate(b,d,info,f){if(ideareFridgeHousing(b))return ideareResizeF
  const edges=(axis)=>{const values=[];const pr=(x,z)=>axis==='u'?x*co+z*si:-x*si+z*co;for(const p of roomVertices())values.push(pr(p.x,p.z));for(const o of ideareAlignmentObjects()){if(key(o)===key(b))continue;for(const [x,z] of v6World(o,v6Local(o)))values.push(pr(x,z));}return values;};
  let du=0,dz=0;if(info.sx){const s=info.sx,origin=b.x*co+b.z*si+s*b.width/2,delta=nearest(origin+d.u,edges('u'))-origin;const [lo,hi]=limits('width');q.width=clamp8(b.width+s*delta,lo,hi);du=s*(q.width-b.width)/2;}
  if(info.sz){const s=info.sz,origin=-b.x*si+b.z*co+s*b.depth/2,delta=nearest(origin+d.z,edges('z'))-origin;const [lo,hi]=limits('depth');q.depth=clamp8(b.depth+s*delta,lo,hi);dz=s*(q.depth-b.depth)/2;}
- if(info.sy>0){const [lo,hi]=limits('height');const base=b.category==='wall-cabinets'?1350:0,targets=[model.room.height-base];for(const o of ideareAlignmentObjects())if(key(o)!==key(b))targets.push(...ideareAlignBounds(o).y.map(y=>y-base));q.height=clamp8(nearest(b.height+d.y,targets),lo,Math.min(hi,Math.max(lo,model.room.height-base)));if(q.height!==b.height)q.shelfPositions=[];}
+ if(info.sy>0){const [lo,hi]=limits('height');const base=ideareMountBase(b),targets=[model.room.height-base];for(const o of ideareAlignmentObjects())if(key(o)!==key(b))targets.push(...ideareAlignBounds(o).y.map(y=>y-base));q.height=clamp8(nearest(b.height+d.y,targets),lo,Math.min(hi,Math.max(lo,model.room.height-base)));if(q.height!==b.height)q.shelfPositions=[];}
  q.x=b.x+du*co-dz*si;q.z=b.z+du*si+dz*co;return q;}
 function repaint(c){if(isSplash(c)){const old=splashGroup?.children.find(o=>o.userData.splashId===c.id);const next=meshPanel(c);if(old&&next){splashGroup.remove(old);disposeGroup(old);splashGroup.add(next);}return;}const old=c.uid?meshById.get(c.uid):extraGroup.children.find(o=>o.userData.extraId===c.id),group=c.uid?cabinetGroup:extraGroup;if(!old)return;const next=c.uid?makeCabinet(c):window.IDEAREDesignerCatalogV3.realizeItem(c);group.remove(old);group.add(next);if(c.uid)meshById.set(c.uid,next);disposeGroup(old);}
 function update(e){const m=drag;if(!m)return;const c=target();if(!c||key(c)!==m.key)return;const dx=e.clientX-m.x,dy=e.clientY-m.y;if(!m.recorded&&Math.hypot(dx,dy)<3)return;const vals=solve(m.vectors,dx,dy),d={u:0,y:0,z:0};m.info.axes.forEach((k,i)=>d[k]=vals[i]);const candidate=()=>isSplash(c)?panelCandidate(m.base,d,m.info):cabCandidate(m.base,d,m.info,m.f),check=q=>isSplash(c)?panelValid(q):window.IDEAREPlacementV4?.valid(q);let q=candidate(),valid=check(q);if(!valid){ideareSnapSuppressed=true;try{q=candidate();valid=check(q);}finally{ideareSnapSuppressed=false;}}overlay.classList.toggle('v8-blocked',!valid);if(!valid){ideareClearGuides();return;}if(isSplash(q)){const w=wall(q);if(w)idearePanelGuide(q,w,panelTargets(q,w));}else ideareShowGuides(q,['x','z',...(m.info.sy?['y']:[])]);
@@ -2280,7 +2280,7 @@ function bounds(p){return {l:Math.min(...p.map(v=>v.x)),r:Math.max(...p.map(v=>v
 function candidate(p,r){if(!p||!validPoly(p))return null;const b=bounds(p),w=Math.round(b.r-b.l),d=Math.round(b.b-b.t);if(w<MIN||d<MIN||w>MAX||d>MAX)return null;return {room:{...r,width:w,depth:d,customOutline:{shape:r.shape,points:p.map(v=>({x:limit((v.x-b.l)/(b.r-b.l),0,1),z:limit((v.z-b.t)/(b.b-b.t),0,1)}))}},dx:-b.l,dz:-b.t,raw:p};}
 function contentsFit(r,dx=0,dz=0){const old=model.room,all=[...model.cabinets,...model.extras],pos=all.map(o=>[o.x,o.z]);try{model.room=r;for(const o of all){o.x+=dx;o.z+=dz;}return validPoly(vertices())&&ideareDoorsValid()&&all.every(o=>window.IDEAREPlacementV4?.valid?window.IDEAREPlacementV4.valid(o):cabinetFitsPolygon(o))&&(!window.IDEAREV8||window.IDEAREV8.roomValid());}catch(e){console.warn('IDEARE room validation',e);return false;}finally{model.room=old;all.forEach((o,i)=>{[o.x,o.z]=pos[i];});}}
 window.IDEARESpaceV10={roomValid:()=>contentsFit(model.room),test:{validPoly,moveEdge,candidate}};
-function solid(i,r=model.room){return !((['open','u_open'].includes(r.shape)&&i===2)||(r.shape==='l_open'&&i===3));}
+function solid(i,r=model.room){return !((['open','u_open'].includes(r.shape)&&i===2));}
 // Curated concept finishes. Every catalogue entry has a deterministic material swatch.
 const floors=[],wallFinishes=[];
 function group(list,category,style,items,rough=.65,scale=1.2){for(const [name,color] of items){list.push({id:(list===floors?'f':'w')+'-'+list.length,category,style,name,color,rough,scale});}}
@@ -2343,7 +2343,7 @@ function initPreview(){if(pr||pvFailed)return !!pr;try{pr=new THREE.WebGLRendere
 function resizePreview(){if(!pr||!cam)return;const r=pvWrap.getBoundingClientRect();if(r.width<4||r.height<4)return;pr.setSize(r.width,r.height,false);cam.aspect=r.width/r.height;cam.updateProjectionMatrix();}
 function fitPreview(r=pendingRoom||model.room){if(!cam||!orbit)return;const w=r.width/1000,d=r.depth/1000,h=r.height/1000,size=Math.max(w,d,h);orbit.target.set(w/2,Math.min(h*.45,1.6),d/2);cam.position.set(w/2+size*.9,h*.75+size*.75,d/2+size*1.05);cam.lookAt(orbit.target);orbit.update();}
 function paintPreview(){if(!pr||!ps||!cam||section.hidden||!pvWrap.clientWidth)return;const dark=document.documentElement.dataset.theme==='dark';ps.background=new THREE.Color(dark?'#292b2e':'#eae7e1');const eye=cam.position,t=orbit.target;for(const {mesh,a,b} of wallMeshes){const dx=b.x-a.x,dz=b.z-a.z,len=Math.hypot(dx,dz),side=(eye.x-a.x)*(-dz)+(eye.z-a.z)*dx,targetSide=(t.x-a.x)*(-dz)+(t.z-a.z)*dx;let blocked=false;if(side<-.0001&&targetSide>0){const s=side/(side-targetSide),x=eye.x+(t.x-eye.x)*s,z=eye.z+(t.z-eye.z)*s,y=eye.y+(t.y-eye.y)*s,u=((x-a.x)*dx+(z-a.z)*dz)/(len*len);blocked=u>=0&&u<=1&&y>=0&&y<=mesh.geometry.parameters.height;}mesh.visible=!blocked;}pr.render(ps,cam);}
-function buildPreview(r){if(section.hidden||!initPreview())return;const first=!pg;if(pg){ps.remove(pg);disposeGroup(pg);}pg=new THREE.Group();ps.add(pg);const vs=vertices(r),f=new THREE.Mesh(polygonFloor(vs),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.7,side:THREE.DoubleSide}));f.rotation.x=-Math.PI/2;f.position.y=-.005;pg.add(f);materialize(f,selectedFinish('floor',r),true);wallMeshes=[];for(let i=0;i<vs.length;i++){if(!solid(i,r))continue;const v=vs[i],q=vs[(i+1)%vs.length],a={x:v.x/1000,z:v.z/1000},b={x:q.x/1000,z:q.z/1000},len=Math.hypot(b.x-a.x,b.z-a.z),h=r.height/1000;const m=ideareJoinedWall(pg,vs,i,r,h,new THREE.MeshStandardMaterial({color:0xffffff}),'preview-wall');materialize(m,selectedFinish('wall',r));wallMeshes.push({mesh:m,a,b});}preview.querySelector('.v10-preview-height').textContent=`Ceiling ${Math.round(r.height)} mm`;resizePreview();if(first)fitPreview(r);paintPreview();}
+function buildPreview(r){if(section.hidden||!initPreview())return;const first=!pg;if(pg){ps.remove(pg);disposeGroup(pg);}pg=new THREE.Group();ps.add(pg);const vs=vertices(r),f=new THREE.Mesh(polygonFloor(vs),new THREE.MeshStandardMaterial({color:0xffffff,roughness:.7,side:THREE.DoubleSide}));f.rotation.x=-Math.PI/2;f.position.y=-.005;pg.add(f);materialize(f,selectedFinish('floor',r),true);wallMeshes=[];for(let i=0;i<vs.length;i++){if(!solid(i,r))continue;const v=vs[i],q=vs[(i+1)%vs.length],a={x:v.x/1000,z:v.z/1000},b={x:q.x/1000,z:q.z/1000},len=Math.hypot(b.x-a.x,b.z-a.z),h=r.height/1000;const m=ideareJoinedWall(pg,vs,i,r,h,new THREE.MeshStandardMaterial({color:0xffffff}),'preview-wall');materialize(m,selectedFinish('wall',r));wallMeshes.push({mesh:m,a,b});}preview.querySelector('.v10-preview-height').textContent=`Ceiling ${ideareCeilingLabel(r.height)}`;resizePreview();if(first)fitPreview(r);paintPreview();}
 function schedulePreview(r=model.room){pendingRoom=r;if(section.hidden)return;if(pvFrame)return;pvFrame=requestAnimationFrame(()=>{pvFrame=0;if(section.hidden)return;try{const r=pendingRoom,k=JSON.stringify([r.shape,r.width,r.depth,r.height,r.customOutline,r.spaceFinishes,model.features]);if(k!==lastRoomKey||!pg){lastRoomKey=k;buildPreview(r);}else{resizePreview();paintPreview();}}catch(error){console.error('IDEARE Define Space preview:',error);pvStatus.hidden=false;pvStatus.textContent='Room preview unavailable. The main designer remains available.';}});}
 preview.querySelector('[data-v10-fit]').onclick=()=>{if(initPreview()){fitPreview();paintPreview();}};if(typeof ResizeObserver==='function')new ResizeObserver(()=>{if(!section.hidden){resizePreview();schedulePreview(pendingRoom||model.room);}}).observe(pvWrap);if(typeof MutationObserver==='function')new MutationObserver(()=>{try{paintPreview();}catch(error){console.warn('IDEARE room preview theme:',error);}}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 // Screen-fixed drag frame: edges translate along their normal, adjacent lines intersect.
@@ -2355,7 +2355,7 @@ function displayPlan(p=vertices(),r=model.room,v=view(p),blocked=false){const {s
 const edgeMarkup=p.map((a,i)=>{const q=p[(i+1)%p.length],x=(a.x+q.x)/2,z=(a.z+q.z)/2,len=Math.hypot(q.x-a.x,q.z-a.z),nx=-(q.z-a.z)/len,nz=(q.x-a.x)/len;const angle=Math.atan2(nz,nx),cursor=Math.abs(Math.cos(angle))>.8?'ew-resize':Math.abs(Math.sin(angle))>.8?'ns-resize':nx*nz>0?'nwse-resize':'nesw-resize';const options=[34,66,98,130].flatMap(dist=>[0,35,-35,70,-70].map(shift=>({x:Math.max(3,Math.min(495,X(x)-nx*dist-nz*shift-50)),y:Math.max(40,Math.min(449,Z(z)-nz*dist+nx*shift-14))})));const free=o=>!labelRects.some(a=>Math.abs(a.x-o.x)<103&&Math.abs(a.y-o.y)<30);const spot=options.find(free)||options[0];labelRects.push(spot);labels.push(`<foreignObject x="${spot.x}" y="${spot.y}" width="100" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="ideare-edge-box"><span>${solid(i,r)?'W':'E'}${i+1}</span><input type="number" min="250" max="20000" step="1" data-ideare-edge-length="${i}" aria-label="Wall ${i+1} length in millimetres" value="${Math.round(len)}"/><span>mm</span></div></foreignObject>`);return `<line class="v10-plan-edge ${solid(i,r)?'':'v10-open-edge'}" x1="${X(a.x)}" y1="${Z(a.z)}" x2="${X(q.x)}" y2="${Z(q.z)}"/><line class="v10-edge-hit" data-edge="${i}" style="cursor:${cursor}" x1="${X(a.x)}" y1="${Z(a.z)}" x2="${X(q.x)}" y2="${Z(q.z)}"/><rect class="v10-plan-grip" data-edge="${i}" tabindex="0" role="button" aria-label="Resize edge ${i+1}, ${Math.round(len)} millimetres" x="${X(x)-7}" y="${Z(z)-7}" width="14" height="14" rx="3" style="cursor:${cursor}"/>`;}).join('');
 const corners=[[-1,-1],[1,-1],[-1,1],[1,1]].map(([sx,sz])=>{const x=sx<0?b.l:b.r,z=sz<0?b.t:b.b;return `<rect class="v10-plan-corner" data-corner="${sx},${sz}" tabindex="0" role="button" aria-label="Resize room corner" x="${X(x)-6}" y="${Z(z)-6}" width="12" height="12" rx="3" style="cursor:${sx===sz?'nwse-resize':'nesw-resize'}"/>`;}).join('');
 const dim=(k,value,x,y)=>`<foreignObject x="${x-54}" y="${y-15}" width="108" height="30"><div xmlns="http://www.w3.org/1999/xhtml" class="v10-dimension"><input aria-label="Room ${k} in millimetres" data-v10-dimension="${k}" type="number" min="1200" max="20000" step="1" value="${value}"/><span>mm</span></div></foreignObject>`;
-plan.innerHTML=`<svg viewBox="0 0 600 480" aria-label="Resizable room floor plan" class="${blocked?'v10-blocked':''}"><defs><pattern id="v10-plan-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="currentColor" stroke-width=".5" opacity=".11"/></pattern></defs><rect width="600" height="480" fill="url(#v10-plan-grid)"/><rect class="v10-bounds" x="${X(b.l)}" y="${Z(b.t)}" width="${w*s}" height="${d*s}"/><polygon points="${pts}" fill="${selectedFloor.color}" fill-opacity=".52"/><g>${edgeMarkup}</g>${ideareDoorPlan(p,r,X,Z,s)}${corners}${labels.join('')}<text x="${X(center.x)}" y="${Z(center.z)}" class="v10-plan-title" text-anchor="middle">${(area(p)/1e6).toFixed(2)} m²</text>${dim('width',w,300,24)}${dim('depth',d,535,32)}</svg>`;
+plan.innerHTML=`<svg viewBox="0 0 600 480" aria-label="Resizable room floor plan" class="${blocked?'v10-blocked':''}"><defs><pattern id="v10-plan-grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="currentColor" stroke-width=".5" opacity=".11"/></pattern></defs><rect width="600" height="480" fill="url(#v10-plan-grid)"/><rect class="v10-bounds" x="${X(b.l)}" y="${Z(b.t)}" width="${w*s}" height="${d*s}"/><polygon points="${pts}" fill="${selectedFloor.color}" fill-opacity=".52"/><g>${edgeMarkup}</g>${ideareDoorPlan(p,r,X,Z,s)}${corners}${labels.join('')}<text x="${X(center.x)}" y="${Z(center.z)}" class="v10-plan-title" text-anchor="middle">${(area(p)/1e6).toFixed(2)} m²</text></svg>`;
 $('#room-area').textContent=(area(p)/1e6).toFixed(2)+' m²';$('#room-badge').textContent=`${w} mm × ${d} mm`;planStatus.textContent=blocked?'That size would overlap an edge, cabinet or wall panel.':'Drag edges or type wall lengths · W = wall, E = open edge';}
 const previousRenderPlan=renderPlan;renderPlan=()=>{if(drag)return;try{displayPlan();schedulePreview();}catch(e){console.warn('IDEARE floor plan',e);previousRenderPlan();}};
 function updateFields(){for(const k of ['width','depth','height'])$('#room-'+k).value=model.room[k];}
@@ -2479,7 +2479,7 @@ function ideareCabinetInterior(c){if(!c.uid)return true;if(ideareFridgeHousing(c
  box(fw,wall,bodyD,cx,wall/2,bodyZ,metal,'ideare_appliance_finish_fridge_body');box(fw,wall,bodyD,cx,fh-wall/2,bodyZ,metal,'ideare_appliance_finish_fridge_body');for(const k of [-1,1])box(wall,fh-2*wall,bodyD,cx+k*(fw-wall)/2,fh/2,bodyZ,metal,'ideare_appliance_finish_fridge_body');box(fw-2*wall,fh-2*wall,wall,cx,fh/2,rear+wall/2,inner,'fridge_inner_back');for(let i=1;i<5;i++)box(fw-2*wall,.012,bodyD-.05,cx,fh*i/5,bodyZ,inner,'fridge_inner_shelf');
  function door(x,y,ww,hh,side){const pivot=new THREE.Group(),sign=side===1?1:-1;const hinge=x-sign*ww/2;pivot.position.set(hinge,y,front);const leafX=sign*ww/2;addBox(pivot,ww-.004,hh-.004,.023,leafX,0,0,metal,'ideare_appliance_finish_fridge_door');addBox(pivot,.014,Math.min(.34,hh*.55),.025,leafX+sign*(ww/2-.038),0,.024,black,'fridge_pull');pivot.rotation.y=doorOpen?-sign*Math.PI/2:0;g.add(pivot);}
  if(s.doors===1)door(cx,fh/2,fw,fh,1);else if(s.type==='side'||s.doors>=3){const split=s.doors===2?0:fh*.35,upper=fh-split;door(cx-fw/4,split+upper/2,fw/2,upper,1);door(cx+fw/4,split+upper/2,fw/2,upper,-1);if(s.doors===3)door(cx,split/2,fw,split,1);if(s.doors===4){door(cx-fw/4,split/2,fw/2,split,1);door(cx+fw/4,split/2,fw/2,split,-1);}}else{const split=fh*.35;door(cx,split/2,fw,split,1);door(cx,split+(fh-split)/2,fw,fh-split,1);}
- const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w+.01,H+.01,D+.01)),new THREE.LineBasicMaterial({color:0xb3905c}));outline.position.y=H/2;outline.visible=model.selected===c.uid;g.add(outline);g.position.set(c.x/1000,0,c.z/1000);g.rotation.y=-(Number(c.rotation)||0)*Math.PI/180;ideareTintAppliance(g,c);return g;}
+ const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w+.01,H+.01,D+.01)),new THREE.LineBasicMaterial({color:0xb3905c}));outline.position.y=H/2;outline.visible=model.selected===c.uid;g.add(outline);g.position.set(c.x/1000,ideareMountBase(c)/1000,c.z/1000);g.rotation.y=-(Number(c.rotation)||0)*Math.PI/180;ideareTintAppliance(g,c);return g;}
  const oldMake=makeCabinet;makeCabinet=(c,...args)=>ideareFridgeHousing(c)?housing(c):oldMake(c,...args);
  const surroundTemplate=()=>catalog.templates.find(t=>category(t)==='tall-cabinets'&&/fridge|refrigerator/.test(String(t.slug||t.name).toLowerCase()));
  const storageTemplate=()=>catalog.templates.find(t=>category(t)==='tall-cabinets'&&/tall.storage/.test(String(t.slug||t.name).toLowerCase()))||catalog.templates.find(t=>category(t)==='tall-cabinets'&&!/fridge|oven|microwave|dishwasher/.test(String(t.slug||t.name).toLowerCase()));
@@ -2500,7 +2500,7 @@ function ideareCabinetInterior(c){if(!c.uid)return true;if(ideareFridgeHousing(c
 })();
 ;
 /* IDEARE unified alignment and joined walls */
-function ideareSolidWall(i,r){return !((['open','u_open'].includes(r.shape)&&i===2)||(r.shape==='l_open'&&i===3));}
+function ideareSolidWall(i,r){return !((['open','u_open'].includes(r.shape)&&i===2));}
 // Vertices represent the finished inner faces. Intersect adjacent offset lines
 // to produce one continuous exterior corner, including angled and concave walls.
 function ideareWallPolygon(v,i,r,th=.075){
@@ -2532,7 +2532,7 @@ function ideareJoinedWall(group,v,i,r,h,material,name){
 function ideareMagnet(raw,target,enter=30,release=75){const d=raw-target,a=Math.abs(d);if(a>=release)return raw;if(a<=enter)return target;const t=(a-enter)/(release-enter),smooth=t*t*(3-2*t);return target+d*smooth;}
 let ideareSnapSuppressed=false;
 function ideareNearest(raw,targets,enter=30,release=75){if(ideareSnapSuppressed)return raw;let best=null,dist=release;for(const t of targets){const d=Math.abs(t-raw);if(d<dist){best=t;dist=d;}}return best===null?(ideareGridActive()?Math.round(raw/STEP)*STEP:raw):ideareMagnet(raw,best,enter,release);}
-function ideareGuideHeight(c){if(c.ideareGuidePanel)return [c.bottom,c.bottom+c.height];if(c.uid){const y=c.category==='wall-cabinets'?1350:0;return [y,y+c.height];}const shape=window.IDEAREDesignerCatalogV3?.findProfile(c)?.shape;if(shape==='hood')return [Math.max(1400,Math.min(model.room.height-140,1950))-140,model.room.height];if(['wall-shelf','rack','organiser','rail','lighting','safety','wall-table'].includes(shape)){const y=Math.min(Math.max(1100,model.room.height*.57),2000);return [Math.max(0,y-c.height/2),Math.min(model.room.height,y+c.height/2)];}return [0,c.height];}
+function ideareGuideHeight(c){if(c.ideareGuidePanel)return [c.bottom,c.bottom+c.height];if(c.uid){const y=ideareMountBase(c);return [y,y+c.height];}const shape=window.IDEAREDesignerCatalogV3?.findProfile(c)?.shape;if(shape==='hood')return [Math.max(1400,Math.min(model.room.height-140,1950))-140,model.room.height];if(['wall-shelf','rack','organiser','rail','lighting','safety','wall-table'].includes(shape)){const y=Math.min(Math.max(1100,model.room.height*.57),2000);return [Math.max(0,y-c.height/2),Math.min(model.room.height,y+c.height/2)];}return [0,c.height];}
 function ideareAlignBounds(c){const p=v6World(c,v6Local(c));return {x:[Math.min(...p.map(a=>a[0])),c.x,Math.max(...p.map(a=>a[0]))],z:[Math.min(...p.map(a=>a[1])),c.z,Math.max(...p.map(a=>a[1]))],y:ideareGuideHeight(c)};}
 function ideareAlignmentObjects(){const v=roomVertices(),p=(Array.isArray(model.room.backsplashes)?model.room.backsplashes:[]).flatMap(b=>{const a=v[b.wallIndex],z=v[(b.wallIndex+1)%v.length];if(!a||!z)return [];const dx=z.x-a.x,dz=z.z-a.z,len=Math.hypot(dx,dz);if(len<1)return [];const at=b.offset+b.width/2;return [{id:b.id,x:a.x+at*dx/len,z:a.z+at*dz/len,width:b.width,depth:8,height:b.height,bottom:b.bottom,rotation:Math.atan2(dz,dx)*180/Math.PI,ideareGuidePanel:true}];});return [...model.cabinets,...model.extras,...p];}
 function ideareMoveTargets(c,axis){const m=ideareAlignBounds(c),vals=[],id=c.uid||c.id;for(const o of ideareAlignmentObjects()){if((o.uid||o.id)===id)continue;const r=ideareAlignBounds(o);for(const a of m[axis])for(const b of r[axis])vals.push(c[axis]+b-a);}for(const p of roomVertices())for(const a of [m[axis][0],m[axis][2]])vals.push(c[axis]+p[axis]-a);return vals;}
@@ -2548,7 +2548,7 @@ let ideareFridgeResizePart='assembly';
 function ideareFridgePart(c,part=ideareFridgeResizePart){const s=ideareFridgeSpec(c),cx=(s.left-s.right)/2,core=s.ow;const z=d=>(d-c.depth)/2;if(part==='left'&&s.left)return {u:-c.width/2+s.left/2,y:0,z:z(s.ld),w:s.left,h:s.lh,d:s.ld};if(part==='right'&&s.right)return {u:c.width/2-s.right/2,y:0,z:z(s.rd),w:s.right,h:s.rh,d:s.rd};if(part==='overhead')return {u:cx,y:s.fh+50,z:z(s.od),w:core,h:s.oh,d:s.od};if(part==='refrigerator')return {u:cx,y:0,z:(c.depth-s.fd)/2-6,w:s.fw,h:s.fh,d:s.fd};return {u:0,y:0,z:0,w:c.width,h:c.height,d:c.depth};}
 function ideareResizeFridge(b,d,info){const s=ideareFridgeSpec(b),part=ideareFridgeResizePart,old={...s},q={...b},p=ideareFridgePart(b,part),a=(Number(b.rotation)||0)*Math.PI/180,co=Math.cos(a),si=Math.sin(a);let du=0,dz=0;const id=b.uid,others=ideareAlignmentObjects().filter(o=>(o.uid||o.id)!==id);const axes=axis=>{const pr=(x,z)=>axis==='u'?x*co+z*si:-x*si+z*co;return [...roomVertices().map(p=>pr(p.x,p.z)),...others.flatMap(o=>v6World(o,v6Local(o)).map(([x,z])=>pr(x,z)))];};
  if(info.sx){const origin=b.x*co+b.z*si+p.u+info.sx*p.w/2,delta=info.sx*(ideareNearest(origin+d.u,axes('u'))-origin);if(part==='refrigerator'){s.fw=Math.max(300,Math.min(1800,s.fw+delta));s.ow=Math.max(s.fw+2*(s.t+25),s.ow+s.fw-old.fw);du=info.sx*(s.ow-old.ow)/2;}else if(part==='left'||part==='right'){const k=part,side=part==='left'?-1:1;s[k]=Math.max(200,Math.min(1200,s[k]+delta));du=(s[k]-old[k])*side/2;}else{const n=Math.max(s.fw+2*(s.t+25),Math.min(2200,s.ow+delta));du=info.sx*(n-s.ow)/2;s.ow=n;}}
- if(info.sy>0){const targets=[model.room.height,...others.map(o=>(o.category==='wall-cabinets'?1350:0)+o.height)];const y=ideareNearest(p.y+p.h+d.y,targets);if(part==='refrigerator'){s.fh=Math.max(400,Math.min(3000,y));const oldTop=old.fh+50+old.oh,top=s.fh+50+s.oh;for(const k of ['lh','rh','ph'])if(Math.abs(s[k]-oldTop)<1)s[k]=top;}else if(part==='left'||part==='right'){const k=part==='left'?'lh':'rh';s[k]=Math.max(400,Math.min(3500,y));}else{const n=Math.max(150,Math.min(1200,y-s.fh-50)),oldTop=s.fh+50+s.oh;s.oh=n;const top=s.fh+50+n;if(Math.abs(s.lh-oldTop)<1)s.lh=top;if(Math.abs(s.rh-oldTop)<1)s.rh=top;if(Math.abs(s.ph-oldTop)<1)s.ph=top;}}
+ if(info.sy>0){const targets=[model.room.height,...others.map(o=>(ideareMountBase(o))+o.height)];const y=ideareNearest(p.y+p.h+d.y,targets);if(part==='refrigerator'){s.fh=Math.max(400,Math.min(3000,y));const oldTop=old.fh+50+old.oh,top=s.fh+50+s.oh;for(const k of ['lh','rh','ph'])if(Math.abs(s[k]-oldTop)<1)s[k]=top;}else if(part==='left'||part==='right'){const k=part==='left'?'lh':'rh';s[k]=Math.max(400,Math.min(3500,y));}else{const n=Math.max(150,Math.min(1200,y-s.fh-50)),oldTop=s.fh+50+s.oh;s.oh=n;const top=s.fh+50+n;if(Math.abs(s.lh-oldTop)<1)s.lh=top;if(Math.abs(s.rh-oldTop)<1)s.rh=top;if(Math.abs(s.ph-oldTop)<1)s.ph=top;}}
  if(info.sz){const origin=-b.x*si+b.z*co+p.z+info.sz*p.d/2,delta=info.sz*(ideareNearest(origin+d.z,axes('z'))-origin);if(part==='refrigerator'){s.fd=Math.max(250,Math.min(1200,s.fd+delta));for(const k of ['od','ld','rd'])if(Math.abs(old[k]-(old.fd+50))<1)s[k]=s.fd+50;}else if(part==='left'||part==='right'||part==='overhead'){const k=part==='left'?'ld':part==='right'?'rd':'od';s[k]=Math.max(180,Math.min(1400,s[k]+delta));}else{const n=Math.max(s.fd+50,Math.min(1400,b.depth+delta));s.od=n;if(s.left)s.ld=n;if(s.right)s.rd=n;}}
  const dims=ideareFridgeDimensions(s);dz=(dims.depth-b.depth)/2;Object.assign(q,dims,{fridgeLayout:s,x:b.x+du*co-dz*si,z:b.z+du*si+dz*co});return q;}
 let ideareFridgeOpenUid=null;
@@ -2674,9 +2674,9 @@ function ideareExactEdge(p,i,target){const n=p.length,a=p[i],b=p[(i+1)%n],len=Ma
  const label=input.closest('label');if(!label)return;
  const heading=document.createElement('span');heading.className='ideare-ceiling-heading';heading.innerHTML='<span>Ceiling height</span><button type="button" class="ideare-unit" aria-label="Change ceiling height unit" title="Toggle millimetres / feet">mm</button>';
  for(const node of [...label.childNodes])if(node.nodeType===3)node.remove();label.prepend(heading);
- const feet=document.createElement('input');feet.type='number';feet.min=1800/304.8;feet.max=8000/304.8;feet.step='any';feet.inputMode='decimal';feet.setAttribute('aria-label','Ceiling height in feet');feet.hidden=true;label.append(feet);
- let useFeet=false;const unit=heading.querySelector('button');function syncCeiling(){input.hidden=useFeet;feet.hidden=!useFeet;unit.textContent=useFeet?'ft':'mm';if(document.activeElement!==feet)feet.value=Number((model.room.height/304.8).toFixed(3));}
- unit.onclick=e=>{e.preventDefault();useFeet=!useFeet;syncCeiling();};feet.addEventListener('change',()=>{const value=Number(feet.value)*304.8;if(!feet.value.trim()||!Number.isFinite(value)||value<1799.9||value>8000.1){notify('Enter a ceiling height between 5.91 and 26.25 feet.',true);}else{input.value=Math.round(value);input.dispatchEvent(new Event('change',{bubbles:true}));}feet.value=Number((model.room.height/304.8).toFixed(3));});feet.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();feet.blur();}});
+ const feet=document.createElement('input');feet.type='text';feet.inputMode='text';feet.placeholder="8' 10\"";feet.setAttribute('aria-label','Ceiling height in feet and inches');feet.hidden=true;label.append(feet);
+ let useFeet=false;const unit=heading.querySelector('button');function syncCeiling(){input.hidden=useFeet;feet.hidden=!useFeet;unit.textContent=useFeet?'ft / in':'mm';ideareCeilingFeet=useFeet;const previewHeight=$('.v10-preview-height');if(previewHeight)previewHeight.textContent=`Ceiling ${ideareCeilingLabel(model.room.height)}`;if(document.activeElement!==feet)feet.value=ideareFeetText(model.room.height);}
+ unit.onclick=e=>{e.preventDefault();useFeet=!useFeet;syncCeiling();};feet.addEventListener('change',()=>{if(feet.value.trim()===ideareFeetText(model.room.height))return;const value=ideareFeetToMm(feet.value);if(!feet.value.trim()||!Number.isFinite(value)||value<1799||value>8001){notify('Enter feet and inches, for example 9\' 0". Range: 1800–8000 mm.',true);}else{input.value=Math.round(value);input.dispatchEvent(new Event('change',{bubbles:true}));}feet.value=ideareFeetText(model.room.height);});feet.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();feet.blur();}});
  const section=document.createElement('section');section.className='ideare-door-editor';section.innerHTML='<div class="ideare-door-heading"><strong>Doors & openings</strong><button type="button" data-door-add>+ Add door</button></div><div class="ideare-door-list"></div><div class="ideare-door-form" hidden></div><small>Wall numbers match the floor plan. Left and right are measured facing the wall from inside the room.</small>';label.after(section);
  const list=section.querySelector('.ideare-door-list'),form=section.querySelector('.ideare-door-form');let editing=null,lastKey='';
  const walls=()=>{const p=roomVertices();return p.map((a,i)=>({i,len:Math.hypot(p[(i+1)%p.length].x-a.x,p[(i+1)%p.length].z-a.z)})).filter(w=>ideareSolidWall(w.i,model.room)&&w.len>=400);};
@@ -2709,6 +2709,64 @@ function ideareExactEdge(p,i,target){const n=p.length,a=p[i],b=p[(i+1)%n],len=Ma
  });
  const prev=renderPlan;renderPlan=(...args)=>{ideareSyncDoorOffsets();const result=prev(...args);if(model.step===2)refresh();return result;};
  const oldSave=save;save=mode=>{if(!ideareDoorsValid()){notify('Adjust invalid door openings before saving.',true);showStep(2);return;}ideareSyncDoorOffsets();return oldSave(mode);};syncCeiling();refresh(true);
+})();
+
+/* IDEARE room precision, adjustable wall mounting and expandable finishes */
+function ideareMountBase(c){
+ if(c?.category!=='wall-cabinets')return 0;
+ const v=c.mountHeightMm;
+ return v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))?Math.max(0,Number(v)):1350;
+}
+var ideareCeilingFeet=false;
+function ideareFeetText(mm){
+ const ticks=Math.round(Number(mm)/25.4*16),feet=Math.floor(ticks/192),rest=ticks%192,inches=Math.floor(rest/16),fraction=rest%16;
+ let suffix='';if(fraction){let a=fraction,b=16;while(a%2===0&&b%2===0){a/=2;b/=2;}suffix=` ${a}/${b}`;}
+ return `${feet}' ${inches}${suffix}"`;
+}
+function ideareFeetToMm(value){
+ const s=String(value).trim().replace(/[′’]/g,"'").replace(/[″“”]/g,'"');
+ const m=s.match(/^(\d+)\s*'\s*(?:(\d+(?:\.\d+)?)(?:\s+(\d+)\s*\/\s*(\d+))?|(?:(\d+)\s*\/\s*(\d+)))?\s*"?$/);
+ if(!m)return NaN;
+ let inches=Number(m[2]||0);const num=m[3]??m[5],den=m[4]??m[6];
+ if(den!==undefined){if(Number(den)<=0||Number(num)>=Number(den))return NaN;inches+=Number(num)/Number(den);}
+ if(inches>=12)return NaN;return Math.round((Number(m[1])*12+inches)*25.4);
+}
+function ideareCeilingLabel(mm){return ideareCeilingFeet?ideareFeetText(mm):`${Math.round(mm)} mm`;}
+// Install before boot; no asynchronous dependencies or new global scripts.
+(()=>{
+ const before=standardCab;standardCab=(...args)=>{const c=before(...args);if(c.category==='wall-cabinets')c.mountHeightMm=Math.max(0,Math.min(1350,model.room.height-c.height));return c;};
+ const baseInspector=renderInspector;
+ renderInspector=(...args)=>{
+  const result=baseInspector(...args),c=selected(),target=$('#dimension-fields');
+  target?.querySelector('.ideare-mount-field')?.remove();
+  if(!c||c.category!=='wall-cabinets'||!target)return result;
+  const field=document.createElement('div');field.className='ideare-mount-field';
+  field.innerHTML=`<label for="ideare-mount-height">Mounting height (mm)</label><input id="ideare-mount-height" type="number" min="0" max="${Math.max(0,model.room.height-c.height)}" step="1" value="${ideareMountBase(c)}"><small>From the finished floor to the cabinet underside. Top: ${Math.round(ideareMountBase(c)+c.height)} mm.</small>`;
+  target.append(field);const input=field.querySelector('input');
+  input.addEventListener('change',()=>{
+   if(selected()?.uid!==c.uid)return;
+   const v=input.value.trim()===''?NaN:Number(input.value),height=Math.round(v);
+   if(!Number.isFinite(v)||height<0||height+c.height>model.room.height){input.value=ideareMountBase(c);notify('Mounting height must keep the cabinet between the floor and ceiling.',true);return;}
+   if(height===ideareMountBase(c)){input.value=height;return;}
+   const q={...c,mountHeightMm:height};
+   if(!window.IDEAREPlacementV4?.valid(q)){input.value=ideareMountBase(c);notify('This mounting height would overlap an object, door or room boundary.',true);return;}
+   history();c.mountHeightMm=height;model.shared=model.shared.filter(s=>!s.cabinetUids?.includes(c.uid));renderAll();changed(false);
+  });
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();input.blur();}});
+  return result;
+ };
+ function installExpand(root,grid,containerClass){
+  if(!root||!grid||root.querySelector('[data-ideare-finish-expand]'))return;
+  const container=containerClass?root.closest(containerClass):root;
+  if(!container)return;
+  const button=document.createElement('button');button.type='button';button.className='ideare-finish-expand';button.dataset.ideareFinishExpand='';button.setAttribute('aria-expanded','false');button.textContent='↗ Expand finishes';
+  grid.before(button);
+  button.addEventListener('click',()=>{
+   const active=container.classList.toggle('ideare-finishes-expanded');button.setAttribute('aria-expanded',String(active));button.textContent=active?'↙ Collapse finishes':'↗ Expand finishes';
+  });
+ }
+ installExpand($('#studio-finish-library'),$('#studio-finish-results'),'.id3-inspector');
+ installExpand($('.v10-finish-ui'),$('.v10-gallery'),null);
 })();
 
 Promise.resolve().then(()=>boot()).catch(ideareStartupError);
