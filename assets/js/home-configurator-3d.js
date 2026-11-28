@@ -40,7 +40,7 @@ export function createHomeScene(host){
    let near=findOpening(o,model.floors[Math.round(y/STOREY)]||[]);if(!near){register(box(group,cx,y+.05,cz,w,.1,d,o.type==='Door'?'#ad8261':'#8ab7c0',opacity),i,active&&!ghost)}
    else{let {axis,coord,a,b}=near,len=b-a,mid=(a+b)/2,low=o.type==='Door'?0:.90,high=low+clamp(Number(o.height)||(o.type==='Door'?2.1:1.2),.4,o.type==='Door'?2.7:1.85),hh=high-low;const wg=new THREE.Group();wg.position.y=y;content.add(wg);let nearWall=near.wall;let center=axis==='x'?[mid,coord]:[coord,mid];const add=(along,vertical,width,height,dep,col,op=1)=>register(box(wg,axis==='x'?along:coord,vertical,axis==='x'?coord:along,axis==='x'?width:(ghost?Math.max(dep,.25):dep),height,axis==='x'?(ghost?Math.max(dep,.25):dep):width,col,op*opacity),i,active&&!ghost);
     add(a+.035,low+hh/2,.07,hh,.20,o.frameColor||'#765b46');add(b-.035,low+hh/2,.07,hh,.20,o.frameColor||'#765b46');add(mid,high-.035,len,.07,.20,o.frameColor||'#765b46');if(o.type==='Window'){add(mid,low+.035,len,.07,.20,o.frameColor||'#765b46');add(mid,low+hh/2,Math.max(.05,len-.12),Math.max(.05,hh-.12),.055,o.color||'#92c2d1',.55);add(mid,low+hh/2,.045,hh,.16,o.frameColor||'#765b46')}else{add(mid,low+hh/2,Math.max(.05,len-.13),Math.max(.05,hh-.09),.06,o.color||'#ad8261');add(b-.16,1.03,.07,.04,.13,'#c3ae8b');}
-    walls.push({group:wg,x:center[0],z:center[1],axis,active,side:sideFor(nearWall,model.floors[Math.round(y/STOREY)]||[])});
+    walls.push({group:wg,x:center[0],z:center[1],axis,active,ghost,side:sideFor(nearWall,model.floors[Math.round(y/STOREY)]||[])});
    }
   }else{let top=o.type==='Tiles'?.075:ROOM.has(o.type)?.035:.025,depth=o.type==='Tiles'?.035:.16;register(box(group,cx,y+top-depth/2,cz,w,depth,d,color,opacity),i,active&&!ghost);if(o.type==='Tiles'||ROOM.has(o.type))grid(group,x,z,w,d,y+top+.008,.5,themeDark()?0x392f27:0x796b57,.28);if(active&&!ghost&&w>=2&&d>=1.5&&o.type!=='Tiles')label(group,o.label||o.type,cx,y+.19,cz);}
   if(active&&i===model.selected&&!ghost){outline(content,x,z,w,d,y+.10,0xd3944d);corners(o,i,y)}
@@ -62,7 +62,15 @@ export function createHomeScene(host){
   if(model.ghost){let o=model.ghost,y=model.level*STOREY;if(o.type==='Wall')wallPiece(o,-1,y,true,true,null,null,model.floors[model.level]);else{floorObject(o,-1,y,true,true);if(ROOM.has(o.type)){for(let [x,z,ww,dd] of [[o.x,o.y,o.w,0],[o.x+o.w,o.y,0,o.h],[o.x,o.y+o.h,o.w,0],[o.x,o.y,0,o.h]])wallPiece({type:'Wall',x,y:z,w:ww,h:dd},-1,y,true,true,null,null,model.floors[model.level])}}}
   let radius=Math.max(w,d,12);sun.position.set(w/2-radius*.65,radius*1.6,d/2-radius*.55);sun.target.position.set(w/2,0,d/2);Object.assign(sun.shadow.camera,{left:-radius,right:radius,top:radius,bottom:-radius,far:radius*5});sun.shadow.camera.updateProjectionMatrix();updateCutaway();schedule();
  }
- function updateCutaway(){if(!model)return;const vx=camera.position.x-target.x,vz=camera.position.z-target.z;for(let wall of walls){let facing=(wall.axis==='x'?vz:vx)*wall.side;let scale=!model.cutaway||wall.ghost?1:wall.side===0?(model.tool==='Wall'||model.tool==='Paint'?1:.34):facing>distance*.08?.065:1;wall.group.scale.y=scale;}for(const roof of roofs){roof.group.visible=!model.cutaway||roof.ghost||(roof.active&&(model.tool==='Roof'||roof.i===model.selected));}}
+ function updateCutaway(){
+  if(!model)return;
+  // Full-wall mode is independent of the camera, active tool and wall side.
+  // Restore all displayed storeys' wall/opening groups, including prior cutaways.
+  if(!model.cutaway){for(const wall of walls){wall.group.visible=true;wall.group.scale.y=1;}for(const roof of roofs)roof.group.visible=true;return;}
+  const vx=camera.position.x-target.x,vz=camera.position.z-target.z;
+  for(const wall of walls){const facing=(wall.axis==='x'?vz:vx)*wall.side;wall.group.visible=true;wall.group.scale.y=wall.ghost?1:wall.side===0?(model.tool==='Wall'||model.tool==='Paint'?1:.34):facing>distance*.08?.065:1;}
+  for(const roof of roofs)roof.group.visible=roof.ghost||(roof.active&&(model.tool==='Roof'||roof.i===model.selected));
+ }
  function updateCamera(){camera.position.set(target.x+distance*Math.cos(elevation)*Math.sin(azimuth),target.y+distance*Math.sin(elevation),target.z+distance*Math.cos(elevation)*Math.cos(azimuth));camera.lookAt(target);camera.updateMatrixWorld();updateCutaway();schedule()}
  function schedule(){if(frame)return;frame=requestAnimationFrame(()=>{frame=0;renderer.render(scene,camera)})}
  function resize(){let w=host.clientWidth,h=host.clientHeight;if(!w||!h)return;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();schedule()}

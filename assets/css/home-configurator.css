@@ -161,7 +161,7 @@ html[data-theme=dark] #hc .hc-house-map{--hc-ground:#646759}
 #hc .hc-hud-btn:disabled{opacity:.3}#hc .hc-hud-separator{height:23px;width:1px;background:var(--hc-line);margin:0 2px}
 #hc .hc-floor-stack{display:flex;flex-direction:column;gap:0}#hc .hc-floor-stack .hc-hud-btn{width:26px;height:17px;padding:0}#hc .hc-floor-stack svg{width:19px;height:19px}
 #hc #floorLabel{font-size:10px;line-height:1.1;max-width:63px;text-align:center;white-space:normal;font-weight:800}
-#hc #view>span{display:none}#hc #view[aria-pressed=true] .hc-cut-icon,#hc #view[aria-pressed=false] .hc-full-icon{display:block}
+#hc #view>span{display:none}#hc #view[aria-pressed=false] .hc-cut-icon,#hc #view[aria-pressed=true] .hc-full-icon{display:block}
 #hc .hc-live-3d{top:10px;left:10px;z-index:2;pointer-events:none}
 #hc .hc-fullscreen-tip{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;white-space:nowrap}
 #hc .hc-fullscreen-tip kbd{font-family:var(--font-mono,monospace);font-size:11px;color:var(--hc-accent);border:1px solid var(--hc-line);background:var(--hc-panel);border-radius:5px;padding:2px 5px;font-weight:700}
@@ -232,3 +232,10 @@ html[data-ideare-page="home-configurator"] body:has(> #hc:not(.hc-partner)[data-
 @media(max-height:520px){#hc:not(.hc-partner)[data-stage=build]{min-height:520px;height:auto;overflow:visible}#hc:not(.hc-partner)[data-stage=build] .hc-layout{flex:none;min-height:450px!important;grid-template-rows:minmax(250px,1fr) auto!important}}
 @media print{#hc .hc-stagebar,#hc .hc-context{display:none!important}}
 #hc:not(.hc-partner)[data-stage=build]{box-sizing:border-box}
+
+/* Unit selector stays compact alongside the land heading, in both themes. */
+#hc .hc-land-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:9px 0 10px;min-width:0;}
+#hc .hc-land-heading h2{margin:0;min-width:0;}
+#hc #hc-units{width:auto;min-width:54px;max-width:76px;flex:0 0 auto;margin:0;padding:5px 6px;font:inherit;font-size:12px;color:var(--hc-text);background:var(--hc-panel);border:1px solid var(--hc-line);border-radius:6px;cursor:pointer;}
+#hc .hc-fields input[type=hidden]{display:none!important;}
+#hc .hc-live-3d{display:none!important;}
