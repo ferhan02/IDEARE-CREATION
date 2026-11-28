@@ -161,7 +161,7 @@ html[data-theme=dark] #hc .hc-house-map{--hc-ground:#646759}
 #hc .hc-hud-btn:disabled{opacity:.3}#hc .hc-hud-separator{height:23px;width:1px;background:var(--hc-line);margin:0 2px}
 #hc .hc-floor-stack{display:flex;flex-direction:column;gap:0}#hc .hc-floor-stack .hc-hud-btn{width:26px;height:17px;padding:0}#hc .hc-floor-stack svg{width:19px;height:19px}
 #hc #floorLabel{font-size:10px;line-height:1.1;max-width:63px;text-align:center;white-space:normal;font-weight:800}
-#hc #view>span{display:none}#hc #view[aria-pressed=false] .hc-cut-icon,#hc #view[aria-pressed=true] .hc-full-icon{display:block}
+#hc #view>span{display:none}#hc #view[data-wall-mode=cutaway] .hc-cut-icon,#hc #view[data-wall-mode=full] .hc-full-icon,#hc #view[data-wall-mode=hidden] .hc-hidden-icon{display:block}
 #hc .hc-live-3d{top:10px;left:10px;z-index:2;pointer-events:none}
 #hc .hc-fullscreen-tip{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;white-space:nowrap}
 #hc .hc-fullscreen-tip kbd{font-family:var(--font-mono,monospace);font-size:11px;color:var(--hc-accent);border:1px solid var(--hc-line);background:var(--hc-panel);border-radius:5px;padding:2px 5px;font-weight:700}
@@ -239,3 +239,11 @@ html[data-ideare-page="home-configurator"] body:has(> #hc:not(.hc-partner)[data-
 #hc #hc-units{width:auto;min-width:54px;max-width:76px;flex:0 0 auto;margin:0;padding:5px 6px;font:inherit;font-size:12px;color:var(--hc-text);background:var(--hc-panel);border:1px solid var(--hc-line);border-radius:6px;cursor:pointer;}
 #hc .hc-fields input[type=hidden]{display:none!important;}
 #hc .hc-live-3d{display:none!important;}
+
+/* Compact current-mode label, with accessible full label on the button at all widths. */
+#hc .hc-wall-mode-label{font-size:10px;line-height:1.15;max-width:62px;text-align:center;color:var(--hc-text);pointer-events:none}
+#hc #hc-move-options{min-width:20px;width:24px;padding:2px}
+@media(max-width:900px){#hc .hc-wall-mode-label{display:none}}
+/* Invalid drag positions never commit. Preserve the previous valid geometry. */
+#hc #plan.hc-collision-blocked,#hc #plan.hc-collision-blocked canvas{cursor:not-allowed!important;}
+#hc #hc-held.invalid{border-color:#d34b44;color:var(--hc-text);}

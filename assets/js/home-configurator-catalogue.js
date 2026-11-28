@@ -7,7 +7,7 @@ const categories = [
 ];
 const item=(id,name,tool,detail,color,extra={})=>({id,name,tool,detail,color,...extra});
 const catalogue={
- walls:[item('wall','Full wall','Wall','2.8 m','#d5c9b9'),item('half-wall','Half wall','Wall','1.1 m','#d5c9b9',{height:1.1}),item('room','Enclosed room','Room','Drag to size','#d9c7ac'),item('partition','Timber wall','Wall','2.8 m','#a98d70'),item('break','Break wall','Break wall','1 m section','#d5c9b9'),item('erase','Remove element','Delete','Click to remove','#c2a48d')],
+ walls:[item('wall','Full wall','Wall','2.8 m','#d5c9b9'),item('half-wall','Half wall','Wall','1.1 m','#d5c9b9',{height:1.1}),item('room','Enclosed room','Room','Drag to size','#d9c7ac'),item('partition','Timber wall','Wall','2.8 m','#a98d70')],
  paint:[item('matte-paint','Matte paint','Paint','Choose colour','#e7e2d9'),item('satin-paint','Satin paint','Paint','Choose colour','#cbb9a4'),item('accent-paint','Accent paint','Paint','Choose colour','#a4a899')],
  windows:[item('window','Standard window','Window','1.20 × 1.20 m','#92c2d1'),item('dark-window','Dark frame','Window','1.20 × 1.20 m','#92c2d1',{frameColor:'#44413d'}),item('wood-window','Timber frame','Window','1.20 × 1.20 m','#92c2d1',{frameColor:'#a4825c'})],
  doors:[item('door','Standard doorway','Door','0.90 × 2.10 m','#ad8261'),item('dark-door','Dark frame','Door','0.90 × 2.10 m','#47413a',{frameColor:'#47413a'}),item('light-door','Oak frame','Door','0.90 × 2.10 m','#b59a73',{frameColor:'#b59a73'})],
