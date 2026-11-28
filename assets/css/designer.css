@@ -821,3 +821,9 @@ html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-applian
 html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-integrated-cabinet-view .ideare-appliance-colour{display:none!important;}
 html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-appliance-view .ideare-appliance-colour{margin:10px 14px;}
 html[data-ideare-page="designer"] .id3-studio .ideare-fridge-config [hidden],html[data-ideare-page="designer"] .id3-studio :is(.ideare-inspector-switch,.ideare-integrated-summary)[hidden]{display:none!important;}
+/* IDEARE direct built-in appliance selection */
+html[data-ideare-page="designer"] .id3-studio.ideare-part-selected #studio-hud{display:none!important;}
+html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-appliance-view .id3-inspector-title .id3-kicker{color:var(--studio-accent);}
+html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-appliance-view .ideare-integrated-summary{margin:0 14px 12px;padding:10px 12px;border:1px solid var(--studio-line);border-radius:8px;background:var(--studio-paper);}
+html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-appliance-view #selected-size{color:var(--studio-muted);font-variant-numeric:tabular-nums;}
+html[data-ideare-page="designer"] .id3-studio #selected-inspector.ideare-appliance-view .ideare-fridge-config{margin:10px 14px;}

@@ -601,17 +601,17 @@ updateDimension=(key,value,final=false)=>{const c=selected();if(!c)return;const 
  const input=$(`[data-dimension="${key}"]`),slider=$(`[data-slider="${key}"]`);if(input)input.value=c[key];if(slider){slider.min=Math.min(n(slider.min),c[key]);slider.max=Math.max(n(slider.max),c[key]);slider.value=c[key];}drawScene();if(final){renderInspector();renderList();changed(false);}else $('#selected-size').textContent=`${mm(c.width)} × ${mm(c.height)} × ${mm(c.depth)}`;};
 warningsFor=c=>{const results=baseWarnings(c).filter(v=>!v.text.startsWith('Cabinet footprint extends beyond')&&!v.text.startsWith('Part of the cabinet lies outside')&&!v.text.startsWith('Cabinet overlaps another cabinet'));const why=invalid(c);if(why)results.push({type:'error',text:why});return results;};
 const baseSave=save;save=mode=>{if(!allFit()){studioMessage('Resolve invalid cabinet positions before saving this existing design.');showStep(3);return;}return baseSave(mode);};
-renderInspector=()=>{baseRenderInspector();const id=model.selected||model.selectedExtra;if(id!==lastSelection){detailsCollapsed=false;lastSelection=id;}inspector.hidden=!id||detailsCollapsed;const btn=$('#details-toggle');btn.disabled=!id;btn.setAttribute('aria-expanded',String(!!id&&!detailsCollapsed));btn.textContent=id&&detailsCollapsed?'Show details':'Details';};
+renderInspector=()=>{baseRenderInspector();const id=model.selected||model.selectedExtra;const selectionKey=id?`${id}:${ideareSelectedAppliance(selected())||''}`:null;if(selectionKey!==lastSelection){detailsCollapsed=false;lastSelection=selectionKey;}inspector.hidden=!id||detailsCollapsed;const btn=$('#details-toggle');btn.disabled=!id;btn.setAttribute('aria-expanded',String(!!id&&!detailsCollapsed));btn.textContent=id&&detailsCollapsed?'Show details':'Details';};
 $('#details-toggle').onclick=()=>{detailsCollapsed=!detailsCollapsed;renderInspector();};
 renderList=()=>{baseRenderList();};
 showStep=i=>{const step=clamp(i,1,4);if(move)endMove(true);app.dataset.studioStep=String(step);document.documentElement.classList.toggle('studio-fullscreen',step===2||step===3);if(step!==3){preview.hidden=true;hoverTip.hidden=true;hud.hidden=true;clearGhost();}baseShowStep(step);if(step===3){renderInspector();requestAnimationFrame(resize);}};
 // Hit-testing selects without dragging; camera orbit remains on empty space.
-function hitObject(e){if(!camera||!raycaster||!renderer)return null;const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return null;const mouse=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects([...cabinetGroup.children,...extraGroup.children],true);for(const hit of hits){let o=hit.object;if(o.isLineSegments||o.isSprite)continue;while(o){if(o.userData?.uid)return {uid:o.userData.uid};if(o.userData?.extraId)return {extraId:o.userData.extraId};o=o.parent;}}return null;}
+function hitObject(e){return idearePartHit(e);}
 onPointerDown=e=>{if(model.step!==3||!camera||!renderer||e.button!==0)return;const hit=hitObject(e);pointerStart={x:e.clientX,y:e.clientY,started:false,studioHit:hit};if(hit){e.stopImmediatePropagation();canvas.setPointerCapture?.(e.pointerId);}};
 // On a cabinet, intercept before OrbitControls starts a camera gesture.
 canvas.addEventListener('pointerdown',onPointerDown,{capture:true});
 onPointerMove=()=>{};
-onPointerUp=e=>{if(pointerStart){const p=pointerStart;const click=!e||Math.hypot(e.clientX-p.x,e.clientY-p.y)<7;if(click&&model.step===3){if(p.studioHit?.uid)select(p.studioHit.uid);else if(p.studioHit?.extraId)selectExtra(p.studioHit.extraId);else if(model.selected||model.selectedExtra)select(null);}}pointerStart=null;draggingId=null;draggingExtraId=null;if(controls&&!move)controls.enabled=true;};
+onPointerUp=e=>{if(pointerStart){const p=pointerStart;const click=!e||Math.hypot(e.clientX-p.x,e.clientY-p.y)<7;if(click&&model.step===3){if(p.studioHit?.uid)ideareSelectPart(model.cabinets.find(c=>c.uid===p.studioHit.uid),p.studioHit.kind||null);else if(p.studioHit?.extraId)selectExtra(p.studioHit.extraId);else if(model.selected||model.selectedExtra)select(null);}}pointerStart=null;draggingId=null;draggingExtraId=null;if(controls&&!move)controls.enabled=true;};
 canvas.addEventListener('pointercancel',()=>{pointerStart=null;if(controls&&!move)controls.enabled=true;});
 function worldAt(e,height=0){if(!camera||!raycaster)return null;const r=canvas.getBoundingClientRect(),v=new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);raycaster.setFromCamera(v,camera);const p=new THREE.Vector3();return raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-height),p)?p:null;}
 function moveStart(e){const c=selected()||extraSelected();if(!c||!camera||e.button!==0)return;e.preventDefault();e.stopPropagation();const isExtra=!c.uid, y=isExtra?c.height/1000:top(c)/1000;const p=worldAt(e,y);if(!p)return;move={item:c,isExtra,y,pointer:e.pointerId,origin:{x:c.x,z:c.z},start:p,recorded:false,wallLock:isExtra?null:detectWallLock(c)};controls.enabled=false;$('#object-move').setPointerCapture(e.pointerId);hud.classList.add('moving');hoverTip.hidden=true;}
@@ -625,8 +625,8 @@ $('#object-move').addEventListener('pointerdown',moveStart);$('#object-move').ad
 $('#object-move').addEventListener('keydown',e=>{const delta={ArrowLeft:[-STEP,0],ArrowRight:[STEP,0],ArrowUp:[0,-STEP],ArrowDown:[0,STEP]}[e.key],c=selected();if(!delta||!c)return;e.preventDefault();const q=snap(c,c.x+delta[0],c.z+delta[1]);if(q)updateCab(c,{x:q.x,z:q.z});else studioMessage('Placement blocked.');});
 window.addEventListener('keydown',e=>{if(model.step!==3||e.target?.matches?.('input,textarea,select'))return;if(e.key==='Escape'){if(move)endMove(true);else{closeMenu();select(null);}}});
 function setHover(uid){if(hoverUid===uid)return;hoverUid=uid;for(const [id,g] of meshById){const outline=g.children.find(o=>o.isLineSegments);if(outline){outline.visible=id===model.selected||id===uid;outline.material.color.set(id===model.selected?0xb3905c:0x786345);}}}
-canvas.addEventListener('pointermove',e=>{if(model.step!==3||move||pointerStart||dragTemplate||e.pointerType==='touch')return;const hit=hitObject(e);setHover(hit?.uid||null);const c=model.cabinets.find(o=>o.uid===hit?.uid);canvas.style.cursor=c?'pointer':'grab';if(c&&c.uid!==model.selected){hoverTip.textContent=`${c.name} · ${mm(c.width)} × ${mm(c.depth)} × ${mm(c.height)}`;hoverTip.hidden=false;const r=wrap.getBoundingClientRect();hoverTip.style.left=Math.max(8,Math.min(r.width-235,e.clientX-r.left+15))+'px';hoverTip.style.top=Math.max(8,e.clientY-r.top+15)+'px';}else hoverTip.hidden=true;});
-canvas.addEventListener('pointerleave',()=>{setHover(null);hoverTip.hidden=true;});
+canvas.addEventListener('pointermove',e=>{if(model.step!==3||move||pointerStart||dragTemplate||e.pointerType==='touch'||e.buttons)return;const hit=hitObject(e);idearePaintParts(hit);const c=hit?.c;canvas.style.cursor=c?'pointer':'grab';if(c){const active=hit.uid?model.selected===hit.uid&&ideareSelectedAppliance(c)===(hit.kind||null):model.selectedExtra===hit.extraId;if(!active){const name=hit.kind?idearePartNames[hit.kind]:c.name||c.kind,dim=hit.kind?idearePartSizeText(c,hit.kind):`${Math.round(c.width)} × ${Math.round(c.height)} × ${Math.round(c.depth)} mm`;hoverTip.textContent=dim?`${name} · ${dim}`:name;hoverTip.hidden=false;const r=wrap.getBoundingClientRect();hoverTip.style.left=Math.max(8,Math.min(r.width-235,e.clientX-r.left+15))+'px';hoverTip.style.top=Math.max(8,e.clientY-r.top+15)+'px';return;}}hoverTip.hidden=true;});
+canvas.addEventListener('pointerleave',()=>{idearePaintParts();hoverTip.hidden=true;});
 function zoom(f){if(!camera||!controls)return;const v=camera.position.clone().sub(controls.target);v.setLength(clamp(v.length()*f,controls.minDistance,controls.maxDistance));camera.position.copy(controls.target).add(v);controls.update();}
 $('#studio-zoom-in').onclick=()=>zoom(.8);$('#studio-zoom-out').onclick=()=>zoom(1.25);
 function hudFrame(){requestAnimationFrame(hudFrame);const c=selected()||extraSelected();if(model.step!==3||!c||!camera||!renderer){hud.hidden=true;return;}const isExtra=!c.uid,r=wrap.getBoundingClientRect();const p=new THREE.Vector3(c.x/1000,(isExtra?c.height:top(c))/1000,c.z/1000).project(camera);if(!move&&(p.z>1||p.z<-1||Math.abs(p.x)>1||Math.abs(p.y)>1)){hud.hidden=true;return;}hud.hidden=false;$('#object-rotate').hidden=isExtra;hud.style.left=`${clamp((p.x+1)*r.width/2,30,r.width-30)}px`;hud.style.top=`${clamp((1-p.y)*r.height/2,30,r.height-42)}px`;}
@@ -1463,16 +1463,7 @@ const selectedMove=$v('#object-move');
 let action=null,dragRaf=0;
 const mouseNdc=e=>{const r=canvas.getBoundingClientRect();return new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);};
 const rayFloor=(e,y)=>{if(!camera||!raycaster)return null;raycaster.setFromCamera(mouseNdc(e),camera);return raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0,1,0),-y),new THREE.Vector3());};
-function locateHit(e){if(!camera||!raycaster||!extraGroup)return null;
- raycaster.setFromCamera(mouseNdc(e),camera);
- const hits=raycaster.intersectObjects([...extraGroup.children,...cabinetGroup.children],true);
- for(const h of hits){if(h.object.isLineSegments||h.object.isSprite)continue;
-  let o=h.object;while(o){if(o.userData?.extraId){const c=model.extras.find(x=>x.id===o.userData.extraId);if(c)return {c,point:h.point};}
-   if(o.userData?.uid){const c=model.cabinets.find(x=>x.uid===o.userData.uid);if(c)return {c,point:h.point};break;}
-   o=o.parent;
-  }
- }return null;
-}
+function locateHit(e){return idearePartHit(e);}
 function begin(e,c,hit=null){if(e.button!==0||model.step!==3||!camera||!controls)return false;
  e.preventDefault();e.stopImmediatePropagation();
  const mounted=wallMounted(c),y=clampV(hit?.y??(visibleHeight(c)[0]+visibleHeight(c)[1])/2000,.05,model.room.height/1000-.05);
@@ -1482,7 +1473,7 @@ function begin(e,c,hit=null){if(e.button!==0||model.step!==3||!camera||!controls
  const wallPlane=lock?new THREE.Plane(new THREE.Vector3(lock.axis==='x'?1:0,0,lock.axis==='z'?1:0),-anchor[lock.axis]):null;
  const wallStart=wallPlane?raycaster.ray.intersectPlane(wallPlane,new THREE.Vector3()):null;
  const base=project(anchor),vectors={};for(const axis of ['x','z']){const p=anchor.clone();p[axis]+=.5;const v=project(p);vectors[axis]={x:(v.x-base.x)/500,y:(v.y-base.y)/500};}
- const isExtra=!isCab(c);if(isExtra){if(model.selectedExtra!==c.id)selectExtra(c.id);}else if(model.selected!==c.uid)select(c.uid);
+ const isExtra=!isCab(c);if(isExtra){if(model.selectedExtra!==c.id)selectExtra(c.id);}else ideareSelectPart(c,null);
  controls.enabled=false;action={id:c.id||c.uid,isExtra,pointer:e.pointerId,y,start:origin,origin:{x:c.x,z:c.z},last:{x:c.x,z:c.z},screen:{x:e.clientX,y:e.clientY},recorded:false,lock,vectors,wallPlane,wallStart};
  try{canvas.setPointerCapture(e.pointerId);}catch(_){}
  canvas.classList.add('ideare-dragging-surface');selectedMove?.classList.add('ideare-direct-moving');$v('#studio-hover')?.setAttribute('hidden','');return true;
@@ -1490,7 +1481,7 @@ function begin(e,c,hit=null){if(e.button!==0||model.step!==3||!camera||!controls
 window.addEventListener('pointerdown',e=>{
  if(model.step!==3||action)return;
  if(window.IDEAREV8?.pointerDown(e))return;
- if(e.target===canvas){const hit=locateHit(e);if(hit)begin(e,hit.c,hit.point);}
+ if(e.target===canvas){const hit=locateHit(e);if(hit){if(hit.kind){e.preventDefault();e.stopImmediatePropagation();ideareSelectPart(hit.c,hit.kind);return;}begin(e,hit.c,hit.point);}}
  else if(e.target.closest?.('#object-move')){const c=model.extras.find(x=>x.id===model.selectedExtra)||model.cabinets.find(x=>x.uid===model.selected);
   if(c)begin(e,c);
  }
@@ -1681,7 +1672,7 @@ makeCabinet=function buildCabinetV4(c,skipHood=false){
   addBox(g,Math.min(w*.91,.75),.016,Math.min(d*.82,.54),0,hobTop,0,dark,'hob_cooktop');
   for(const x of [-w*.22,w*.22])for(const z of [-d*.17,d*.17]){
    const tor=new THREE.Mesh(new THREE.TorusGeometry(.042,.005,7,24),ringMat);tor.rotation.x=Math.PI/2;tor.position.set(x,hobTop+.013,z);tor.name='hob_burner';g.add(tor);
-   const cap=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.012,20),dark);cap.position.set(x,hobTop+.017,z);g.add(cap);
+   const cap=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.012,20),dark);cap.position.set(x,hobTop+.017,z);cap.name='hob_cap';g.add(cap);
   }
   // A removable illustration of the requested 14 kg cylinder (Ø333 × H600 mm),
   // only visible with door fronts open; installation/safety require staff review.
@@ -2202,7 +2193,7 @@ function pointerDown(e){if(e.target!==canvas||e.button!==0||model.step!==3||!cam
  const hits=raycaster.intersectObjects([splashGroup,cabinetGroup,extraGroup],true);for(const h of hits){if(!h.object.isMesh||!h.object.visible)continue;let o=h.object;while(o&&!o.userData.splashId&&!o.userData.uid&&!o.userData.extraId)o=o.parent;if(!o)continue;if(!o.userData.splashId)break;
  const p=panels().find(p=>p.id===o.userData.splashId);if(!p)break;e.preventDefault();e.stopImmediatePropagation();const was=mode&&splashId===p.id;selectPanel(p);mode=was;modeKey=was?p.id:null;begin(e,p,{move:true,point:h.point,axes:['u','y']},canvas);return true;}
  return false;}
-window.IDEAREV8={pointerDown,roomValid:()=>panels().every(panelValid)};
+window.IDEAREV8={pointerDown,roomValid:()=>panels().every(panelValid),resetPartResize:()=>{if(!drag){mode=false;modeKey=null;ideareClearGuides();}}};
 // Persistent projected selection rectangle and direct edge handles.
 const resizeButton=document.createElement('button');resizeButton.type='button';resizeButton.id='ideare-resize-toggle';resizeButton.title='Resize selected object';resizeButton.setAttribute('aria-label','Resize selected object');resizeButton.textContent='⤡';hud.append(resizeButton);
 const overlay=document.createElement('div');overlay.className='v8-resize-overlay';overlay.hidden=true;overlay.innerHTML='<svg aria-hidden="true"><polygon/><path/></svg><div class="v8-resize-size"></div><div class="v8-resize-toolbar"><span>Resize mode · drag the edges</span><button type="button">Done</button></div>';wrap.append(overlay);overlay.querySelector('.v8-resize-toolbar button').onclick=()=>{if(!drag){mode=false;modeKey=null;}};
@@ -2390,7 +2381,7 @@ window.addEventListener('pagehide',()=>{observer?.disconnect();orbit?.dispose();
 function ideareApplianceLabel(c){return [c.uid?template(c.templateId)?.slug:'',c.name,c.kind].filter(Boolean).join(' ').replace(/[-_]/g,' ').toLowerCase();}
 function ideareSink(c){return !!c?.uid&&/\bsink\b/.test(ideareApplianceLabel(c))&&c.category!=='wall-cabinets';}
 function ideareIntegrated(c){return !!c?.uid&&(!!ideareFridgeHousing(c)||/\b(sink|oven|microwave|fridge|freezer|refrigerator|dishwasher|hob|cooker|hood|extractor)\b/.test(ideareApplianceLabel(c)));}
-function ideareTintAppliance(g,c){if(!/^#[0-9a-f]{6}$/i.test(c.applianceColor||''))return;
+function ideareTintAppliance(g,c){if(c.uid||!/^#[0-9a-f]{6}$/i.test(c.applianceColor||''))return;
  const materials=new Map();g.traverse(o=>{if(!o.isMesh||!o.material?.color||!(/^(appliance_body|oven_facade|microwave_body|freezer_door|fridge_door|dishwasher_door|hood_canopy|hood_chimney|ceramic_hob|hob_cooktop|v6_hood_glass_panel|v6_hood_chimney|v6_hood_lower_trim|v7_microwave_body|v7_microwave_face|ideare_appliance_finish)/.test(o.name)))return;
   if(!materials.has(o.material)){const m=o.material.clone();m.color.set(c.applianceColor);m.map=null;materials.set(o.material,m);}o.material=materials.get(o.material);
  });}
@@ -2414,14 +2405,14 @@ function ideareTintAppliance(g,c){if(!/^#[0-9a-f]{6}$/i.test(c.applianceColor||'
   }
   surround(w,d,t,H-t/2,frameMat,'sink_cutout_carcass');surround(w,d,.028,H+.014,topMat,'sink_cutout_worktop');
   const rim=.017,bh=Math.min(.19,H*.23);for(const sign of [-1,1]){addBox(g,sw+rim*2,.008,rim,0,topH+.004,z+sign*(sd+rim)/2,st,'ideare_appliance_finish_sink_rim');addBox(g,rim,.008,sd,sign*(sw+rim)/2,topH+.004,z,st,'ideare_appliance_finish_sink_rim');addBox(g,.007,bh,sd,sign*(sw-.007)/2,topH-bh/2,z,inner,'ideare_appliance_finish_sink_bowl_side');addBox(g,sw-.014,bh,.007,0,topH-bh/2,z+sign*(sd-.007)/2,inner,'ideare_appliance_finish_sink_bowl_side');}
-  addBox(g,sw-.014,.009,sd-.014,0,topH-bh,z,inner,'ideare_appliance_finish_sink_bowl_bottom');const drain=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.006,24),dark());drain.position.set(0,topH-bh+.009,z);g.add(drain);
+  addBox(g,sw-.014,.009,sd-.014,0,topH-bh,z,inner,'ideare_appliance_finish_sink_bowl_bottom');const drain=new THREE.Mesh(new THREE.CylinderGeometry(.024,.024,.006,24),dark());drain.position.set(0,topH-bh+.009,z);drain.name='sink_drain';g.add(drain);
   const fz=-d/2+.043,fx=Math.min(sw*.25,.13),fh=topH+.24;
   const pipe=new THREE.CatmullRomCurve3([new THREE.Vector3(fx,topH,fz),new THREE.Vector3(fx,fh-.035,fz),new THREE.Vector3(fx,fh,fz+.065),new THREE.Vector3(fx,fh-.04,fz+.145),new THREE.Vector3(fx,fh-.085,fz+.17)]);
   const tap=new THREE.Mesh(new THREE.TubeGeometry(pipe,28,.011,12,false),st);tap.name='sink_tap';g.add(tap);
  }
  function storageFront(g,c,lo,hi){const h=hi-lo,w=c.width/1000,d=c.depth/1000;if(h<.065||c.front==='open')return;const count=Math.max(1,Math.min(2,Number(c.doorCount)||2)),cell=w/count,front=finishMat(c);for(let i=0;i<count;i++){const left=count===1?c.hingeSide!=='right':i%2===0,sign=left?1:-1,p=new THREE.Group();p.position.set(-w/2+i*cell+(left?0:cell),lo,d/2+.008);addBox(p,Math.max(.01,cell-.002),h-.003,.019,sign*cell/2,h/2,0,front,'door_panel');if(model.selected===c.uid&&model.doorsOpen)p.rotation.y=left?-1.2:1.2;const profile=v7ResolvedHandle(c)||v7Handles.find(p=>p.id==='bar-steel')||v7Handles[0];if(profile&&profile.kind!=='none'&&!/handleless|push/i.test(catalog.handles.find(x=>Number(x.id)===Number(c.handle))?.name||'')){const hw=v7Hardware(profile,Math.min(.16,h*.55,cell*.7));hw.position.set(sign*(cell-.045),h/2,.012);hw.rotation.z=Math.PI/2;p.add(hw);}g.add(p);}}
  function ovenFace(g,c,lo,hi,kind){const w=c.width/1000,d=c.depth/1000,h=hi-lo,cy=(lo+hi)/2,W=Math.min(.60,w-.024),D=Math.min(.55,d-.03),z=d/2-.012;
-  if(h<.08||W<.08||D<.03)return;const s=steel(),b=dark(),v=glass();
+  if(h<.08||W<.08||D<.03)return;const part=new THREE.Group();part.userData.ideareBuiltIn=kind;g.add(part);g=part;const s=steel(),b=dark(),v=glass();
   addBox(g,W,h-.007,D,0,cy,z-D/2,s,'ideare_appliance_finish_body');addBox(g,W,h-.006,.021,0,cy,z+.012,s,'ideare_appliance_finish_face');
   if(kind==='fridge'){const gap=.004,free=Math.min(h*.32,.6);addBox(g,W-.003,free-gap,.024,0,lo+free/2,z+.025,s,'ideare_appliance_finish_fridge');addBox(g,W-.003,h-free-gap,.024,0,lo+free+(h-free)/2,z+.025,s,'ideare_appliance_finish_fridge');for(const y of [lo+free*.65,lo+free+(h-free)*.43])addBox(g,.015,Math.min(.27,h*.22),.035,W*.38,y,z+.051,b,'fridge_pull');return;}
   if(kind==='dishwasher'){addBox(g,W*.93,h*.81,.019,0,cy-h*.055,z+.025,s,'ideare_appliance_finish_dishwasher');addBox(g,W*.92,h*.10,.020,0,hi-h*.065,z+.028,b,'dishwasher_controls');addBox(g,W*.53,.015,.038,0,hi-h*.16,z+.045,s,'dishwasher_pull');return;}
@@ -2449,7 +2440,7 @@ function ideareTintAppliance(g,c){if(!/^#[0-9a-f]{6}$/i.test(c.applianceColor||'
   const current=/^#[0-9a-f]{6}$/i.test(c.applianceColor||'')?c.applianceColor:'#aeb5b8';el.innerHTML=`<strong>Appliance finish</strong><div class="ideare-appliance-swatches">${[['#26292b','Black'],['#aeb5b8','Stainless steel'],['#f2f0eb','White'],['#8b8f8e','Graphite'],['#bdab8c','Champagne']].map(([v,n])=>`<button type="button" data-appliance-colour="${v}" style="--appliance-swatch:${v}" title="${n}" aria-label="${n}" aria-pressed="${c.applianceColor===v}"></button>`).join('')}<input type="color" data-appliance-custom aria-label="Custom appliance colour" value="${current}"><button type="button" data-appliance-colour="default" class="ideare-appliance-reset">Reset</button></div><small>Changes the appliance finish, not the cabinet doors.</small>`;
  };
  const originalInspector=renderInspector;renderInspector=()=>{const old=$('#selected-inspector .ideare-appliance-colour');old?.remove();originalInspector();};
- function setColour(v){const c=selected()||extraSelected();if(!c||c.uid&&!ideareIntegrated(c)||v!=='default'&&!/^#[0-9a-f]{6}$/i.test(v))return;history();if(v==='default')delete c.applianceColor;else c.applianceColor=v;renderAll();changed(false);}
+ function setColour(v){const c=selected()||extraSelected();if(!c||v!=='default'&&!/^#[0-9a-f]{6}$/i.test(v))return;const kind=ideareSelectedAppliance(c);if(c.uid&&!kind)return;history();if(kind){c.applianceColours={...(c.applianceColours||{}),[kind]:v==='default'?null:v};}else if(v==='default')delete c.applianceColor;else c.applianceColor=v;renderAll();changed(false);}
  document.addEventListener('click',e=>{const b=e.target.closest?.('[data-appliance-colour]');if(b){e.preventDefault();setColour(b.dataset.applianceColour);}});
  document.addEventListener('change',e=>{if(e.target.matches?.('[data-appliance-custom]'))setColour(e.target.value);});
  const oldSave=save;save=mode=>{if(model.extras.some(c=>!window.IDEAREPlacementV4.valid(c))){notify('Move appliances fully inside the room before saving.',true);showStep(3);return;}return oldSave(mode);};
@@ -2775,62 +2766,111 @@ function ideareCeilingLabel(mm){return ideareCeilingFeet?ideareFeetText(mm):`${M
  installExpand($('.v10-finish-ui'),$('.v10-gallery'),null);
 })();
 
-/* IDEARE finish cards, appliance inspector separation and closed plinths */
-(()=>{
- const panel=$('#selected-inspector');
- if(!panel)return;
- let lastUid=null,mode='cabinet';
- const switcher=document.createElement('div');switcher.className='ideare-inspector-switch';switcher.hidden=true;
- switcher.setAttribute('role','group');switcher.setAttribute('aria-label','Edit cabinet or built-in appliance');
- switcher.innerHTML='<button type="button" data-ideare-edit-kind="cabinet" aria-pressed="true">Cabinet</button><button type="button" data-ideare-edit-kind="appliance" aria-pressed="false">Appliance</button>';
- const title=panel.querySelector('.id3-inspector-title');if(!title)return;title.after(switcher);
- const summary=document.createElement('div');summary.className='ideare-integrated-summary';summary.hidden=true;switcher.after(summary);
- function applianceNames(c){
-  const label=ideareApplianceLabel(c),names=[];
-  if(ideareFridgeHousing(c)||/\b(fridge|freezer|refrigerator)\b/.test(label))names.push('Refrigerator');
-  if(/\bsink\b/.test(label))names.push('Sink');
-  if(/\b(hob|cooker)\b/.test(label))names.push('Hob');
-  if(/\boven\b/.test(label))names.push('Oven');
-  if(/\bmicrowave\b/.test(label))names.push('Microwave');
-  if(/\bdishwasher\b/.test(label))names.push('Dishwasher');
-  if(/\b(hood|extractor)\b/.test(label))names.push('Extractor hood');
-  return names.length?names.join(' & '):'Integrated appliance';
+/* IDEARE independent built-in appliance picking */
+var idearePartSelection=null;
+var idearePartPending=null;
+const idearePartNames={oven:'Oven',microwave:'Microwave',fridge:'Refrigerator',dishwasher:'Dishwasher',hob:'Hob',hood:'Extractor hood',sink:'Sink'};
+function ideareSelectedAppliance(c){return c?.uid&&idearePartSelection?.uid===c.uid&&model.selected===c.uid?idearePartSelection.kind:null;}
+function idearePartKind(mesh,root){
+ for(let o=mesh;o&&o!==root;o=o.parent){
+  if(idearePartNames[o.userData?.ideareBuiltIn])return o.userData.ideareBuiltIn;
+  const n=o.name||'';
+  if(/^v7_microwave_(body|face|window|display|button|pull)$/.test(n))return 'microwave';
+  if(/^(v6_hood_|integrated_hood|hood_)/.test(n))return 'hood';
+  if(/^(hob_cooktop|hob_burner|hob_cap|ceramic_hob)$/.test(n))return 'hob';
+  if(/^(ideare_appliance_finish_sink_|sink_tap$|sink_drain$)/.test(n))return 'sink';
+  if(/^(ideare_appliance_finish_fridge|fridge_inner_|fridge_pull$|fridge_door$|freezer_door$)/.test(n))return 'fridge';
  }
+ return null;
+}
+function idearePartColour(c,kind){const colours=c.applianceColours;return colours&&Object.prototype.hasOwnProperty.call(colours,kind)?colours[kind]:c.applianceColor;}
+function idearePartVisible(o,root){for(let p=o;p;p=p.parent){if(p.visible===false)return false;if(p===root)break;}return true;}
+function idearePartHit(e){
+ if(!camera||!raycaster||!cabinetGroup||!extraGroup)return null;
+ const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return null;
+ raycaster.setFromCamera(new THREE.Vector2((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1),camera);
+ for(const hit of raycaster.intersectObjects([...cabinetGroup.children,...extraGroup.children],true)){
+  if(!hit.object.isMesh||!idearePartVisible(hit.object))continue;
+  for(let o=hit.object;o;o=o.parent){
+   if(o.userData?.uid){const c=model.cabinets.find(x=>x.uid===o.userData.uid);if(c)return {c,uid:c.uid,kind:idearePartKind(hit.object,o),point:hit.point};break;}
+   if(o.userData?.extraId){const c=model.extras.find(x=>x.id===o.userData.extraId);if(c)return {c,extraId:c.id,kind:null,point:hit.point};break;}
+  }
+ }
+ return null;
+}
+function idearePartDimensions(c,kind){
+ if(kind==='fridge'&&ideareFridgeHousing(c)){const s=ideareFridgeSpec(c);return [s.fw,s.fh,s.fd];}
+ return meshById.get(c.uid)?.userData?.idearePartSizes?.[kind]||null;
+}
+function idearePartSizeText(c,kind){const d=idearePartDimensions(c,kind);return d?`${d.map(v=>Math.round(v)).join(' × ')} mm`:'';}
+function idearePaintParts(hover=null){
+ for(const [uid,g] of meshById){
+  const selected=uid===model.selected,part=selected&&idearePartSelection?.uid===uid?idearePartSelection.kind:null;
+  const over=hover?.uid===uid,overKind=over?hover.kind:null;
+  for(const o of g.children){if(!o.isLineSegments)continue;
+   const k=o.userData?.idearePartOutline;
+   if(k){o.visible=(selected&&part===k)||(over&&overKind===k);if(o.visible)o.material.color.set(selected&&part===k?0xb3905c:0x96764d);}
+   else{o.visible=(selected&&!part)||(over&&!overKind);if(o.visible)o.material.color.set(selected&&!part?0xb3905c:0x786345);}
+  }
+ }
+}
+function ideareSelectPart(c,kind=null){
+ if(!c?.uid)return;
+ const before=ideareSelectedAppliance(c);
+ if(model.selected===c.uid&&before===kind)return;
+ idearePartPending=kind?{uid:c.uid,kind}:null;
+ try{select(c.uid);}finally{idearePartPending=null;}
+}
+(()=>{
+ const panel=$('#selected-inspector');if(!panel)return;
+ const app=$('#id3-app'),title=panel.querySelector('.id3-inspector-title');if(!title)return;
+ const summary=document.createElement('div');summary.className='ideare-integrated-summary';summary.hidden=true;title.after(summary);
+ const oldMake=makeCabinet;
+ makeCabinet=(c,...args)=>{
+  const g=oldMake(c,...args);if(!ideareIntegrated(c))return g;
+  g.updateMatrixWorld(true);const inv=new THREE.Matrix4().copy(g.matrixWorld).invert(),bounds=new Map(),colours=new Map();
+  g.traverse(o=>{
+   if(!o.isMesh||!idearePartVisible(o,g))return;
+   const kind=idearePartKind(o,g);if(!kind)return;
+   o.userData.ideareBuiltIn=kind;
+   if(o.geometry){o.geometry.computeBoundingBox();const b=o.geometry.boundingBox?.clone();if(b){b.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv,o.matrixWorld));if(!bounds.has(kind))bounds.set(kind,new THREE.Box3().makeEmpty());bounds.get(kind).union(b);}}
+   const color=idearePartColour(c,kind);
+   // Only tint the finish surfaces; keep windows, displays and controls distinct.
+   if(/^#[0-9a-f]{6}$/i.test(color||'')&&o.material?.color&&/^(appliance_body|oven_facade|microwave_body|freezer_door|fridge_door|dishwasher_door|hood_canopy|hood_chimney|ceramic_hob|hob_cooktop|v6_hood_glass_panel|v6_hood_chimney|v6_hood_lower_trim|v7_microwave_body|v7_microwave_face|ideare_appliance_finish)/.test(o.name)){
+    if(!colours.has(kind))colours.set(kind,new Map());const m=colours.get(kind);
+    if(!m.has(o.material)){const next=o.material.clone();next.color.set(color);next.map=null;m.set(o.material,next);}o.material=m.get(o.material);
+   }
+  });
+  g.userData.idearePartSizes={};
+  for(const [kind,b] of bounds){if(b.isEmpty())continue;const size=b.getSize(new THREE.Vector3()),center=b.getCenter(new THREE.Vector3());g.userData.idearePartSizes[kind]=[size.x*1000,size.y*1000,size.z*1000];
+   const geo=new THREE.BoxGeometry(size.x+.009,size.y+.009,size.z+.009),edges=new THREE.EdgesGeometry(geo);geo.dispose();const line=new THREE.LineSegments(edges,new THREE.LineBasicMaterial({color:0xb3905c}));line.position.copy(center);line.userData.idearePartOutline=kind;line.visible=ideareSelectedAppliance(c)===kind;g.add(line);
+  }
+  if(ideareSelectedAppliance(c))for(const o of g.children)if(o.isLineSegments&&!o.userData.idearePartOutline)o.visible=false;
+  return g;
+ };
+ const oldSelect=select;select=uid=>{idearePartSelection=idearePartPending?.uid===uid?{...idearePartPending}:null;window.IDEAREV8?.resetPartResize?.();return oldSelect(uid);};
+ const oldExtra=selectExtra;selectExtra=uid=>{idearePartSelection=null;window.IDEAREV8?.resetPartResize?.();return oldExtra(uid);};
  function refresh(){
-  const c=selected(),eligible=!!(c&&(ideareIntegrated(c)||ideareFridgeHousing(c)));
-  if(lastUid!==c?.uid){lastUid=c?.uid;mode='cabinet';}
-  if(!eligible)mode='cabinet';
-  const appliance=eligible&&mode==='appliance';
-  switcher.hidden=!eligible;summary.hidden=!appliance;
-  panel.classList.toggle('ideare-appliance-view',appliance);
-  panel.classList.toggle('ideare-integrated-cabinet-view',eligible&&!appliance);
-  for(const b of switcher.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.ideareEditKind===mode));
-  if(eligible){
-   const heading=document.createElement('strong');heading.textContent=applianceNames(c);
-   const note=document.createElement('small');note.textContent=ideareFridgeHousing(c)?'Adjust refrigerator dimensions, door arrangement and finish separately from the surround.':'Appliance finish is independent of the cabinet. The appliance model fits the cabinet opening automatically; change the housing measurements in Cabinet.';
-   summary.replaceChildren(heading,note);
-  }
-  const colour=panel.querySelector('.ideare-appliance-colour');if(colour)colour.hidden=eligible&&!appliance;
+  const c=selected();if(!c||idearePartSelection?.uid!==c.uid)idearePartSelection=null;
+  const kind=ideareSelectedAppliance(c),eligible=!!(c&&ideareIntegrated(c)),appliance=!!kind;
+  panel.classList.toggle('ideare-appliance-view',appliance);panel.classList.toggle('ideare-integrated-cabinet-view',eligible&&!appliance);
+  app?.classList.toggle('ideare-part-selected',appliance);app?.classList.toggle('ideare-fixed-part-selected',appliance&&!ideareFridgeHousing(c));
+  summary.hidden=!appliance;
+  const kicker=title.querySelector('.id3-kicker');if(kicker)kicker.textContent=appliance?'SELECTED APPLIANCE':'SELECTED CABINET';
+  if(c){$('#selected-name').textContent=appliance?idearePartNames[kind]:c.name;$('#selected-size').textContent=appliance?idearePartSizeText(c,kind):`${Math.round(c.width)} × ${Math.round(c.height)} × ${Math.round(c.depth)} mm`;}
+  if(appliance){const note=document.createElement('small');note.textContent=ideareFridgeHousing(c)?'Refrigerator measurements, door arrangement and finish.':'Built-in appliance finish. Model dimensions follow the cabinet opening.';summary.replaceChildren(note);}
+  const colour=panel.querySelector('.ideare-appliance-colour');if(colour){colour.hidden=!appliance;if(appliance){const v=idearePartColour(c,kind);for(const b of colour.querySelectorAll('[data-appliance-colour]'))b.setAttribute('aria-pressed',String(b.dataset.applianceColour===v));const custom=colour.querySelector('[data-appliance-custom]');if(custom)custom.value=/^#[0-9a-f]{6}$/i.test(v||'')?v:'#aeb5b8';}}
   const fridge=panel.querySelector('.ideare-fridge-config');if(!fridge)return;
-  // Keep existing inputs and handlers inside the same form. Only expose the relevant group.
   fridge.querySelector('strong').textContent=appliance?'Refrigerator details':'Surround & storage';
-  for(const field of fridge.querySelectorAll('[data-fridge-field],[data-fridge-side]')){
-   const isAppliance=['fw','fh','fd','doors','type'].includes(field.dataset.fridgeField);
-   const label=field.closest('label');if(label)label.hidden=appliance!==isAppliance;
-  }
-  const tips=fridge.querySelectorAll(':scope > small');
-  if(tips[0])tips[0].textContent=appliance?'Fridge rests directly on the floor. Measurements in mm.':'Measurements in mm. Cabinetry dimensions follow the refrigerator opening.';
-  if(tips[1])tips[1].textContent=appliance?'Check actual appliance dimensions and hinge clearance before installation.':'Resize the overhead and pantry cabinets using the preview grips. Zero pantry width removes that side.';
+  for(const field of fridge.querySelectorAll('[data-fridge-field],[data-fridge-side]')){const isAppliance=['fw','fh','fd','doors','type'].includes(field.dataset.fridgeField);const label=field.closest('label');if(label)label.hidden=appliance!==isAppliance;}
+  const tips=fridge.querySelectorAll(':scope > small');if(tips[0])tips[0].textContent=appliance?'Fridge rests directly on the floor. Measurements in mm.':'Cabinetry dimensions in mm.';if(tips[1])tips[1].textContent=appliance?'Check appliance installation and hinge clearances.':'Resize overhead and pantry storage using preview grips.';
   const apply=fridge.querySelector('[data-fridge-apply]');if(apply)apply.textContent=appliance?'Apply refrigerator dimensions':'Apply surround dimensions';
-  const select=fridge.querySelector('[data-fridge-resize-part]');
-  if(select){
-   for(const option of select.options){const show=appliance===(option.value==='refrigerator');option.hidden=!show;option.disabled=!show;}
-   if(!select.value||select.selectedOptions[0]?.disabled){select.value=appliance?'refrigerator':'assembly';select.dispatchEvent(new Event('change',{bubbles:true}));}
-  }
+  const target=fridge.querySelector('[data-fridge-resize-part]');if(target){for(const option of target.options){const show=appliance===(option.value==='refrigerator');option.hidden=!show;option.disabled=!show;}if(!target.value||target.selectedOptions[0]?.disabled){target.value=appliance?'refrigerator':'assembly';target.dispatchEvent(new Event('change',{bubbles:true}));}}
   const door=fridge.querySelector('[data-fridge-door-preview]');if(door)door.hidden=!appliance;
  }
- switcher.addEventListener('click',e=>{const b=e.target.closest('[data-ideare-edit-kind]');if(!b||mode===b.dataset.ideareEditKind)return;mode=b.dataset.ideareEditKind;refresh();});
  const previous=renderInspector;renderInspector=(...args)=>{const result=previous(...args);refresh();return result;};
+ const previousDraw=drawScene;drawScene=(...args)=>{const result=previousDraw(...args);idearePaintParts();const c=selected(),kind=ideareSelectedAppliance(c);if(kind)$('#selected-size').textContent=idearePartSizeText(c,kind);return result;};
+ const previousList=renderList;renderList=(...args)=>{const result=previousList(...args),c=selected(),kind=ideareSelectedAppliance(c);if(kind)$('#selection-badge').textContent=idearePartNames[kind];return result;};
 })();
 
 Promise.resolve().then(()=>boot()).catch(ideareStartupError);

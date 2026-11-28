@@ -153,6 +153,7 @@ The primary PHP pages run directly under Apache. No mandatory npm build or Compo
 ```text
 IDEARE-CREATION/
 ├── index.php                     # Homepage
+├── ideare_db.sql                 # Bundled database schema and data
 ├── designer.php                  # Additional designer entry point
 ├── material-catalogue.php        # Catalogue landing page
 ├── hpl-catalogue.php              # HPL browser
@@ -206,72 +207,134 @@ The following table groups are referenced by the current source; this is a depen
 
 Cabinet saves persist the scene and related configuration records, including revisions and hashed access tokens. Home design leads are written separately as JSON files. Keep a consistent backup of database records and their corresponding uploaded images/documents.
 
-**Important:** The reviewed repository does not contain an SQL dump or migration set. Obtain the latest complete `ideare_db` export, including catalogue seed data and the current designer tables, from the project owner. Creating an empty database alone will not enable the database-backed features.
+The root-level [`ideare_db.sql`](ideare_db.sql) contains the database export (36 tables), including the cabinet and HPL catalogue data, inspiration records, design tables, and appointment tables. It was exported from MariaDB 10.4.32 using phpMyAdmin 5.2.3. It does **not** contain a `CREATE DATABASE` or `USE` statement, so create and select `ideare_db` before importing it. The presence of a table does not guarantee it contains products or other records; for example, the stone tables are included but have no seed inserts in the reviewed export.
+
+> **Release privacy:** The current SQL export includes inserts into customer, appointment and saved-design tables. Before distributing a public release, verify that all such records are synthetic demo data or replace the export with a sanitized schema and catalogue seed dataset. Never distribute actual customer information, private designs, passwords or access credentials. Do not overwrite an existing operational database with the bundled dump.
 
 ## Installation
 
-### 1. Prerequisites
+This guide is for a first-time user downloading an IDEARE Creation release on Windows. No programming experience, Git, Node.js, npm or Composer is needed for the standard installation. The website runs locally on your computer using XAMPP; an internet connection is needed to download the files and load externally hosted fonts and 3D libraries.
 
-- Windows with XAMPP (or an equivalent Apache/PHP/MySQL environment).
-- PHP 8.1 or newer, with `pdo_mysql`, `mbstring`, `fileinfo` and session support enabled.
-- MySQL/MariaDB and phpMyAdmin or a compatible SQL client.
-- A current WebGL-capable browser such as Chrome, Edge or Firefox.
-- Git (optional if downloading the repository ZIP).
-- The latest database export and any separately stored runtime assets.
+**Quick overview:** Download the release → Install XAMPP → Extract the website → Start Apache and MySQL → Create and import the database → Open the website in your browser.
 
-### 2. Download the repository
+### Step 1 — Download IDEARE Creation
 
-Open a terminal and run:
+1. Go to the [IDEARE Creation Releases page](https://github.com/ferhan02/IDEARE-CREATION/releases).
+2. Open the release you want to install (normally the latest stable release).
+3. Under **Assets**, download the project's installation ZIP if one is provided. Otherwise, download **Source code (zip)**, provided that the release includes `ideare_db.sql` and the complete website files.
+4. Save the ZIP file to your Downloads folder. You do not need to install Git or clone the repository.
 
-```bat
-cd /d C:\xampp\htdocs
-git clone https://github.com/ferhan02/IDEARE-CREATION.git "IDEARE CREATION"
-```
+If no suitable release has been published yet, open the [main repository](https://github.com/ferhan02/IDEARE-CREATION), click the green **Code** button, then choose **Download ZIP**. This downloads the current development snapshot rather than a versioned release. Make sure the downloaded version contains `ideare_db.sql` before continuing.
 
-Alternatively, download **Code → Download ZIP** from GitHub and extract its contents to:
+### Step 2 — Download and install XAMPP
+
+1. Visit the [official XAMPP download page](https://www.apachefriends.org/download.html).
+2. Download XAMPP for Windows with PHP 8.2 or a newer compatible PHP version (the website requires PHP 8.1 or newer).
+3. Run the downloaded XAMPP installer. Allow the installer to run if Windows asks for permission.
+4. In the component selection screen, make sure **Apache**, **MySQL**, **PHP** and **phpMyAdmin** are installed. XAMPP labels its MariaDB service as MySQL.
+5. Use the default installation folder `C:\xampp` for this guide.
+6. Finish the installation and open **XAMPP Control Panel**.
+
+If XAMPP is already installed with a compatible PHP version, you can skip this step. The required PHP extensions are `pdo_mysql`, `mbstring`, `fileinfo` and session support.
+
+### Step 3 — Extract the website into XAMPP
+
+1. Open File Explorer and go to your Downloads folder.
+2. Right-click the downloaded IDEARE ZIP and select **Extract All**.
+3. Open the extracted folder. GitHub may name it `IDEARE-CREATION-main` or include the release version in the folder name.
+4. Open `C:\xampp\htdocs` in File Explorer.
+5. Create a new folder named `IDEARE CREATION` inside `htdocs`.
+6. Copy **all the contents** of the extracted website folder into `C:\xampp\htdocs\IDEARE CREATION`.
+
+Your folder should look like this (other project files and folders are omitted here for clarity):
 
 ```text
 C:\xampp\htdocs\IDEARE CREATION\
+├── index.php
+├── ideare_db.sql
+├── README.md
+├── assets\
+├── config\
+├── includes\
+├── pages\
+├── designer\
+├── home-configurator\
+├── api\
+├── public\
+└── uploads\
 ```
 
-Ensure `index.php`, `config/`, `assets/` and the other root folders sit directly inside this directory, not inside an additional nested repository folder.
+**Important:** `index.php` and `ideare_db.sql` must be directly inside the `IDEARE CREATION` folder. Do not leave another `IDEARE-CREATION-main` or release-version folder nested inside it. If you installed XAMPP somewhere other than `C:\xampp`, use that installation's `htdocs` directory instead.
 
-### 3. Start the local server
+### Step 4 — Start Apache and MySQL
 
-Open XAMPP Control Panel and start **Apache** and **MySQL**. Verify that `http://localhost/` and `http://localhost/phpmyadmin/` open. If the server uses a non-default port, include that port in the URLs below.
+1. Open **XAMPP Control Panel** from the Windows Start menu (or run `C:\xampp\xampp-control.exe`).
+2. In the Apache row, click **Start**.
+3. In the MySQL row, click **Start**.
+4. Confirm that both modules are running (normally highlighted in green with process IDs and ports displayed).
+5. Open Chrome, Edge or Firefox and visit [http://localhost/](http://localhost/) to confirm Apache is working.
 
-### 4. Import the database
+Keep both services running while using the website. If either service fails to start, check the XAMPP log for port conflicts. If Apache is configured on a different port, such as 8080, use `http://localhost:8080/` instead throughout this guide.
 
-1. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
-2. Create `ideare_db` with `utf8mb4` encoding if the supplied SQL export does not create it itself.
-3. Select the database, open **Import**, choose the latest IDEARE SQL export and run the import.
-4. Confirm the required tables and catalogue rows exist, using the table inventory above as a starting point.
-5. If updating an existing installation, back it up and apply only the appropriate schema changes instead of overwriting live data.
+### Step 5 — Create the IDEARE database
 
-### 5. Configure PHP database connections
+1. In your web browser, open [http://localhost/phpmyadmin/](http://localhost/phpmyadmin/). You can also click **Admin** next to MySQL in XAMPP.
+2. In the left sidebar, click **New** (or open the **Databases** tab).
+3. In the database name field, enter exactly `ideare_db`.
+4. Select `utf8mb4_general_ci` or another available compatible `utf8mb4` collation.
+5. Click **Create**.
+6. In the left sidebar, click the newly created `ideare_db` database.
 
-Review these two files:
+The database name must match the website's PHP configuration. The bundled SQL file does not create or select the database for you. If `ideare_db` already exists, do not delete or import over it without backing it up and checking whether the data needs to be preserved. The next step assumes a fresh, empty database.
+
+### Step 6 — Import the included SQL file
+
+1. With `ideare_db` selected in phpMyAdmin, click the **Import** tab at the top.
+2. Under **File to import**, click **Choose File** or **Browse**.
+3. Navigate to `C:\xampp\htdocs\IDEARE CREATION\ideare_db.sql` and select it.
+4. Leave the format set to **SQL** and the character set at UTF-8.
+5. Scroll to the bottom and click **Import** (called **Go** in some phpMyAdmin versions).
+6. Wait for phpMyAdmin to finish and check for a successful import message. If there is an error, resolve it before using database-dependent features.
+7. Expand `ideare_db` in the left sidebar. Tables such as `cabinet_templates`, `designs`, `topmix`, `dgtango`, `inspiration_designs` and `customer_appointments` should now appear. The reviewed export contains 36 tables; other releases may have a different count.
+
+You do not need to download a separate SQL file or manually create each table. A blank database without the SQL import is not enough to run the catalogue, saving and booking features.
+
+### Step 7 — Check the database connection (normally no changes needed)
+
+The included PHP configuration is already set up for a default local XAMPP installation:
+
+| Setting | Default value |
+| --- | --- |
+| Database host | `localhost` |
+| Database name | `ideare_db` |
+| MySQL username | `root` |
+| MySQL password | Empty (no password) |
+| Character set | `utf8mb4` |
+
+If you installed XAMPP using its standard local settings, proceed to Step 8. If your MySQL username, password, hostname or port is different, open these two files in a text editor and update both PDO connection definitions to match your own server:
 
 - `config/db.php`
 - `config/databases.php`
 
-The checked-in local defaults use `localhost`, `ideare_db`, user `root` and an empty password. These are suitable only for a matching isolated local XAMPP setup. If your MySQL credentials differ, edit both PDO connection definitions to match. In production, use a restricted database account and environment-backed credentials rather than committing passwords.
+The default empty-password root account is intended only for an isolated local development installation. Do not use it for a public website.
 
-### 6. Configure storage and assets
+### Step 8 — Open the IDEARE Creation website
 
-- Preserve the `assets/images/` and `public/uploads/materials/` directory structures; filenames and letter case matter on Linux.
-- Restore any database-referenced images that are not included in Git.
-- Give the PHP process write access to the relevant upload directories for consultation attachments and generated design PDFs.
-- For home concept submissions, set `IDEARE_HOME_LEAD_DIR` to a writable directory outside the web document root. If unset, the code attempts to create `ideare-home-leads` alongside the web document root (typically `C:\xampp\ideare-home-leads` in a standard XAMPP installation).
-- Verify PHP upload and POST limits accommodate the application's accepted attachments. Preserve server-side restrictions against direct access or execution in private storage.
+Make sure Apache and MySQL are still running. Open your browser and enter this address:
 
-### 7. Open the website
+**[http://localhost/IDEARE%20CREATION/](http://localhost/IDEARE%20CREATION/)**
 
-```text
-http://localhost/IDEARE%20CREATION/
-```
+You can also open [http://localhost/IDEARE%20CREATION/index.php](http://localhost/IDEARE%20CREATION/index.php).
 
-| Page | Local URL path (after `/IDEARE%20CREATION/`) |
+The IDEARE homepage should appear. You have now completed the basic installation. Do not double-click `index.php` in File Explorer; PHP pages must be served through Apache, not opened using a `file:///` URL.
+
+If you chose a different project folder name, change the URL to match. For example, if your folder is `C:\xampp\htdocs\IDEARE-CREATION`, use `http://localhost/IDEARE-CREATION/` instead. `%20` represents the space in `IDEARE CREATION`.
+
+### Step 9 — Verify that the website works
+
+Use the following pages to check the installation. All paths below are relative to `http://localhost/IDEARE%20CREATION/`.
+
+| Page | Local URL path |
 | --- | --- |
 | Homepage | `index.php` |
 | About | `pages/about.php` |
@@ -288,7 +351,32 @@ http://localhost/IDEARE%20CREATION/
 | Contact | `pages/contact.php` |
 | Location | `pages/where-we-are.php` |
 
-### 8. Optional Planner 5D integration
+- Open the homepage and switch between light and dark modes.
+- Open the HPL catalogue and confirm products are displayed; the stone catalogue needs separate product rows if the imported release contains only empty stone tables.
+- Launch the cabinet studio, choose a room shape and add a cabinet. Launch the home studio and confirm that its 3D viewport loads. Use a WebGL-capable browser with hardware acceleration and an internet connection for CDN libraries.
+- If testing submissions, use fictitious customer information. Check that save/booking operations return a confirmation; do not assume that a confirmation sends email or WhatsApp notifications.
+
+If something fails, see [Troubleshooting](#troubleshooting).
+
+### Using the website again later
+
+There is no need to re-extract the ZIP or re-import the database every time. Open XAMPP Control Panel, start Apache and MySQL, then visit the same localhost URL. When you finish using the site, you can stop Apache and MySQL from the control panel. Saved database records remain on your computer.
+
+### Updating to a newer release
+
+Back up the existing project folder, database and runtime uploads before replacing files. Read the release notes for any schema changes; do not blindly import the full SQL dump into a database containing existing designs or appointments. For a separate clean test installation, use a separate database and adjust both PDO configuration files accordingly.
+
+### Additional storage and asset configuration
+
+The standard local installation should not require extra setup just to open the homepage. For complete submission functionality:
+
+- Preserve `assets/images/` and `public/uploads/materials/`; restore any separately maintained images referenced in the database if needed.
+- Give the PHP process write access to the relevant upload directories for consultation attachments and generated design PDFs.
+- For home concept submissions, `IDEARE_HOME_LEAD_DIR` may be set to a writable directory outside the web document root. If unset, the code attempts to create `ideare-home-leads` alongside the document root (typically `C:\xampp\ideare-home-leads`).
+- Check PHP upload and POST limits if attachments fail. Preserve server-side restrictions against direct access or execution in private storage.
+- This guide is for a local evaluation/development installation, not internet-facing hosting. Do not expose the bundled SQL dump, configuration files, backups or private uploads over HTTP. See [Maintenance and deployment](#maintenance-and-deployment).
+
+### Optional Planner 5D integration (not required for installation)
 
 Only enable the partner editor after confirming the commercial agreement, approved embed URL, permitted host and required behaviour. Relevant configuration is in `home-configurator/planner5d-config.php`:
 
@@ -378,7 +466,7 @@ Operationally, review incoming appointment records, saved/submitted cabinet desi
 ### Production checklist
 
 - Use HTTPS, secure session configuration, restricted database credentials and a supported PHP version.
-- Keep secrets, database exports, customer information, saved edit links and private lead files out of public Git repositories.
+- Keep secrets, unsanitized database exports, real customer information, saved edit links and private lead files out of public Git repositories. Distribute only sanitized schema and non-sensitive seed data; deny HTTP access to `ideare_db.sql` or remove it from the deployed document root after import.
 - Deny direct HTTP access to private uploads, configuration, backup files and historical update utilities; verify Apache actually enforces the rules.
 - Review all legacy and active APIs for authentication/authorisation, CSRF, input validation, rate limiting and safe file handling before public deployment.
 - Disable public error display; log errors privately and monitor failures.
@@ -395,7 +483,9 @@ Before deploying changes, test on desktop, tablet and phone, in both themes, and
 
 | Symptom | What to check |
 | --- | --- |
-| Website does not load | Apache running, correct port, root folder and URL. |
+| Apache or MySQL will not start | XAMPP logs, occupied ports (Apache normally 80/443; MySQL normally 3306), other running web/database services. |
+| Website does not load / 404 | Apache running, correct port, root folder and URL. Check that `index.php` is not nested inside a second extracted folder. |
+| SQL import fails | Select an empty `ideare_db`, use the bundled `ideare_db.sql`, check the phpMyAdmin error and avoid importing twice into the same database. |
 | Database unavailable | MySQL running, database name, both PDO configurations, `pdo_mysql` extension. |
 | Empty cabinet or material catalogue | Complete SQL import, correct schema and active template/product data. |
 | Missing project/material images | Database paths, filename case, restored uploads and correct relative URLs. |
@@ -409,8 +499,8 @@ Before deploying changes, test on desktop, tablet and phone, in both themes, and
 
 ## Current scope and limitations
 
-- This documentation describes the customer-facing repository on `main`, reviewed on 28 November 2026 (tree `1e1d6099f599169cd2b204ddf1696fd7cff50838`).
-- The SQL schema/export, staff portal and operational data are not bundled in that tree. Obtain these independently where needed.
+- This documentation describes the customer-facing repository on `main`, reviewed on 28 November 2026 (tree `fed2f1dcce7cf5b22307a3a58fc42282ddf6fa65`).
+- The SQL export is bundled as `ideare_db.sql`. The separate staff portal is not included. Review the export for sensitive records before distribution; some catalogues may need additional product data.
 - Some pages and historical update files coexist with newer implementations. Verify active references before deleting files.
 - The homepage includes an enquiry interface; do not assume every contact button has a working backend or automated notification. Use the verified booking and design submission handlers and test the live contact flow before release.
 - The website is a concept visualisation and lead-generation platform, not an e-commerce checkout, structural engineering system or automated manufacturing solution.
