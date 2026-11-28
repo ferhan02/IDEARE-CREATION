@@ -48,6 +48,15 @@ try {
  foreach(array_slice((array)($scene['features']??[]),0,40) as $feature){
    $type=$feature['type']??'';if(!in_array($type,['door','window','outlet','plumbing'],true))continue;
    $wall=(int)($feature['wallIndex']??0);$wall=max(0,min(count($cleanVertices)-1,$wall));$offset=max(.05,min(.95,(float)($feature['offset']??.5)));$a=$cleanVertices[$wall];$b=$cleanVertices[($wall+1)%count($cleanVertices)];
+   // Door frame offsets are measured along the wall, not clamped percentages.
+   if($type==='door' && isset($feature['leftMm'])){
+     $wallLength=hypot($b['x']-$a['x'],$b['z']-$a['z']);
+     $left=id3_num($feature['leftMm'],0,20000,'door left offset');
+     $doorWidth=id3_num($feature['width']??null,400,3000,'door frame width');
+     $doorHeight=id3_num($feature['height']??null,1000,$height,'door frame height');
+     if($wallLength<1 || $left+$doorWidth>$wallLength+.5)throw new DomainException('Door frame exceeds wall length.');
+     $offset=($left+$doorWidth/2)/$wallLength;
+   }
    $fx=$a['x']+($b['x']-$a['x'])*$offset;$fz=$a['z']+($b['z']-$a['z'])*$offset;
    $f->execute([$roomId,id3_uuid(),$type,$wall,$fx,id3_num($feature['y']??0,0,8000,'feature y'),$fz,id3_num($feature['width']??150,10,5000,'feature width'),id3_num($feature['height']??100,10,5000,'feature height'),10,json_encode($feature)]);
  }
