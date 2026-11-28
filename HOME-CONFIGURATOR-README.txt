@@ -1,8 +1,0 @@
-IDEARE Home Configurator MVP
-1. Extract the contents to the existing project root (where index.php lives).
-2. Run apply-homepage.bat once on Windows/XAMPP, or php home-configurator/apply-homepage.php from project root. It patches only the existing Cabinet Designer section and backs up index.php in your system temp folder.
-3. Open homepage or home-configurator/index.php.
-4. For handoff, set IDEARE_HOME_LEAD_DIR to a private, writable directory outside the document root. Default is ideare-home-leads alongside the document root (e.g. C:\xampp\ideare-home-leads). JSON includes contact details; restrict staff access, set retention and add abuse protection before public release. No database migration, staff dashboard or email notification included.
-5. Browser print dialog provides Save as PDF after contact fields are completed; this is not a server-generated PDF or lead submission. Share links embed geometry and preferences, not contact details. Large plans may exceed URL limits. Save is local to device.
-6. Prices are illustrative hardcoded MYR rates, not IDEARE quotes. Clearances are manual assumptions. Plans are conceptual room blocks, not complete architectural layouts; no roof, structural checks, door cutouts, automatic room closure, irregular parcel drawing or true 3D. Do not use to construct a building. Surface overlaps may overcount area. Validate layout and pricing with IDEARE before public use.
-7. PHP and JS syntax checks run; browser/XAMPP integration not tested. Shared customer header classifies the new index route as home; check inherited homepage scripts/styles on your installation. No existing repo files are overwritten by extraction; patch runs separately.

@@ -751,3 +751,10 @@ html.studio-fullscreen[data-ideare-page="designer"] .id3-studio .v10-plan-panel{
 .ideare-edge-box span{color:var(--studio-muted);font-size:9px}
 .ideare-door-plan{pointer-events:none;stroke:var(--studio-ink);fill:var(--studio-accent)}
 .ideare-door-sweep{stroke:none;fill:var(--studio-accent);opacity:.12}.ideare-door-gap{stroke:var(--studio-paper);stroke-width:6;stroke-linecap:butt}.ideare-door-arc{fill:none;stroke:var(--studio-ink);stroke-width:1.2;stroke-dasharray:4 3}.ideare-door-leaf{stroke:var(--studio-ink);stroke-width:3;stroke-linecap:round}
+
+/* IDEARE door wall picker — use the same palette as the backsplash modal. */
+.id3-studio .ideare-door-wall-field{display:grid;gap:4px;min-width:0;font-size:10px;line-height:1.4;}
+.id3-studio .ideare-door-wall-button{display:flex;align-items:center;justify-content:space-between;gap:7px;width:100%;text-align:left;min-height:42px;padding:8px 10px!important;border:1px solid var(--studio-line)!important;border-radius:9px;background:var(--studio-paper)!important;color:var(--studio-ink)!important;cursor:pointer;}
+.id3-studio .ideare-door-wall-button strong{font-size:12px;min-width:0;overflow-wrap:anywhere;}
+.id3-studio .ideare-door-wall-button span{font-size:10px;font-weight:600;color:var(--studio-muted);white-space:nowrap;}
+.id3-studio .ideare-door-wall-button:hover,.id3-studio .ideare-door-wall-button:focus-visible{border-color:var(--studio-accent)!important;outline:2px solid var(--studio-accent);outline-offset:2px;}
