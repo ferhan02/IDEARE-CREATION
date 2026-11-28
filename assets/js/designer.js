@@ -301,7 +301,7 @@ function addSharedElements(){for(const element of model.shared){
  let material=element.type==='worktop'?fetchTexture(element.material):null;
  let finish=material?new THREE.MeshStandardMaterial({map:material,color:'#fff',roughness:.36}):mat(element.type==='worktop'?'#777675':element.type==='backsplash'?'#a5a5a2':'#4b4947');
  if(element.type==='worktop')addBox(worldGroup,width,.03,d+.032,(minx+maxx)/2000,h+.015,z+.016,finish,'continuous_worktop');
- if(element.type==='plinth')addBox(worldGroup,width-.035,Math.max(.03,first.plinthHeight/1000),d-.1,(minx+maxx)/2000,first.plinthHeight/2000,z-.03,finish,'continuous_plinth');
+ // Linked plinth covers are rendered per cabinet so they cannot expose legs during dragging.
  if(element.type==='backsplash')addBox(worldGroup,width+.035,.2,.022,(minx+maxx)/2000,h+.12,z-d/2,finish,'continuous_backsplash');
  }}
 function addExtras(){for(let item of model.extras){let group=new THREE.Group();group.userData.extraId=item.id;group.position.set(item.x/1000,0,item.z/1000);let w=item.width/1000,d=item.depth/1000,h=item.height/1000;let silver=mat(/fridge|oven|dishwasher|microwave|refrigerator/i.test(item.kind)?'#9a9da0':'#af987c');addBox(group,w,h,d,0,h/2,0,silver,'concept_extra');const label=document.createElement('canvas');label.width=256;label.height=64;const c=label.getContext('2d');c.fillStyle='#f8f6f0';c.fillRect(0,0,256,64);c.font='bold 21px Arial';c.fillStyle='#4b4a46';c.textAlign='center';c.fillText(String(item.kind).slice(0,19),128,40);const t=new THREE.CanvasTexture(label);let flag=new THREE.Sprite(new THREE.SpriteMaterial({map:t,depthTest:false}));flag.position.set(0,h+.24,0);flag.scale.set(.82,.22,1);group.add(flag);const outline=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w+.01,h+.01,d+.01)),new THREE.LineBasicMaterial({color:0xb3905c}));outline.position.y=h/2;outline.visible=item.id===model.selectedExtra;group.add(outline);extraGroup.add(group);}}
@@ -2389,7 +2389,7 @@ window.addEventListener('pagehide',()=>{observer?.disconnect();orbit?.dispose();
 /* IDEARE interaction and integrated appliance update 2026-11-25 */
 function ideareApplianceLabel(c){return [c.uid?template(c.templateId)?.slug:'',c.name,c.kind].filter(Boolean).join(' ').replace(/[-_]/g,' ').toLowerCase();}
 function ideareSink(c){return !!c?.uid&&/\bsink\b/.test(ideareApplianceLabel(c))&&c.category!=='wall-cabinets';}
-function ideareIntegrated(c){return !!c?.uid&&/\b(sink|oven|microwave|fridge|freezer|refrigerator|dishwasher|hob|cooker|hood|extractor)\b/.test(ideareApplianceLabel(c));}
+function ideareIntegrated(c){return !!c?.uid&&(!!ideareFridgeHousing(c)||/\b(sink|oven|microwave|fridge|freezer|refrigerator|dishwasher|hob|cooker|hood|extractor)\b/.test(ideareApplianceLabel(c)));}
 function ideareTintAppliance(g,c){if(!/^#[0-9a-f]{6}$/i.test(c.applianceColor||''))return;
  const materials=new Map();g.traverse(o=>{if(!o.isMesh||!o.material?.color||!(/^(appliance_body|oven_facade|microwave_body|freezer_door|fridge_door|dishwasher_door|hood_canopy|hood_chimney|ceramic_hob|hob_cooktop|v6_hood_glass_panel|v6_hood_chimney|v6_hood_lower_trim|v7_microwave_body|v7_microwave_face|ideare_appliance_finish)/.test(o.name)))return;
   if(!materials.has(o.material)){const m=o.material.clone();m.color.set(c.applianceColor);m.map=null;materials.set(o.material,m);}o.material=materials.get(o.material);
@@ -2493,7 +2493,7 @@ function ideareCabinetInterior(c){if(!c.uid)return true;if(ideareFridgeHousing(c
  const fields=[['fw','Fridge width',300,1800],['fh','Fridge height',400,3000],['fd','Fridge depth',250,1200],['oh','Overhead cabinet height',150,1200],['left','Left pantry width',0,1200],['right','Right pantry width',0,1200],['ph','Pantry height (both sides)',400,3500]];
  const oldInspector=renderInspector;renderInspector=()=>{oldInspector();const panel=$('#selected-inspector'),c=selected();panel?.querySelector('.ideare-fridge-config')?.remove();$('#id3-app')?.classList.toggle('ideare-fridge-active',!!ideareFridgeHousing(c));if(!ideareFridgeHousing(c)||!panel)return;const s=ideareFridgeSpec(c),el=document.createElement('div');el.className='ideare-fridge-config';el.innerHTML=`<strong>Refrigerator housing</strong><small>Fridge rests directly on the floor. Measurements in mm.</small><div class="ideare-fridge-fields">${fields.map(([k,label,min,max])=>`<label>${label}<input type="number" min="${min}" max="${max}" step="1" data-fridge-field="${k}" value="${Math.round(s[k])}"></label>`).join('')}<label>Fridge doors<select data-fridge-field="doors">${[1,2,3,4].map(n=>`<option value="${n}" ${s.doors===n?'selected':''}>${n}</option>`).join('')}</select></label><label>Door arrangement<select data-fridge-field="type"><option value="stack" ${s.type==='stack'?'selected':''}>Top / bottom</option><option value="side" ${s.type==='side'?'selected':''}>Side by side</option></select></label><label>Pantries<select data-fridge-side><option value="none" ${!s.left&&!s.right?'selected':''}>None</option><option value="left" ${s.left&&!s.right?'selected':''}>Left</option><option value="right" ${!s.left&&s.right?'selected':''}>Right</option><option value="both" ${s.left&&s.right?'selected':''}>Both</option></select></label></div><small>Pantries start at the overhead cabinet top. Resize either pantry or the overhead section with the preview grips. Zero pantry width removes that side. Verify installation clearances with the appliance manual.</small><button type="button" class="id3-btn id3-secondary" data-fridge-apply>Apply dimensions</button>`;const anchor=panel.querySelector('.ideare-appliance-colour')||panel.querySelector('#ideare-option-shell');if(anchor)anchor.before(el);else panel.append(el);};
  document.addEventListener('change',e=>{const height=e.target.closest('[data-fridge-field="fh"]');if(height){const c=selected(),ph=height.closest('.ideare-fridge-config').querySelector('[data-fridge-field="ph"]');if(ideareFridgeHousing(c)){const old=ideareFridgeSpec(c),top=old.fh+50+old.oh;if(Number(ph.value)===top)ph.value=Number(height.value)+50+Number(height.closest('.ideare-fridge-config').querySelector('[data-fridge-field="oh"]').value);}}const select=e.target.closest('[data-fridge-side]');if(!select)return;const p=select.closest('.ideare-fridge-config'),left=p.querySelector('[data-fridge-field="left"]'),right=p.querySelector('[data-fridge-field="right"]'),ph=p.querySelector('[data-fridge-field="ph"]'),fh=p.querySelector('[data-fridge-field="fh"]');left.value=['left','both'].includes(select.value)?Number(left.value)||450:0;right.value=['right','both'].includes(select.value)?Number(right.value)||450:0;ph.value=Number(fh.value)+50+Number(p.querySelector('[data-fridge-field="oh"]').value);});
- document.addEventListener('click',e=>{const b=e.target.closest('[data-fridge-apply]');if(!b)return;const c=selected();if(!ideareFridgeHousing(c))return;const s=ideareFridgeSpec(c),old={...s};for(const f of b.closest('.ideare-fridge-config').querySelectorAll('[data-fridge-field]')){const k=f.dataset.fridgeField;if(k!=='type'&&f.value.trim()===''){notify('Enter all refrigerator dimensions.',true);return;}s[k]=k==='type'?f.value:Number(f.value);}ideareSyncFridgeFields(s,old);if(!ideareFridgeSpecValid(s)){notify('Check fridge and pantry dimensions. Pantry width must be zero or at least 200 mm.',true);return;}const q=configure({...c},s),a=(Number(c.rotation)||0)*Math.PI/180,dd=(q.depth-c.depth)/2;q.x=c.x-Math.sin(a)*dd;q.z=c.z+Math.cos(a)*dd;if(!window.IDEAREPlacementV4.valid(q)){notify('These dimensions would overlap another object or extend outside the room. Move the surround or reduce its size.',true);return;}history();Object.assign(c,q);renderAll();changed(false);});
+ document.addEventListener('click',e=>{const b=e.target.closest('[data-fridge-apply]');if(!b)return;const c=selected();if(!ideareFridgeHousing(c))return;const s=ideareFridgeSpec(c),old={...s};for(const f of b.closest('.ideare-fridge-config').querySelectorAll('[data-fridge-field]')){const k=f.dataset.fridgeField;if(f.closest('label')?.hidden)continue;if(k!=='type'&&f.value.trim()===''){notify('Enter all refrigerator dimensions.',true);return;}s[k]=k==='type'?f.value:Number(f.value);}ideareSyncFridgeFields(s,old);if(!ideareFridgeSpecValid(s)){notify('Check fridge and pantry dimensions. Pantry width must be zero or at least 200 mm.',true);return;}const q=configure({...c},s),a=(Number(c.rotation)||0)*Math.PI/180,dd=(q.depth-c.depth)/2;q.x=c.x-Math.sin(a)*dd;q.z=c.z+Math.cos(a)*dd;if(!window.IDEAREPlacementV4.valid(q)){notify('These dimensions would overlap another object or extend outside the room. Move the surround or reduce its size.',true);return;}history();Object.assign(c,q);renderAll();changed(false);});
  // The surrounding assembly has separate measurements; prevent generic edits
  // from changing its outer bounding box without updating the actual components.
  const oldDimension=updateDimension;updateDimension=(k,v,final=false)=>{const c=selected();if(ideareFridgeHousing(c)){const el=$(`[data-dimension="${k}"]`),slider=$(`[data-slider="${k}"]`);if(el)el.value=c[k];if(slider)slider.value=c[k];return;}return oldDimension(k,v,final);};
@@ -2606,13 +2606,19 @@ function ideareMakeGridLines(minor,major,group){
 }
 // Concealed adjustable feet and individual toe-kick boards, within original dimensions.
 function ideareCabinetSupports(g,c,h,x,z,w,d,showKick=true){
- if(h<=0||w<=0||d<=0)return;const legMat=new THREE.MeshStandardMaterial({color:0x343333,roughness:.72}),kick=mat('#555451'),radius=Math.min(.025,w*.12,d*.12),ix=Math.max(0,w/2-Math.min(.075,w*.22)),iz=Math.max(0,d/2-Math.min(.085,d*.23));
- for(const X of (w>1.05?[-ix,0,ix]:[-ix,ix]))for(const Z of [-iz,iz]){const leg=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius*.85,Math.max(.01,h-.012),12),legMat);leg.position.set(x+X,h/2,z+Z);leg.name='ideare_adjustable_leg';g.add(leg);const foot=new THREE.Mesh(new THREE.CylinderGeometry(radius*1.25,radius*1.25,.012,12),legMat);foot.position.set(x+X,.006,z+Z);foot.name='ideare_leg_foot';g.add(foot);}
- if(!showKick)return;const t=Math.min(.018,w*.1,d*.1),ww=Math.max(.01,w-.028),dd=Math.max(.01,d-.10),height=Math.max(.01,h-.004),cz=z-.035;
- for(const Z of [-1,1])addBox(g,ww,height,t,x,height/2,cz+Z*(dd-t)/2,kick,'recessed_plinth');
- for(const X of [-1,1])addBox(g,t,height,Math.max(.01,dd-2*t),x+X*(ww-t)/2,height/2,cz,kick,'recessed_plinth');
+ // Conceptual closed toe-kick. The rendered floor is at -11 mm, not y=0.
+ // Keep the front recessed without exposing individual support feet.
+ if(![h,x,z,w,d].every(Number.isFinite)||h<=0||w<=0||d<=0)return;
+ const floor=-.011,recess=Math.min(.035,d*.12),depth=d-recess;
+ addBox(g,w,h-floor,depth,x,(h+floor)/2,z-recess/2,mat('#555451'),'recessed_plinth');
+ // Each module carries its own cover, including during dragging of linked runs.
 }
-function ideareCornerSupports(g,c,p,h){if(h<=0)return;const shape=p.map(([x,z])=>({x,z})),minX=Math.min(...p.map(v=>v[0])),maxX=Math.max(...p.map(v=>v[0])),minZ=Math.min(...p.map(v=>v[1])),maxZ=Math.max(...p.map(v=>v[1])),legMat=mat('#343333');const sites=[];for(const xx of [.13,.5,.87])for(const zz of [.13,.5,.87]){const x=minX+(maxX-minX)*xx,z=minZ+(maxZ-minZ)*zz;if([[-.028,0],[.028,0],[0,-.028],[0,.028]].every(([dx,dz])=>pointInsidePolygon(x+dx,z+dz,shape)))sites.push([x,z]);}for(const [x,z] of sites){const leg=new THREE.Mesh(new THREE.CylinderGeometry(.023,.028,h,12),legMat);leg.position.set(x,h/2,z);leg.name='ideare_adjustable_leg';g.add(leg);}if(model.shared.some(r=>r.type==='plinth'&&r.cabinetUids?.includes(c.uid)))return;const q=p.map(([x,z])=>[x*.92,z*.92]),m=mat('#555451');for(let i=0;i<q.length;i++)v6Panel(g,q[i],q[(i+1)%q.length],h/2,Math.max(.01,h-.004),.018,m,'recessed_plinth');}
+function ideareCornerSupports(g,c,p,h){
+ if(!Number.isFinite(h)||h<=0||!Array.isArray(p)||p.length<3)return;
+ // Preserve the exact L-shaped/diagonal footprint, including its inner notch.
+ // The opaque volume represents the closed plinth, not a solid timber specification.
+ v6Slab(g,p,-.011,h+.011,mat('#555451'),'recessed_plinth');
+}
 (()=>{
  const bar=$('.studio-controls'),grid=$('#grid-toggle'),wall=$('#wall-toggle'),items=$('#studio-items'),itemButton=$('#list-toggle');if(!bar||!grid||!wall||!items||!itemButton)return;
  const paths={wall:'<path d="m3 7 9-5 9 5v10l-9 5-9-5zM3 7l9 5 9-5M12 12v10"/>',cut:'<path d="m3 7 9-5 9 5v10l-9 5-9-5zM12 2v10l9 5M12 12l-9 5"/><path d="M3 7l9 5v10" stroke-dasharray="2 2"/>',grid:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/>',snap:'<path d="M5 3v10a7 7 0 0 0 14 0V3h-4v10a3 3 0 0 1-6 0V3zM5 8h4m6 0h4"/>',items:'<path d="M8 6h13M8 12h13M8 18h13M3 6h1M3 12h1M3 18h1"/>',photo:'<path d="M3 6h4l2-3h6l2 3h4v14H3z"/><circle cx="12" cy="13" r="3.5"/>',next:'<path d="M4 12h15m-6-6 6 6-6 6"/>',details:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/>'};
@@ -2767,6 +2773,64 @@ function ideareCeilingLabel(mm){return ideareCeilingFeet?ideareFeetText(mm):`${M
  }
  installExpand($('#studio-finish-library'),$('#studio-finish-results'),'.id3-inspector');
  installExpand($('.v10-finish-ui'),$('.v10-gallery'),null);
+})();
+
+/* IDEARE finish cards, appliance inspector separation and closed plinths */
+(()=>{
+ const panel=$('#selected-inspector');
+ if(!panel)return;
+ let lastUid=null,mode='cabinet';
+ const switcher=document.createElement('div');switcher.className='ideare-inspector-switch';switcher.hidden=true;
+ switcher.setAttribute('role','group');switcher.setAttribute('aria-label','Edit cabinet or built-in appliance');
+ switcher.innerHTML='<button type="button" data-ideare-edit-kind="cabinet" aria-pressed="true">Cabinet</button><button type="button" data-ideare-edit-kind="appliance" aria-pressed="false">Appliance</button>';
+ const title=panel.querySelector('.id3-inspector-title');if(!title)return;title.after(switcher);
+ const summary=document.createElement('div');summary.className='ideare-integrated-summary';summary.hidden=true;switcher.after(summary);
+ function applianceNames(c){
+  const label=ideareApplianceLabel(c),names=[];
+  if(ideareFridgeHousing(c)||/\b(fridge|freezer|refrigerator)\b/.test(label))names.push('Refrigerator');
+  if(/\bsink\b/.test(label))names.push('Sink');
+  if(/\b(hob|cooker)\b/.test(label))names.push('Hob');
+  if(/\boven\b/.test(label))names.push('Oven');
+  if(/\bmicrowave\b/.test(label))names.push('Microwave');
+  if(/\bdishwasher\b/.test(label))names.push('Dishwasher');
+  if(/\b(hood|extractor)\b/.test(label))names.push('Extractor hood');
+  return names.length?names.join(' & '):'Integrated appliance';
+ }
+ function refresh(){
+  const c=selected(),eligible=!!(c&&(ideareIntegrated(c)||ideareFridgeHousing(c)));
+  if(lastUid!==c?.uid){lastUid=c?.uid;mode='cabinet';}
+  if(!eligible)mode='cabinet';
+  const appliance=eligible&&mode==='appliance';
+  switcher.hidden=!eligible;summary.hidden=!appliance;
+  panel.classList.toggle('ideare-appliance-view',appliance);
+  panel.classList.toggle('ideare-integrated-cabinet-view',eligible&&!appliance);
+  for(const b of switcher.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.ideareEditKind===mode));
+  if(eligible){
+   const heading=document.createElement('strong');heading.textContent=applianceNames(c);
+   const note=document.createElement('small');note.textContent=ideareFridgeHousing(c)?'Adjust refrigerator dimensions, door arrangement and finish separately from the surround.':'Appliance finish is independent of the cabinet. The appliance model fits the cabinet opening automatically; change the housing measurements in Cabinet.';
+   summary.replaceChildren(heading,note);
+  }
+  const colour=panel.querySelector('.ideare-appliance-colour');if(colour)colour.hidden=eligible&&!appliance;
+  const fridge=panel.querySelector('.ideare-fridge-config');if(!fridge)return;
+  // Keep existing inputs and handlers inside the same form. Only expose the relevant group.
+  fridge.querySelector('strong').textContent=appliance?'Refrigerator details':'Surround & storage';
+  for(const field of fridge.querySelectorAll('[data-fridge-field],[data-fridge-side]')){
+   const isAppliance=['fw','fh','fd','doors','type'].includes(field.dataset.fridgeField);
+   const label=field.closest('label');if(label)label.hidden=appliance!==isAppliance;
+  }
+  const tips=fridge.querySelectorAll(':scope > small');
+  if(tips[0])tips[0].textContent=appliance?'Fridge rests directly on the floor. Measurements in mm.':'Measurements in mm. Cabinetry dimensions follow the refrigerator opening.';
+  if(tips[1])tips[1].textContent=appliance?'Check actual appliance dimensions and hinge clearance before installation.':'Resize the overhead and pantry cabinets using the preview grips. Zero pantry width removes that side.';
+  const apply=fridge.querySelector('[data-fridge-apply]');if(apply)apply.textContent=appliance?'Apply refrigerator dimensions':'Apply surround dimensions';
+  const select=fridge.querySelector('[data-fridge-resize-part]');
+  if(select){
+   for(const option of select.options){const show=appliance===(option.value==='refrigerator');option.hidden=!show;option.disabled=!show;}
+   if(!select.value||select.selectedOptions[0]?.disabled){select.value=appliance?'refrigerator':'assembly';select.dispatchEvent(new Event('change',{bubbles:true}));}
+  }
+  const door=fridge.querySelector('[data-fridge-door-preview]');if(door)door.hidden=!appliance;
+ }
+ switcher.addEventListener('click',e=>{const b=e.target.closest('[data-ideare-edit-kind]');if(!b||mode===b.dataset.ideareEditKind)return;mode=b.dataset.ideareEditKind;refresh();});
+ const previous=renderInspector;renderInspector=(...args)=>{const result=previous(...args);refresh();return result;};
 })();
 
 Promise.resolve().then(()=>boot()).catch(ideareStartupError);
