@@ -2873,4 +2873,54 @@ function ideareSelectPart(c,kind=null){
  const previousList=renderList;renderList=(...args)=>{const result=previousList(...args),c=selected(),kind=ideareSelectedAppliance(c);if(kind)$('#selection-badge').textContent=idearePartNames[kind];return result;};
 })();
 
+/* IDEARE anchored colour picker — no operating-system dialog. */
+(()=>{
+ const app=document.querySelector('#id3-app');if(!app)return;
+ const sourceSelector='input[type="color"][data-appliance-custom],.v10-custom input[type="color"],input#ideare-grid-colour[type="color"]';
+ const controls=new Map();let active=null,pending=0;
+ const clamp=(n,min=0,max=1)=>Math.min(max,Math.max(min,n));
+ const valid=v=>/^#[0-9a-f]{6}$/i.test(v||'');
+ const clean=v=>{v=String(v).trim();if(!v.startsWith('#'))v='#'+v;return valid(v)?v.toUpperCase():null;};
+ function fromHex(hex){const [r,g,b]=[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16)/255),max=Math.max(r,g,b),min=Math.min(r,g,b),d=max-min;let h=0;if(d)h=(max===r?(g-b)/d:max===g?(b-r)/d+2:(r-g)/d+4)*60;return {h:(h+360)%360,s:max?d/max:0,v:max};}
+ function toHex({h,s,v}){const c=v*s,x=c*(1-Math.abs((h%360)/60%2-1)),m=v-c;const rgb=[[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][Math.floor((h%360)/60)];return '#'+rgb.map(n=>Math.round(clamp(n+m)*255).toString(16).padStart(2,'0')).join('').toUpperCase();}
+ const panel=document.createElement('section');panel.id='ideare-colour-picker';panel.className='ideare-colour-picker';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-labelledby','ideare-colour-title');panel.innerHTML=`<div class="icp-head"><div><span class="icp-kicker">CUSTOM COLOUR</span><strong id="ideare-colour-title">Choose a colour</strong></div><button type="button" data-icp-close aria-label="Close colour picker">×</button></div><div class="icp-plane" tabindex="0" role="group" aria-label="Saturation and brightness. Arrow keys adjust saturation and brightness."><span class="icp-marker"></span></div><label class="icp-hue-label">Hue <input class="icp-hue" type="range" min="0" max="359" step="1" aria-label="Hue"></label><div class="icp-comparison"><div><span class="icp-chip icp-before"></span><small>Current</small></div><div><span class="icp-chip icp-after"></span><small>New colour</small></div></div><label class="icp-hex-label">HEX <input class="icp-hex" type="text" maxlength="7" autocomplete="off" spellcheck="false" aria-label="Hex colour code" placeholder="#A17B50"></label><div class="icp-feedback" role="status"></div><div class="icp-actions"><button type="button" data-icp-cancel>Cancel</button><button type="button" data-icp-apply>Apply colour</button></div>`;
+ document.body.append(panel);
+ const q=s=>panel.querySelector(s),plane=q('.icp-plane'),hue=q('.icp-hue'),hex=q('.icp-hex'),apply=q('[data-icp-apply]'),feedback=q('.icp-feedback');
+ function swatch(source,button){const value=valid(source.value)?source.value:'#A17B50';button.style.setProperty('--icp-colour',value);button.title=`Custom colour · ${value.toUpperCase()}`;}
+ function setup(){for(const source of app.querySelectorAll(sourceSelector)){
+  const value=source.value,button=document.createElement('button');button.type='button';button.className='ideare-colour-trigger';button.setAttribute('aria-label',source.getAttribute('aria-label')||'Choose custom colour');button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls',panel.id);button.setAttribute('aria-expanded','false');button.innerHTML='<span class="icp-trigger-swatch" aria-hidden="true"></span><svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 5 5-2 2-5-5zM10 5 4 11v5h5l6-6M4 16l-1 1"/></svg>';
+  // Retain the original value and existing listeners, but make native picker impossible.
+  source.type='hidden';source.value=value;source.dataset.ideareColourSource='';source.after(button);controls.set(source,button);swatch(source,button);
+  // Capture handler below prevents the wall catalogue's delegated Apply handler firing here.
+ }
+ for(const [source,button] of controls){if(!source.isConnected||!button.isConnected){if(active?.source===source)close(false);controls.delete(source);if(button.isConnected)button.remove();}else{swatch(source,button);if(button.disabled!==source.disabled)button.disabled=source.disabled;}}
+ if(active)position();}
+ function schedule(){if(!pending)pending=requestAnimationFrame(()=>{pending=0;setup();});}
+ function theme(){const computed=getComputedStyle(app);for(const [name,fallback] of Object.entries({'--studio-paper':'#f9f6f0','--studio-ink':'#28231e','--studio-muted':'#766b5e','--studio-line':'#d9cfc0','--studio-accent':'#a17b50'}))panel.style.setProperty(name,computed.getPropertyValue(name).trim()||fallback);}
+ function position(){if(!active)return;const b=active.button;if(!b.isConnected||!b.getClientRects().length||b.disabled){close(false);return;}const r=b.getBoundingClientRect(),vw=document.documentElement.clientWidth,vh=window.innerHeight,margin=8,gap=8;if(r.bottom<0||r.top>vh||r.right<0||r.left>vw){close(false);return;}
+  theme();panel.style.width=Math.min(306,vw-2*margin)+'px';panel.style.maxHeight='none';const full=panel.getBoundingClientRect().height,below=vh-r.bottom-gap-margin,above=r.top-gap-margin;
+  // Prefer directly below. Flip only if below cannot fit and above is more usable.
+  const flip=below<full&&above>below&&below<Math.min(full,300);const available=flip?above:below;
+  const maxH=Math.min(full,Math.max(1,available));panel.style.maxHeight=maxH+'px';const height=panel.getBoundingClientRect().height;
+  panel.style.left=Math.max(margin,Math.min(r.left,vw-panel.getBoundingClientRect().width-margin))+'px';panel.style.top=Math.max(margin,flip?r.top-gap-height:r.bottom+gap)+'px';panel.dataset.placement=flip?'above':'below';
+ }
+ function paint(updateHex=true){if(!active)return;const {h,s,v}=active.hsv,color=toHex(active.hsv);active.draft=color;plane.style.setProperty('--icp-hue',`hsl(${h},100%,50%)`);q('.icp-marker').style.left=s*100+'%';q('.icp-marker').style.top=(1-v)*100+'%';hue.value=Math.round(h)%360;q('.icp-after').style.background=color;if(updateHex)hex.value=color;hex.setAttribute('aria-invalid','false');apply.disabled=false;feedback.textContent='';}
+ function open(source,button){if(active?.button===button){close(true);return;}close(false);const initial=valid(source.value)?source.value.toUpperCase():'#A17B50';active={source,button,initial,hsv:fromHex(initial),draft:initial};q('#ideare-colour-title').textContent=source.getAttribute('aria-label')||'Choose a colour';q('.icp-before').style.background=initial;button.setAttribute('aria-expanded','true');panel.hidden=false;paint();position();if(active)hex.focus({preventScroll:true});}
+ function close(restore){if(!active)return;const {button}=active;active=null;panel.hidden=true;button.setAttribute('aria-expanded','false');if(restore&&button.isConnected)button.focus({preventScroll:true});}
+ function commit(){if(!active||apply.disabled)return;const {source,button,draft,initial}=active;close(false);if(source.isConnected&&draft!==initial){source.value=draft.toLowerCase();swatch(source,button);source.dispatchEvent(new Event('input',{bubbles:true}));source.dispatchEvent(new Event('change',{bubbles:true}));}if(button.isConnected)button.focus({preventScroll:true});schedule();}
+ document.addEventListener('click',e=>{let button=e.target.closest?.('.ideare-colour-trigger');const native=e.target.closest?.(sourceSelector);if(native&&app.contains(native)){setup();button=controls.get(native);}if(!button||!app.contains(button))return;e.preventDefault();e.stopImmediatePropagation();for(const [source,b] of controls)if(b===button){open(source,b);break;}},true);
+ document.addEventListener('pointerdown',e=>{if(active&&!panel.contains(e.target)&&!active.button.contains(e.target))close(false);},true);
+ window.addEventListener('keydown',e=>{if(active&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();close(true);}},true);
+ panel.addEventListener('click',e=>{if(e.target.closest('[data-icp-close],[data-icp-cancel]'))close(true);else if(e.target.closest('[data-icp-apply]'))commit();});
+ function pick(e){if(!active)return;const r=plane.getBoundingClientRect();if(!r.width||!r.height)return;active.hsv.s=clamp((e.clientX-r.left)/r.width);active.hsv.v=clamp(1-(e.clientY-r.top)/r.height);paint();}
+ let pointer=null;plane.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();pointer=e.pointerId;plane.setPointerCapture(e.pointerId);pick(e);});plane.addEventListener('pointermove',e=>{if(pointer===e.pointerId)pick(e);});for(const event of ['pointerup','pointercancel','lostpointercapture'])plane.addEventListener(event,e=>{if(pointer===e.pointerId)pointer=null;});
+ plane.addEventListener('keydown',e=>{if(!active||!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();const step=e.shiftKey?.1:.02;if(e.key==='ArrowLeft'||e.key==='ArrowRight')active.hsv.s=clamp(active.hsv.s+(e.key==='ArrowRight'?step:-step));else active.hsv.v=clamp(active.hsv.v+(e.key==='ArrowUp'?step:-step));paint();});
+ hue.addEventListener('input',()=>{if(active){active.hsv.h=Number(hue.value);paint();}});
+ hex.addEventListener('input',()=>{if(!active)return;const v=clean(hex.value);if(!v){apply.disabled=true;hex.setAttribute('aria-invalid','true');feedback.textContent='Enter a six-digit HEX colour.';return;}const hsv=fromHex(v);if(!hsv.s)hsv.h=active.hsv.h;active.hsv=hsv;paint(false);});
+ hex.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();commit();}});
+ const observer=new MutationObserver(schedule);observer.observe(app,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','value']});new MutationObserver(schedule).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme','class']});
+ app.addEventListener('input',schedule);app.addEventListener('change',schedule);app.addEventListener('click',schedule);window.addEventListener('resize',schedule);window.addEventListener('scroll',e=>{if(active&&!panel.contains(e.target instanceof Node?e.target:null))position();},true);
+ setup();
+})();
+
 Promise.resolve().then(()=>boot()).catch(ideareStartupError);
